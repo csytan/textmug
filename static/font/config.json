@@ -1,0 +1,46 @@
+{
+  "name": "pics",
+  "css_prefix_text": "icon-",
+  "css_use_suffix": false,
+  "hinting": true,
+  "units_per_em": 1000,
+  "ascent": 850,
+  "glyphs": [
+    {
+      "uid": "f48ae54adfb27d8ada53d0fd9e34ee10",
+      "css": "trash",
+      "code": 59393,
+      "src": "fontawesome"
+    },
+    {
+      "uid": "bc64550dd022ce21604f97309b346cea",
+      "css": "cog",
+      "code": 59396,
+      "src": "entypo"
+    },
+    {
+      "uid": "191bcf63575a78def53c907c3d3bf7f0",
+      "css": "floppy",
+      "code": 59392,
+      "src": "entypo"
+    },
+    {
+      "uid": "ivdkw88f6me1kxmgrk3qzv6jkgxhbuj7",
+      "css": "lock-1",
+      "code": 59394,
+      "src": "modernpics"
+    },
+    {
+      "uid": "8u06eo32zy61toyj78of6mi7inn3xlcl",
+      "css": "lock-open-1",
+      "code": 59395,
+      "src": "modernpics"
+    },
+    {
+      "uid": "c2958cfd1eed4434ab6e4bd6ab337af9",
+      "css": "cup",
+      "code": 59398,
+      "src": "linecons"
+    }
+  ]
+}

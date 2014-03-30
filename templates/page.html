@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+    <script>
+        $(function(){
+            initPage({% raw json_encode(page) %});
+        });
+    </script>
+    <div id="controls">
+        <a class="menu_btn save icon-floppy"></a>
+        <a class="menu_btn locked icon-lock-1"
+            {% if not page['encrypted'] %}style="display:none"{% end %}></a>
+        <a class="menu_btn unlocked icon-lock-open-1"
+            {% if page['encrypted'] %}style="display:none"{% end %}></a>
+    </div>
+    <div id="encrypt_dialog">
+        <h2>Encrypt this page</h2>
+        <input id="password" class="text_input" type="password" placeholder="password">
+        <a class="btn encrypt">encrypt</a>
+    </div>
+
+    <div id="decrypt_dialog">
+        <h2>This page is encrypted</h2>
+        Enter a password to decrypt.
+        <input id="password" class="text_input" type="password" placeholder="password">
+        <a class="btn decrypt">decrypt</a>
+    </div>
+
+    <div id="editor" contenteditable="true">{{ page['text'] }}</div>
+{% end %}
+

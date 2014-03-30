@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>textmug</title>
+    <link href="/static/font/css/pics.css" rel="stylesheet" type="text/css">
+    <link href="/static/style.css" rel="stylesheet" type="text/css">
+    <script src="/static/jquery.min.js"></script>
+    <script src="/static/json2.js" type="text/javascript"></script>
+    <script src="/static/sjcl.js" type="text/javascript"></script>
+    <script src="/static/main.js" type="text/javascript"></script>
+</head>
+
+<body>
+    <a id="menu_btn" class="btn menu_btn icon-cup" href="/"></a>
+    <div id="menu">
+    </div>
+    <div id="content">
+        {% block content %}{% end %}
+    </div>
+</body>
+
+</html>
+

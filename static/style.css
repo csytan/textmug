@@ -1,0 +1,148 @@
+/* 
+Some colors from the Tomorrow Night theme:
+https://github.com/chriskempson/tomorrow-theme 
+*/
+
+
+body {
+    background: #1d1f21;
+    margin: 0;
+}
+
+.text_input {
+    color: #ddd;
+    padding: 10px;
+    font-size: 18px;
+    border: none;
+    outline: none;
+    background: #4D4D4D;
+    border-radius: 4px;
+    width: 150px;
+}
+
+.menu_btn {
+    display: block;
+    float: right;
+    color: #777;
+    font-size: 40px;
+    cursor: pointer;
+    text-decoration: none;
+}
+.menu_btn:hover {
+    color: #eee;
+}
+
+#menu_btn {
+    position: fixed;
+    top: 0;
+    left: 0;
+    font-size: 30px;
+    padding: 12px 9px;
+    background: #171819;
+}
+#menu_btn:hover {
+    color: #ccc;
+    border-color: #ccc;
+}
+
+#controls {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+}
+
+#content {
+    width: 90%;
+    max-width: 850px;
+    margin: auto;
+    margin-top: 50px;
+}
+
+
+#editor {
+    color: #c5c8c6;
+    font-family: 'Lucida Grande';
+    font-size: 18px;
+    line-height: 1.6em;
+    display: block;
+    width: 100%;
+    min-height: 500px;
+    border: none;
+    outline: none;
+    padding: 20px 0 100px;
+    background: none;
+    overflow-y: hidden;
+}
+
+#editor h1,
+#editor h2,
+#editor h3,
+#editor h4 {
+    color: #cc6666;
+    line-height: 1.2;
+}
+
+#editor blockquote {
+    color: #8F9190;
+    margin: 0;
+    padding: 20px 25px;
+    border-left: 10px solid rgba(255, 255, 255, 0.06);
+}
+
+#editor pre {
+    background: rgba(0,0,0,0.3);
+    padding: 10px 20px;
+    border-radius: 7px;
+}
+
+#editor code {
+    background: rgba(0,0,0,0.3);
+    border-radius: 4px;
+    padding: 4px 5px;
+}
+
+#editor .lh {
+    color: #eee;
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+#editor .li {
+    padding-left: 50px;
+    padding-bottom: 4px;
+}
+#editor .li .dash {
+    float: left;
+    margin-left: -20px;
+}
+
+#editor .hr {
+    color: rgba(255,255,255,0.15);
+    margin: 5px 0;
+    font-weight: bold;
+    letter-spacing: 8px;
+}
+
+#editor strong {
+    color: #f0c674;
+}
+
+#editor em {
+    color: #de935f;
+}
+
+#editor a {
+    color: #81a2be;
+    text-decoration: none;
+    cursor: pointer;
+}
+#editor a:hover {
+    color: #609AFB;
+}
+
+#encrypt_dialog,
+#decrypt_dialog {
+    display: none;
+}
+
+

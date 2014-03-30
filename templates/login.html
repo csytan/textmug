@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+    <title>login • textmug</title>
+{% end %}
+
+
+{% block content %}
+    <form method="post">
+        {% raw xsrf_form_html() %}
+        <input id="bot" type="hidden" name="bot" value="true">
+        <label>Username</label>
+        <input id="username" class="text_input short" type="text" name="username" placeholder="Username" maxlength="20" required>
+        <label>Password</label>
+        <input class="text_input short" type="password" name="password" placeholder="Password" required>
+        <input class="btn" type="submit" value="Login">
+    </form>
+{% end %}
