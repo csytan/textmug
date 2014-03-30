@@ -29,6 +29,7 @@ initPage = function(page){
         var cipherJSON = sjcl.encrypt(password, plainText);
         console.log(cipherJSON);
         page.text = JSON.stringify(cipherJSON);
+        page.encrypted = true;
         $('#encrypt_dialog, .unlocked').hide();
         $('#decrypt_dialog, .locked').show();
         return false;
@@ -52,11 +53,21 @@ initPage = function(page){
             _xsrf: getCookie('_xsrf')
         };
         $.post('', data, function(response){
-            alert(response);
+            if (page.id){
+                alert(1)
+            } else {
+                window.location.href = response;
+            }
         });
         return false; 
     });
+
+    $('.settings').click(function(){
+        $('#settings_dialog, #editor').toggle();
+        return false;
+    });
     
+
     $('#editor')
         .keypress(function(e){
             if (e.keyCode === 13){
@@ -350,9 +361,9 @@ function inlineHTML(text){
         link: /^https?:\/\/[^\s<]+[^<.,:;"'\]\s]/,
         link: /^((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/,
         email: /^\S+@\S+/,
-        strong: /^\*\*[\s\S]+?\*\*/,
-        em: /^\*[\s\S]+\*/,
-        code: /^`[^`]+`/
+        code: /^`[^`]+`/,
+        strong: /^\*\*[^\*]+?\*\*/,
+        em: /^\*[^\*]+\*/
     };
     var html = '';
 

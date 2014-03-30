@@ -8,16 +8,10 @@
         });
     </script>
     <div id="controls">
+        <a class="menu_btn settings icon-cog"></a>
+        <a class="menu_btn locked icon-lock-1"></a>
+        <a class="menu_btn unlocked icon-lock-open-1"></a>
         <a class="menu_btn save icon-floppy"></a>
-        <a class="menu_btn locked icon-lock-1"
-            {% if not page['encrypted'] %}style="display:none"{% end %}></a>
-        <a class="menu_btn unlocked icon-lock-open-1"
-            {% if page['encrypted'] %}style="display:none"{% end %}></a>
-    </div>
-    <div id="encrypt_dialog">
-        <h2>Encrypt this page</h2>
-        <input id="password" class="text_input" type="password" placeholder="password">
-        <a class="btn encrypt">encrypt</a>
     </div>
 
     <div id="decrypt_dialog">
@@ -26,6 +20,28 @@
         <input id="password" class="text_input" type="password" placeholder="password">
         <a class="btn decrypt">decrypt</a>
     </div>
+
+    <form id="settings_dialog" method="post">
+        <h1>Page Settings</h1>
+
+        <label>Sharing</label>
+        <select name="public">
+            <option value="0">Display publically</option>
+            <option value="1">Keep this page private</option>
+        </select>
+        <br>
+
+        <label>Encryption</label>
+        <select name="encrypt">
+            <option value="0">Don't encrypt this page</option>
+            <option value="1">Enable client side encryption</option>
+        </select>
+
+        <div id="encrypt_dialog">
+            <input id="password" class="text_input" type="password" placeholder="password">
+            <a class="btn encrypt">encrypt</a>
+        </div>
+    </form>
 
     <div id="editor" contenteditable="true">{{ page['text'] }}</div>
 {% end %}

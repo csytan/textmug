@@ -32,7 +32,7 @@ if not db_exists:
         id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
         username TEXT,
         text TEXT,
-        private INTEGER DEFAULT 0,
+        public INTEGER DEFAULT 0,
         encrypted INTEGER DEFAULT 0,
         FOREIGN KEY(username) REFERENCES users(username)
     );
@@ -81,15 +81,15 @@ def get_page(id):
     cur = con.execute(sql, [id])
     return cur.fetchone()
 
-def create_page(text, username=None, private=False, encrypted=False):
-    sql = 'INSERT INTO pages(text, username, private, encrypted) VALUES(?,?,?,?)'
-    cur = con.execute(sql, [text, username, private, encrypted])
+def create_page(text, username=None, public=False, encrypted=False):
+    sql = 'INSERT INTO pages(text, username, public, encrypted) VALUES(?,?,?,?)'
+    cur = con.execute(sql, [text, username, public, encrypted])
     con.commit()
     return cur.lastrowid
 
-def update_page(id, text, private=False, encrypted=False):
-    sql = 'UPDATE pages SET text=?, private=?, encrypted=? WHERE id=?'
-    cur = con.execute(sql, [text, private, encrypted, id])
+def update_page(id, text, public=False, encrypted=False):
+    sql = 'UPDATE pages SET text=?, public=?, encrypted=? WHERE id=?'
+    cur = con.execute(sql, [text, public, encrypted, id])
     con.commit()
     return cur.lastrowid
 

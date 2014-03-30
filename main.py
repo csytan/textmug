@@ -40,11 +40,11 @@ class Page(Base):
 
         if not id:
             id = db.create_page(text=text, encrypted=encrypted)
-            return self.redirect('/' + str(id))
+            return self.write('/' + str(id))
 
         page = db.update_page(id=id, text=text, encrypted=encrypted)
-        return self.write('1')
-    
+        self.write('1')
+
 
 class SignUp(Base):
     def get(self):

@@ -5,11 +5,25 @@ https://github.com/chriskempson/tomorrow-theme
 
 
 body {
+    font-family: Courier, "Courier New", monospace;
+    font-size: 18px;
+    color: #c5c8c6;
     background: #1d1f21;
     margin: 0;
 }
 
-.text_input {
+h1, h2, h3 {
+    font-weight: normal;
+}
+
+label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+input[type="text"],
+input[type="password"] {
+    display: block;
     color: #ddd;
     padding: 10px;
     font-size: 18px;
@@ -17,8 +31,31 @@ body {
     outline: none;
     background: #4D4D4D;
     border-radius: 4px;
-    width: 150px;
+    width: 275px;
+    margin-bottom: 20px;
 }
+
+select {
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+.btn {
+    display: inline-block;
+    cursor: pointer;
+    border: none;
+    font-family: monospace;
+    font-size: 15px;
+    color: white;
+    background: #111;
+    padding: 10px 20px;
+    border-radius: 7px;
+    margin: 0;
+}
+.btn:hover {
+    background: #000;
+}
+
 
 .menu_btn {
     display: block;
@@ -51,6 +88,11 @@ body {
     right: 15px;
 }
 
+#controls .locked,
+#controls .unlocked {
+    display: none;
+}
+
 #content {
     width: 90%;
     max-width: 850px;
@@ -80,6 +122,9 @@ body {
 #editor h4 {
     color: #cc6666;
     line-height: 1.2;
+    margin: 0;
+    margin-bottom: 0.5em;
+    font-weight: bold;
 }
 
 #editor blockquote {
@@ -141,7 +186,8 @@ body {
 }
 
 #encrypt_dialog,
-#decrypt_dialog {
+#decrypt_dialog,
+#settings_dialog {
     display: none;
 }
 
