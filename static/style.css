@@ -5,15 +5,14 @@ https://github.com/chriskempson/tomorrow-theme
 
 
 body {
-    font-family: Courier, "Courier New", monospace;
-    font-size: 18px;
+    font-family: 'Lucida Grande', 'Lucida Sans Unicode', sans-serif;
+    font-size: 16px;
     color: #c5c8c6;
     background: #1d1f21;
     margin: 0;
 }
 
 h1, h2, h3 {
-    font-weight: normal;
 }
 
 label {
@@ -22,11 +21,13 @@ label {
 }
 
 input[type="text"],
-input[type="password"] {
+input[type="password"],
+textarea {
     display: block;
+    font-family: Monaco, "Lucida Console", monospace;
+    font-size: 17px;
     color: #ddd;
     padding: 10px;
-    font-size: 18px;
     border: none;
     outline: none;
     background: #4D4D4D;
@@ -37,6 +38,7 @@ input[type="password"] {
 
 select {
     font-size: 18px;
+    margin: 0;
     margin-bottom: 20px;
 }
 
@@ -44,7 +46,6 @@ select {
     display: inline-block;
     cursor: pointer;
     border: none;
-    font-family: monospace;
     font-size: 15px;
     color: white;
     background: #111;
@@ -58,10 +59,9 @@ select {
 
 
 .menu_btn {
-    display: block;
-    float: right;
+    display: inline-block;
     color: #777;
-    font-size: 40px;
+    font-size: 35px;
     cursor: pointer;
     text-decoration: none;
 }
@@ -69,23 +69,56 @@ select {
     color: #eee;
 }
 
-#menu_btn {
+#menu {
     position: fixed;
     top: 0;
     left: 0;
-    font-size: 30px;
-    padding: 12px 9px;
+    width: 130px;
+}
+#menu:hover {
     background: #171819;
 }
-#menu_btn:hover {
+
+#menu .logo {
+    display: block;
+    font-size: 45px;
+    padding: 15px;
+    padding-bottom: 0;
+}
+#menu .logo:hover {
     color: #ccc;
     border-color: #ccc;
 }
 
+
+#menu .items {
+    display: none;
+    padding: 10px 0;
+}
+#menu .item {
+    display: block;
+    color: #777;
+    padding: 8px 15px;
+    font-size: 17px;
+    text-decoration: none;
+}
+#menu .item:hover {
+    background: #111;
+}
+#menu:hover .items {
+    display: block;
+}
+
+
+
 #controls {
     position: fixed;
-    top: 15px;
-    right: 15px;
+    top: 20px;
+    right: 20px;
+}
+#controls .menu_btn {
+    float: right;
+    margin-left: 15px;
 }
 
 #controls .locked,
@@ -103,7 +136,6 @@ select {
 
 #editor {
     color: #c5c8c6;
-    font-family: 'Lucida Grande';
     font-size: 18px;
     line-height: 1.6em;
     display: block;
@@ -191,4 +223,7 @@ select {
     display: none;
 }
 
+.encrypt_password {
+    display: none;
+}
 

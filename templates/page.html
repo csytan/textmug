@@ -8,10 +8,10 @@
         });
     </script>
     <div id="controls">
-        <a class="menu_btn settings icon-cog"></a>
-        <a class="menu_btn locked icon-lock-1"></a>
-        <a class="menu_btn unlocked icon-lock-open-1"></a>
-        <a class="menu_btn save icon-floppy"></a>
+        <a class="menu_btn settings icon-settings"></a>
+        <a class="menu_btn locked icon-locked"></a>
+        <a class="menu_btn unlocked icon-unlocked"></a>
+        <a class="menu_btn save icon-save"></a>
     </div>
 
     <div id="decrypt_dialog">
@@ -37,9 +37,9 @@
             <option value="1">Enable client side encryption</option>
         </select>
 
-        <div id="encrypt_dialog">
-            <input id="password" class="text_input" type="password" placeholder="password">
-            <a class="btn encrypt">encrypt</a>
+        <div class="encrypt_password">
+            <label>Password</label>
+            <input type="password" placeholder="password">
         </div>
     </form>
 

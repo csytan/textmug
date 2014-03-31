@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>textmug</title>
-    <link href="/static/font/css/pics.css" rel="stylesheet" type="text/css">
+    <link href="/static/font_styles.css" rel="stylesheet" type="text/css">
     <link href="/static/style.css" rel="stylesheet" type="text/css">
     <script src="/static/jquery.min.js"></script>
     <script src="/static/json2.js" type="text/javascript"></script>
@@ -11,8 +11,21 @@
 </head>
 
 <body>
-    <a id="menu_btn" class="menu_btn icon-cup" href="/"></a>
     <div id="menu">
+        <a class="logo menu_btn icon-logo" href="/"></a>
+        <div class="items">
+            {% if current_user %}
+                <a href="/{{ current_user['username'] }}" class="item">
+                    {{ current_user['username'] }}
+                </a>
+                <a href="/about" class="item">about</a>
+                <a href="/logout" class="item">logout</a>
+            {% else %}
+                <a href="/about" class="item">about</a>
+                <a href="/login" class="item">login</a>
+                <a href="/signup" class="item">sign up</a>
+            {% end %}
+        </div>
     </div>
     <div id="content">
         {% block content %}{% end %}

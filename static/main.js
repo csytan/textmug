@@ -23,6 +23,19 @@ initPage = function(page){
     });
 
 
+    $('#settings_dialog select[name="encrypt"]').change(function(){
+        var encrypt = $(this).find('option:selected').val();
+        encrypt = parseInt(encrypt);
+        page.encrypted = encrypt;
+        if (encrypt === 1){
+            $('#settings_dialog .encrypt_password').show();
+        } else {
+            $('#settings_dialog .encrypt_password').hide();
+        }
+        console.log(encrypt);
+    });
+
+
     $('.encrypt').click(function(){
         var password = $(this).parent().find('input[type="password"]').val();
         var plainText = domToText($('#editor')[0]);

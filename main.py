@@ -15,6 +15,9 @@ class Base(tornado.web.RequestHandler):
         if username:
             return db.get_user(username)
 
+    def reload(self):
+        self.redirect(self.request.path)
+
 
 class Index(Base):
     def get(self):
@@ -77,16 +80,19 @@ class Login(Base):
 
     @tornado.web.asynchronous
     def post(self):
-        username = self.get_argument('username', None)
+        username = self.get_argument('username', '').encode('utf8')
         email = self.get_argument('email', None)
-        password = self.get_argument('password', '').encode('utf-8')
-
+        password = self.get_argument('password', '').encode('utf8')
         user = db.get_user(username)
+        if not user:
+            self.set_secure_cookie('flash', 'Username or Password Incorrect')
+            return self.reload()
         thread = threading.Thread(target=self.check_password, args=(user, password))
         thread.start()
 
     def check_password(self, user, password):
-        if not bcrypt.hashpw(password, user['password']) == user['password']:
+        db_password = user['password'].encode('utf8')
+        if not bcrypt.hashpw(password, db_password) == db_password:
             user = None
         tornado.ioloop.IOLoop.instance().add_callback(
             self.post2, user)
@@ -97,6 +103,12 @@ class Login(Base):
             self.redirect('/')
         else:
             self.redirect('/login')
+
+
+class Logout(Base):
+    def get(self):
+        self.clear_cookie('user')
+        self.redirect('/')
 
 
 class User(Base):
@@ -117,6 +129,7 @@ app = tornado.web.Application([
     (r'/', Index),
     (r'/login', Login),
     (r'/signup', SignUp),
+    (r'/logout', Logout),
     (r'/new', Page),
     (r'/(\d+)', Page),
     (r'/(.+)', User)
