@@ -1,3 +1,7 @@
+/*! normalize.css v3.0.1 | MIT License | git.io/normalize */
+html{font-family:sans-serif;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}body{margin:0}article,aside,details,figcaption,figure,footer,header,hgroup,main,nav,section,summary{display:block}audio,canvas,progress,video{display:inline-block;vertical-align:baseline}audio:not([controls]){display:none;height:0}[hidden],template{display:none}a{background:transparent}a:active,a:hover{outline:0}abbr[title]{border-bottom:1px dotted}b,strong{font-weight:bold}dfn{font-style:italic}h1{font-size:2em;margin:.67em 0}mark{background:#ff0;color:#000}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sup{top:-0.5em}sub{bottom:-0.25em}img{border:0}svg:not(:root){overflow:hidden}figure{margin:1em 40px}hr{-moz-box-sizing:content-box;box-sizing:content-box;height:0}pre{overflow:auto}code,kbd,pre,samp{font-family:monospace,monospace;font-size:1em}button,input,optgroup,select,textarea{color:inherit;font:inherit;margin:0}button{overflow:visible}button,select{text-transform:none}button,html input[type="button"],input[type="reset"],input[type="submit"]{-webkit-appearance:button;cursor:pointer}button[disabled],html input[disabled]{cursor:default}button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0}input{line-height:normal}input[type="checkbox"],input[type="radio"]{box-sizing:border-box;padding:0}input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-outer-spin-button{height:auto}input[type="search"]{-webkit-appearance:textfield;-moz-box-sizing:content-box;-webkit-box-sizing:content-box;box-sizing:content-box}input[type="search"]::-webkit-search-cancel-button,input[type="search"]::-webkit-search-decoration{-webkit-appearance:none}fieldset{border:1px solid silver;margin:0 2px;padding:.35em .625em .75em}legend{border:0;padding:0}textarea{overflow:auto}optgroup{font-weight:bold}table{border-collapse:collapse;border-spacing:0}td,th{padding:0}
+
+
 /* 
 Some colors from the Tomorrow Night theme:
 https://github.com/chriskempson/tomorrow-theme 
@@ -13,6 +17,9 @@ body {
 }
 
 h1, h2, h3 {
+    font-weight: normal;
+    margin-top: 0;
+    margin-bottom: 0.8em;
 }
 
 label {
@@ -30,16 +37,21 @@ textarea {
     padding: 10px;
     border: none;
     outline: none;
-    background: #4D4D4D;
+    background: #333;
     border-radius: 4px;
     width: 275px;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
 }
+
+::-webkit-input-placeholder {
+    color: #777;
+}
+
 
 select {
     font-size: 18px;
-    margin: 0;
-    margin-bottom: 20px;
+    color: #444;
+    margin: 5px 0 20px;
 }
 
 .btn {
@@ -47,9 +59,9 @@ select {
     cursor: pointer;
     border: none;
     font-size: 15px;
-    color: white;
+    color: #ccc;
     background: #111;
-    padding: 10px 20px;
+    padding: 10px 25px;
     border-radius: 7px;
     margin: 0;
 }
@@ -89,6 +101,10 @@ select {
     color: #ccc;
     border-color: #ccc;
 }
+#menu:hover .logo {
+    -webkit-transform: translate(0, -10px) rotate(-25deg);
+}
+
 
 
 #menu .items {
@@ -130,7 +146,7 @@ select {
     width: 90%;
     max-width: 700px;
     margin: auto;
-    margin-top: 50px;
+    margin-top: 100px;
 }
 
 
@@ -143,7 +159,7 @@ select {
     min-height: 500px;
     border: none;
     outline: none;
-    padding: 20px 0 100px;
+    padding-bottom: 100px;
     background: none;
     overflow-y: hidden;
 }
