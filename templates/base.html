@@ -15,8 +15,8 @@
         <a class="logo menu_btn icon-logo" href="/"></a>
         <div class="items">
             {% if current_user %}
-                <a href="/{{ current_user['username'] }}" class="item">
-                    {{ current_user['username'] }}
+                <a href="/{{ current_user.id }}" class="item">
+                    {{ current_user.id }}
                 </a>
                 <a href="/about" class="item">about</a>
                 <a href="/logout" class="item">logout</a>

@@ -4,7 +4,11 @@
 {% block content %}
     <script>
         $(function(){
-            initPage({% raw json_encode(page) %});
+            initPage({% raw json_encode({
+                'encrypted': page.encrypted,
+                'public': page.public,
+                'text': page.text
+            }) %});
         });
     </script>
     <div id="controls">
@@ -43,6 +47,6 @@
         </div>
     </form>
 
-    <div id="editor" contenteditable="true">{{ page['text'] }}</div>
+    <div id="editor" contenteditable="true">{{ page.text }}</div>
 {% end %}
 

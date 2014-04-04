@@ -1,102 +1,43 @@
 import datetime
 import os
-import sqlite3
+
+import peewee
 
 
-db_path = os.path.join(os.path.dirname(__file__), 'database')
-db_exists = os.path.isfile(db_path)
-con = sqlite3.connect(db_path)
+database = peewee.SqliteDatabase('database')
+database.connect()
 
 
-def dict_factory(cursor, row):
-    return {
-        col[0]: row[i] for i, col in enumerate(cursor.description)
-    }
-
-con.row_factory = dict_factory
+class BaseModel(peewee.Model):
+    class Meta:
+        database = database
 
 
-if not db_exists:
-    # Initialize DB
+class User(BaseModel):
+    id = peewee.TextField(primary_key=True)
+    email = peewee.TextField(unique=True, null=True)
+    password = peewee.TextField()
+    joined = peewee.DateTimeField()
 
-    con.execute("""
-    CREATE TABLE users(
-        username TEXT PRIMARY KEY,
-        joined TEXT,
-        email TEXT UNIQUE,
-        password TEXT
-    );""")
-
-    con.execute("""
-    CREATE TABLE pages(
-        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-        username TEXT,
-        text TEXT,
-        public INTEGER DEFAULT 0,
-        encrypted INTEGER DEFAULT 0,
-        FOREIGN KEY(username) REFERENCES users(username)
-    );
-    """)
-
-
-def execute_table(sql, table, **kwargs):
-    """
-    Takes kwargs, and formats them for parameter substitution in an SQL command
-
-        prepare_data(name="Joe", email="joe@joe.com", age=21)
-
-        Returns: [['name', 'email', 'age'], ['Joe', 'joe@joe.com', 21]]
-    """
-    keys, values = zip(*kwargs.items())
-    con.execute(sql, [table] + keys + values)
-
-
-def insert(table, **kwargs):
-    sql = 'INSERT INTO {}({}) VALUES({})'
-    keys, values = zip(*kwargs.items())
-    sql = sql.format(table, ','.join(keys), ','.join('?' * len(values)))
-    con.execute(sql, values)
-
-
-def get_user(username):
-    sql = 'SELECT * FROM users WHERE username=?'
-    cur = con.execute(sql, [username])
-    return cur.fetchone()
-
-def create_user(username, password, email=None):
-    sql = 'INSERT INTO users(username, email, password) VALUES(?,?,?)'
-    cur = con.execute(sql, [username, email, password])
-    con.commit()
-    return cur.lastrowid
-
-def update_user(id, email, password):
-    sql = 'UPDATE users SET email=?, password=? WHERE id=?'
-    cur = con.execute(sql, [email, password, id])
-    con.commit()
-    return cur.lastrowid
-
-
-def get_page(id):
-    sql = 'SELECT * FROM pages WHERE id=?'
-    cur = con.execute(sql, [id])
-    return cur.fetchone()
-
-def create_page(text, username=None, public=False, encrypted=False):
-    sql = 'INSERT INTO pages(text, username, public, encrypted) VALUES(?,?,?,?)'
-    cur = con.execute(sql, [text, username, public, encrypted])
-    con.commit()
-    return cur.lastrowid
-
-def update_page(id, text, public=False, encrypted=False):
-    sql = 'UPDATE pages SET text=?, public=?, encrypted=? WHERE id=?'
-    cur = con.execute(sql, [text, public, encrypted, id])
-    con.commit()
-    return cur.lastrowid
+    @classmethod
+    def get_by_id(cls, id):
+        return cls.select().where(cls.id == id).first()
 
 
 
+class Page(BaseModel):
+    id = peewee.PrimaryKeyField()
+    user = peewee.ForeignKeyField(User, null=True, related_name='pages')
+    created = peewee.DateTimeField()
+    text = peewee.TextField()
+    public = peewee.BooleanField(default=False)
+    encrypted = peewee.BooleanField(default=False)
+
+    @classmethod
+    def get_by_id(cls, id):
+        return cls.select().where(cls.id == id).first()
 
 
 
-
+peewee.create_model_tables([User, Page], fail_silently=True)
 

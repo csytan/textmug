@@ -1,3 +1,4 @@
+import datetime
 import logging
 import os
 import threading
@@ -9,11 +10,12 @@ import tornado.web
 import db
 
 
+
 class Base(tornado.web.RequestHandler):
     def get_current_user(self):
         username = self.get_secure_cookie('user')
         if username:
-            return db.get_user(username)
+            return db.User.get_by_id(username)
 
     def reload(self):
         self.redirect(self.request.path)
@@ -27,25 +29,23 @@ class Index(Base):
 class Page(Base):
     def get(self, id=None):
         if id:
-            page = db.get_page(id)
+            page = db.Page.get_by_id(int(id))
         else:
-            page = {
-                'id': None,
-                'text': '',
-                'encrypted': False
-            }
+            page = db.Page()
         self.render('page.html', page=page)
         
     def post(self, id=None):
         text = self.get_argument('text', None)
-        encrypted = self.get_argument('encrypted', '0')
-        encrypted = bool(int(encrypted))
-
-        if not id:
-            id = db.create_page(text=text, encrypted=encrypted)
-            return self.write('/' + str(id))
-
-        page = db.update_page(id=id, text=text, encrypted=encrypted)
+        encrypted = bool(self.get_argument('encrypted', None))
+        if id:
+            page = db.Page.get_by_id(int(id))
+            page.text = text
+            page.encrypted = encrypted
+            page.save()
+        else:
+            page = db.Page(text=text, encrypted=encrypted, created=datetime.datetime.now())
+            page.save()
+            return self.write('/' + str(page.id))
         self.write('1')
 
 
@@ -67,9 +67,11 @@ class SignUp(Base):
             self.post2, username, hashed)
 
     def post2(self, username, hashed):
-        if db.create_user(username=username, password=hashed):
-            self.set_secure_cookie('user', username)
-            self.redirect('/' + str(username))
+        user = db.User(id=username, password=hashed, joined=datetime.datetime.now())
+        user.save(force_insert=True)
+        if user.id:
+            self.set_secure_cookie('user', user.id)
+            self.redirect('/' + user.id)
         else:
             self.redirect('/signup')
 
@@ -83,7 +85,7 @@ class Login(Base):
         username = self.get_argument('username', '').encode('utf8')
         email = self.get_argument('email', None)
         password = self.get_argument('password', '').encode('utf8')
-        user = db.get_user(username)
+        user = db.User.get_by_id(username)
         if not user:
             self.set_secure_cookie('flash', 'Username or Password Incorrect')
             return self.reload()
@@ -91,7 +93,7 @@ class Login(Base):
         thread.start()
 
     def check_password(self, user, password):
-        db_password = user['password'].encode('utf8')
+        db_password = user.password.encode('utf8')
         if not bcrypt.hashpw(password, db_password) == db_password:
             user = None
         tornado.ioloop.IOLoop.instance().add_callback(
@@ -99,7 +101,7 @@ class Login(Base):
 
     def post2(self, user):
         if user:
-            self.set_secure_cookie('user', user['username'])
+            self.set_secure_cookie('user', user.id)
             self.redirect('/')
         else:
             self.redirect('/login')
