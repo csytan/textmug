@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+
+{% block main %}
+    <div class="header">
+        <a href="/{{ user.id }}">
+            {{ user.id }}
+        </a>
+    </div>
+
+    {% for page in pages %}
+        <div class="page">
+            <a href="/{{ page.id }}">{{ page.name }}</a>
+        </div>
+    {% end %}
+{% end %}

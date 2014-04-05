@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 
-{% block content %}
+{% block script %}
     <script>
         $(function(){
             initPage({% raw json_encode({
@@ -11,12 +11,19 @@
             }) %});
         });
     </script>
-    <div id="controls">
-        <a class="menu_btn settings icon-settings"></a>
-        <a class="menu_btn locked icon-locked"></a>
-        <a class="menu_btn unlocked icon-unlocked"></a>
-        <a class="menu_btn save icon-save"></a>
-    </div>
+{% end %}
+
+
+
+{% block main %}
+    {% if current_user %}
+        <div id="controls">
+            <a class="menu_btn settings icon-settings"></a>
+            <a class="menu_btn locked icon-locked"></a>
+            <a class="menu_btn unlocked icon-unlocked"></a>
+            <a class="menu_btn save icon-save"></a>
+        </div>
+    {% end %}
 
     <div id="decrypt_dialog">
         <h2>This page is encrypted</h2>

@@ -1,2 +1,29 @@
 {% extends "base.html" %}
 
+
+{% block script %}
+    <script>
+        $(function(){
+            initPage({
+                'encrypted': false,
+                'public': true,
+                'text': ''
+            });
+        });
+    </script>
+{% end %}
+
+
+
+
+{% block main %}
+    <div class="header">
+        {% if current_user %}
+            <a href="/{{ current_user.id }}">
+                {{ current_user.id }}
+            </a> / new page
+        {% end %}
+    </div>
+
+    <div id="editor" contenteditable="true"></div>
+{% end %}

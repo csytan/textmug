@@ -26,6 +26,13 @@ class Index(Base):
         self.render('index.html', text=None)
 
 
+class User(Base):
+    def get(self, id):
+        user = db.User.get_by_id(id)
+        pages = []
+        self.render('user.html', user=user, pages=pages)
+
+
 class Page(Base):
     def get(self, id=None):
         if id:
@@ -113,11 +120,6 @@ class Logout(Base):
         self.redirect('/')
 
 
-class User(Base):
-    def get(self):
-        pass
-
-
 settings = {
     'template_path': os.path.join(os.path.dirname(__file__), 'templates'),
     'static_path': os.path.join(os.path.dirname(__file__), 'static'),
@@ -133,7 +135,9 @@ app = tornado.web.Application([
     (r'/signup', SignUp),
     (r'/logout', Logout),
     (r'/new', Page),
+    (r'/about', Page),
     (r'/(\d+)', Page),
+    (r'/(.+)/(.+)', Page),
     (r'/(.+)', User)
 ], **settings)
 

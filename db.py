@@ -23,10 +23,16 @@ class User(BaseModel):
     def get_by_id(cls, id):
         return cls.select().where(cls.id == id).first()
 
+    def is_admin(self):
+        if self.id == 'csytan':
+            return True
+        return False
+
 
 
 class Page(BaseModel):
     id = peewee.PrimaryKeyField()
+    name = peewee.TextField(unique=True)
     user = peewee.ForeignKeyField(User, null=True, related_name='pages')
     created = peewee.DateTimeField()
     text = peewee.TextField()
@@ -36,6 +42,11 @@ class Page(BaseModel):
     @classmethod
     def get_by_id(cls, id):
         return cls.select().where(cls.id == id).first()
+
+    @property
+    def name(self):
+        if self.user:
+            return id.split('/')[1]
 
 
 
