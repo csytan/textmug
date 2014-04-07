@@ -29,7 +29,7 @@ class Index(Base):
 class User(Base):
     def get(self, id):
         user = db.User.get_by_id(id)
-        pages = []
+        pages = user.pages
         self.render('user.html', user=user, pages=pages)
 
 
@@ -130,14 +130,13 @@ settings = {
 }
 
 app = tornado.web.Application([
-    (r'/', Index),
+    (r'/', Page),
     (r'/login', Login),
     (r'/signup', SignUp),
     (r'/logout', Logout),
-    (r'/new', Page),
-    (r'/about', Page),
-    (r'/(\d+)', Page),
-    (r'/(.+)/(.+)', Page),
+    (r'/(?P<name>about)', Page),
+    (r'/(?P<id>\d+)', Page),
+    (r'/(?P<name>.+/.+)', Page),
     (r'/(.+)', User)
 ], **settings)
 

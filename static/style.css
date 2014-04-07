@@ -16,6 +16,14 @@ body {
     margin: 0;
 }
 
+a {
+    color: #999;
+    text-decoration: none;
+}
+a:hover {
+    color: #ddd;
+}
+
 h1, h2, h3 {
     font-weight: normal;
     margin-top: 0;
@@ -70,43 +78,38 @@ select {
 }
 
 
-.menu_btn {
-    display: inline-block;
-    color: #777;
-    font-size: 35px;
-    cursor: pointer;
-    text-decoration: none;
+#user_header {
+    position: fixed;
+    top: 24px;
+    left: 95px;
+    color: #666;
+    font-size: 18px;
 }
-.menu_btn:hover {
-    color: #eee;
-}
+
 
 #menu {
     position: fixed;
     top: 0;
     left: 0;
-    width: 130px;
+    z-index: 10;
 }
 #menu:hover {
     background: #171819;
 }
-
 #menu .logo {
-    display: block;
+    display: inline-block;
     font-size: 45px;
+    color: #666;
     padding: 15px;
-    padding-bottom: 0;
+    padding-bottom: 5px;
+    line-height: 1;
 }
 #menu .logo:hover {
     color: #ccc;
-    border-color: #ccc;
 }
 #menu:hover .logo {
-    -webkit-transform: translate(0, -10px) rotate(-25deg);
+    -webkit-transform: rotate(-25deg);
 }
-
-
-
 #menu .items {
     display: none;
     padding: 10px 0;
@@ -126,32 +129,36 @@ select {
 }
 
 
-
-#controls {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-}
-#controls .menu_btn {
-    float: right;
-    margin-left: 15px;
-}
-
-#controls .locked,
-#controls .unlocked {
-    display: none;
-}
-
 #main {
     width: 90%;
     max-width: 700px;
     margin: auto;
-    padding: 50px 0 100px;
+    padding: 80px 0 100px;
 }
 
-.header {
-    font-size: 20px;
-    margin-bottom: 30px;
+
+#controls {
+    position: fixed;
+    top: 15px;
+    right: 10px;
+    width: 50px;
+}
+#controls .menu_btn {
+    display: inline-block;
+    color: #666;
+    font-size: 33px;
+    padding: 10px;
+    padding-bottom: 5px;
+    line-height: 1;
+    cursor: pointer;
+    text-decoration: none;
+}
+#controls .menu_btn:hover {
+    color: #eee;
+}
+#controls .locked,
+#controls .unlocked {
+    display: none;
 }
 
 
@@ -161,13 +168,14 @@ select {
     line-height: 1.6em;
     display: block;
     width: 100%;
-    min-height: 100px;
+    min-height: 50px;
     border: none;
     outline: none;
     background: none;
     overflow-y: hidden;
     border-left: 1px dotted rgba(255,255,255,.05);
     padding: 20px;
+    padding-top: 5px;
     margin-left: -20px;
 }
 
@@ -183,10 +191,11 @@ select {
 }
 
 #editor blockquote {
-    color: #8F9190;
+    color: #B9B9B9;
+    font-style: italic;
     margin: 0;
     padding: 20px 25px;
-    border-left: 10px solid rgba(255, 255, 255, 0.06);
+    border-left: 7px solid rgba(255, 255, 255, 0.06);
 }
 
 #editor pre {
@@ -248,5 +257,9 @@ select {
 
 .encrypt_password {
     display: none;
+}
+
+.new_page {
+    float: right;
 }
 

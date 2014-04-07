@@ -59,3 +59,9 @@
 .icon-logo:before {
   content: "d";
 }
+.icon-file-add:before {
+  content: "g";
+}
+.icon-folder-add:before {
+  content: "h";
+}

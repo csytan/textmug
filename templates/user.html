@@ -1,11 +1,18 @@
 {% extends "base.html" %}
 
 
+{% block user_header %}
+    / my pages
+{% end %}
+
+
 {% block main %}
-    <div class="header">
-        <a href="/{{ user.id }}">
-            {{ user.id }}
-        </a>
+    <h1>{{ user.id }}'s pages</h1>
+
+    <div id="controls">
+        {% if current_user and user == current_user %}
+            <a class="menu_btn icon-file-add" href="/"></a>
+        {% end %}
     </div>
 
     {% for page in pages %}

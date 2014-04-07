@@ -14,16 +14,20 @@
 {% end %}
 
 
+{% block user_header %}
+    / page_name
+{% end %}
+
 
 {% block main %}
-    {% if current_user %}
-        <div id="controls">
-            <a class="menu_btn settings icon-settings"></a>
+    <div id="controls">
+        <a class="menu_btn save icon-save"></a>
+        {% if current_user %}
             <a class="menu_btn locked icon-locked"></a>
             <a class="menu_btn unlocked icon-unlocked"></a>
-            <a class="menu_btn save icon-save"></a>
-        </div>
-    {% end %}
+            <a class="menu_btn settings icon-settings"></a>
+        {% end %}
+    </div>
 
     <div id="decrypt_dialog">
         <h2>This page is encrypted</h2>

@@ -13,21 +13,25 @@
 
 <body>
     <div id="menu">
-        <a class="logo menu_btn icon-logo" href="/"></a>
+        <a class="logo icon-logo" href="/"></a>
         <div class="items">
+            <a href="/about" class="item">about</a>
             {% if current_user %}
-                <a href="/{{ current_user.id }}" class="item">
-                    {{ current_user.id }}
-                </a>
-                <a href="/about" class="item">about</a>
                 <a href="/logout" class="item">logout</a>
             {% else %}
-                <a href="/about" class="item">about</a>
                 <a href="/login" class="item">login</a>
                 <a href="/signup" class="item">sign up</a>
             {% end %}
         </div>
     </div>
+    {% if current_user %}
+        <div id="user_header">
+            <a href="/{{ current_user.id }}">
+                {{ current_user.id }}
+            </a>
+            {% block user_header %}/ new page{% end %}
+        </div>
+    {% end %}
     <div id="main">
         {% block main %}{% end %}
     </div>
