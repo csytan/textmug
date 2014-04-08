@@ -32,21 +32,25 @@ class User(BaseModel):
 
 class Page(BaseModel):
     id = peewee.PrimaryKeyField()
-    name = peewee.TextField(unique=True)
+    name = peewee.TextField(unique=True, null=True)
     user = peewee.ForeignKeyField(User, null=True, related_name='pages')
     created = peewee.DateTimeField()
     text = peewee.TextField()
-    public = peewee.BooleanField(default=False)
+    public = peewee.BooleanField(default=True)
     encrypted = peewee.BooleanField(default=False)
 
     @classmethod
     def get_by_id(cls, id):
         return cls.select().where(cls.id == id).first()
 
+    @classmethod
+    def get_by_name(cls, name):
+        return cls.select().where(cls.name == name).first()
+
     @property
-    def name(self):
+    def page_name(self):
         if self.user:
-            return id.split('/')[1]
+            return self.name.split('/')[1]
 
 
 

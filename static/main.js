@@ -63,11 +63,12 @@ initPage = function(page){
     $('.save').click(function(){
         var data = {
             text: domToText($('#editor')[0]),
+            page_name: $('#page_name').val(),
             _xsrf: getCookie('_xsrf')
         };
         $.post('', data, function(response){
-            if (page.id){
-                alert(1)
+            if (response == 1){
+                console.log('saved');
             } else {
                 window.location.href = response;
             }

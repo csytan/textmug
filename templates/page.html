@@ -15,7 +15,12 @@
 
 
 {% block user_header %}
-    / page_name
+    {% if current_user %}
+        / <input id="page_name" type="text" 
+            placeholder="new_page_name" value="{{ page.page_name if page.page_name else '' }}">
+    {% else %}
+        / new_page
+    {% end %}
 {% end %}
 
 

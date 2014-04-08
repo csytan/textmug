@@ -85,6 +85,12 @@ select {
     color: #666;
     font-size: 18px;
 }
+#page_name {
+    display: inline-block;
+    background: none;
+    padding: 5px;
+    margin: 0;
+}
 
 
 #menu {
@@ -133,7 +139,7 @@ select {
     width: 90%;
     max-width: 700px;
     margin: auto;
-    padding: 80px 0 100px;
+    padding: 100px 0;
 }
 
 
@@ -186,7 +192,6 @@ select {
     color: #cc6666;
     line-height: 1.2;
     margin: 0;
-    margin-bottom: 0.5em;
     font-weight: bold;
 }
 

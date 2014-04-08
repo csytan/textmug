@@ -34,26 +34,50 @@ class User(Base):
 
 
 class Page(Base):
-    def get(self, id=None):
+    def get(self, id=None, name=None):
         if id:
             page = db.Page.get_by_id(int(id))
+        elif name:
+            page = db.Page.get_by_name(name)
         else:
             page = db.Page()
         self.render('page.html', page=page)
         
-    def post(self, id=None):
-        text = self.get_argument('text', None)
-        encrypted = bool(self.get_argument('encrypted', None))
+    def post(self, id=None, name=None):        
         if id:
             page = db.Page.get_by_id(int(id))
-            page.text = text
-            page.encrypted = encrypted
-            page.save()
+        elif name:
+            page = db.Page.get_by_name(name)
         else:
-            page = db.Page(text=text, encrypted=encrypted, created=datetime.datetime.now())
-            page.save()
-            return self.write('/' + str(page.id))
-        self.write('1')
+            page = db.Page(
+                user=self.current_user,
+                created=datetime.datetime.now())
+
+        if page.user and page.user != self.current_user or \
+            self.current_user and not self.current_user.is_admin():
+            raise tornado.web.HTTPError(401)
+        
+        page.text = self.get_argument('text', '')
+
+        redirect = False if page.id else True
+        if self.current_user:
+            can_has_chars = 'abcdefghijklmnopqrstuvwxyz0123456789._-'
+            page_name = self.get_argument('page_name', '').lower()
+            page_name = ''.join(s for s in page_name if s in can_has_chars)
+            page_name = self.current_user.id + '/' + page_name[:30]
+            if page_name != page.name:
+                redirect = True
+            page.name = page_name
+
+            page.encrypted = bool(self.get_argument('encrypted', False))
+            page.public = bool(self.get_argument('public', False))
+
+        page.save()
+
+        if redirect:
+            self.write('/' + (page.name or str(page.id)))
+        else:
+            self.write('1')
 
 
 class SignUp(Base):
