@@ -263,7 +263,9 @@ select {
     display: none;
 }
 
-.new_page {
-    float: right;
+
+.page {
+    font-size: 20px;
+    margin: 15px 0;
 }
 

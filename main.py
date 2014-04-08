@@ -35,6 +35,7 @@ class User(Base):
 
 class Page(Base):
     def get(self, id=None, name=None):
+        page = None
         if id:
             page = db.Page.get_by_id(int(id))
         elif name:
