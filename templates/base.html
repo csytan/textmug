@@ -13,7 +13,12 @@
 
 <body>
     <div id="menu">
-        <a class="logo icon-logo" href="/"></a>
+        <a class="logo icon-logo" 
+            {% if current_user %}
+                href="/{{ current_user.id }}"
+            {% else %}
+                href="/"
+            {% end %}></a>
         <div class="items">
             <a href="/about" class="item">about</a>
             {% if current_user %}

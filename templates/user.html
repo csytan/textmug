@@ -7,7 +7,11 @@
 
 
 {% block main %}
-    <h1>{{ user.id }}'s pages</h1>
+    {% if current_user == user %}
+        <h1>My pages</h1>
+    {% else %}
+        <h1>{{ user.id }}</h1>
+    {% end %}
 
     <div id="controls">
         {% if current_user and user == current_user %}

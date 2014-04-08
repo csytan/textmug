@@ -39,7 +39,7 @@ class Page(Base):
             page = db.Page.get_by_id(int(id))
         elif name:
             page = db.Page.get_by_name(name)
-        else:
+        if not page:
             page = db.Page()
         self.render('page.html', page=page)
         
