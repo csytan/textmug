@@ -134,7 +134,7 @@ class Login(Base):
     def post2(self, user):
         if user:
             self.set_secure_cookie('user', user.id)
-            self.redirect('/')
+            self.redirect('/' + user.id)
         else:
             self.redirect('/login')
 
