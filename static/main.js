@@ -22,6 +22,11 @@ initPage = function(page){
         return false;
     });
 
+    $('#main').click(function(){
+        $('#editor').focus();
+        return false;
+    });
+
 
     $('#settings_dialog select[name="encrypt"]').change(function(){
         var encrypt = $(this).find('option:selected').val();
@@ -104,9 +109,11 @@ initPage = function(page){
                 var text2 = domToText(this);
                 if (text2 != text){
                     console.log('Mismatch!------------');
-                    console.log('Text (DOM --> TXT):');
+                    console.log('DOM --> TXT:');
                     console.log(text);
-                    console.log('Text2 (TXT1 --> DOM --> TXT2):');
+                    console.log('TXT --> HTML:')
+                    console.log(this.innerHTML);
+                    console.log('HTML --> DOM --> TXT:');
                     console.log(text2);
                 }
 
@@ -129,9 +136,11 @@ initPage = function(page){
             var text2 = domToText(this);
             if (text2 != text){
                 console.log('Mismatch!------------');
-                console.log('Text (DOM --> TXT):');
+                console.log('DOM --> TXT:');
                 console.log(text);
-                console.log('Text2 (TXT1 --> DOM --> TXT2):');
+                console.log('TXT --> HTML:')
+                console.log(this.innerHTML);
+                console.log('HTML --> DOM --> TXT:');
                 console.log(text2);
             }
 
@@ -302,19 +311,48 @@ function lexer(text){
 function textToHTML(text){
     var tokens = lexer(text);
     var html = '';
+    
+    var all_newlines = true;
+    for (var i=0, token; token=tokens[i]; i++){
+        if (token.type !== 'newline'){
+            all_newlines = false;
+            break;
+        }
+    }
+
 
     for (var i=0, token; token=tokens[i]; i++){
         if (token.type === 'newline'){
-            var prev = tokens[i - 1];
             var next = tokens[i + 1];
-            
-            if (i === tokens.length - 1){
-                // If it is the last element add an extra new line
-                // '\n' --> '<div><br></div><div><br></div>'
+
+            var prevBlock = false;
+            for (var j=i, tk; tk=tokens[j]; j--){
+                if (tk.type !== 'newline'){
+                    prevBlock = true;
+                }
+            }
+
+            if (i === 0 && all_newlines){
+                /* If text is all newlines add an extra new line
+                    \n          <div><br></div>
+                                <div><br></div>
+
+                    \n\n        <div><br></div>
+                                <div><br></div>
+                                <div><br></div>
+                */
                 html += '<div><br></div>';
-            } else if (prev && prev.type !== 'newline' && next){
-                // Skip newline if the previous element is a block element
-                // and there is another element after this one
+            } else if (next && next.type !== 'newline' && prevBlock){
+                /*  Skip a newline if next element is a block element
+                    and there is previous block element before this one
+
+                    a\na        <div>a</div>
+                                <div>a</div>
+                    
+                    a\n\na      <div>a</div>
+                                <div><br></div>
+                                <div>a</div>
+                */
                 continue;
             }
             html += '<div><br></div>';
