@@ -6,7 +6,8 @@ initPage = function(page){
         $('#editor').hide();
         $('#lock_unlock').show();
     } else {
-        var html = textToHTML(page.text);
+        var text = domToText($('#editor')[0]);
+        var html = textToHTML(text);
         $('#editor').html(html)
             .focus();
     }
@@ -71,6 +72,7 @@ initPage = function(page){
             page_name: $('#page_name').val(),
             _xsrf: getCookie('_xsrf')
         };
+        console.log(data);
         $.post('', data, function(response){
             if (response == 1){
                 console.log('saved');
@@ -89,8 +91,11 @@ initPage = function(page){
 
     $('#editor')
         .keypress(function(e){
+            // Browser normalization
             if (e.keyCode === 13){
-                // Normalize what happens in browsers after hitting return
+                // Return key. Browsers use different elements as their 'empty' element.
+                // More info:
+                // http://lists.whatwg.org/pipermail/whatwg-whatwg.org/2011-May/031577.html
 
                 var offsets = getCaretPositions(this);
                 var text = domToText(this);
@@ -105,6 +110,7 @@ initPage = function(page){
                 offsets = [offsets[0] + 1, offsets[0] + 1];
 
                 this.innerHTML = textToHTML(text);
+                setCaretPositions(offsets, this);
 
                 var text2 = domToText(this);
                 if (text2 != text){
@@ -116,21 +122,13 @@ initPage = function(page){
                     console.log('HTML --> DOM --> TXT:');
                     console.log(text2);
                 }
-
-                setCaretPositions(offsets, this);
                 return false;
             }
         })
-        .keyup(function(){
+        .keyup(function(e){
             var offsets = getCaretPositions(this);
-            //console.log('Offsets:', offsets);
-
             var text = domToText(this);
-            //console.log('Text:', '"' + text + '"');
-
             var html = textToHTML(text);
-            //console.log('HTML:', html);
-
             this.innerHTML = html;
 
             var text2 = domToText(this);
@@ -168,7 +166,7 @@ function isBlockElement(node){
 }
 
 
-function domToText(container){
+domToText = function domToText(container){
     var text = '';
 
     function traverse(node){
@@ -207,7 +205,7 @@ function lexer(text){
         newline: /^\n/,
         heading: /^(#{1,6})[^\n]*/,
         blockquote: /^>[^\n]*/,
-        li: /^- [^\n]*/,
+        li: /^-[^\n]*/,
         lh: /^[^\n-]+:\n/,
         hr: /^-{3,}/,
         pre: /^```((?!```)[\s\S])+(```)?/,
@@ -270,11 +268,10 @@ function lexer(text){
 
         // List elements
         if (cap = rules.li.exec(text)){
-            var capTxt = cap[0].replace('\n', '');
-            text = text.substring(capTxt.length);
+            text = text.substring(cap[0].length);
             tokens.push({
                 type: 'li',
-                text: capTxt
+                text: cap[0]
             });
             continue;
         }
@@ -308,31 +305,33 @@ function lexer(text){
 };
 
 
-function textToHTML(text){
+textToHTML = function textToHTML(text){
     var tokens = lexer(text);
     var html = '';
-    
-    var all_newlines = true;
-    for (var i=0, token; token=tokens[i]; i++){
-        if (token.type !== 'newline'){
-            all_newlines = false;
-            break;
+
+    function allNewlines(){
+        for (var i=0, token; token=tokens[i]; i++){
+            if (token.type !== 'newline'){
+                return false;
+            }
         }
+        return true;
     }
 
+    function hasPrevBlock(index){
+        for (var i=index, token; token=tokens[i]; i--){
+            if (token.type !== 'newline'){
+                return true;
+            }
+        }
+        return false;
+    }
 
     for (var i=0, token; token=tokens[i]; i++){
         if (token.type === 'newline'){
             var next = tokens[i + 1];
 
-            var prevBlock = false;
-            for (var j=i, tk; tk=tokens[j]; j--){
-                if (tk.type !== 'newline'){
-                    prevBlock = true;
-                }
-            }
-
-            if (i === 0 && all_newlines){
+            if (i === 0 && allNewlines()){
                 /* If text is all newlines add an extra new line
                     \n          <div><br></div>
                                 <div><br></div>
@@ -342,7 +341,7 @@ function textToHTML(text){
                                 <div><br></div>
                 */
                 html += '<div><br></div>';
-            } else if (next && next.type !== 'newline' && prevBlock){
+            } else if (next && next.type !== 'newline' && hasPrevBlock(i)){
                 /*  Skip a newline if next element is a block element
                     and there is previous block element before this one
 
@@ -379,8 +378,7 @@ function textToHTML(text){
         }
 
         if (token.type === 'li'){
-            html += '<div class="li"><span class="dash">-</span>' +
-                inlineHTML(token.text.slice(1)) + '</div>';
+            html += '<div class="li">' + inlineHTML(token.text) + '</div>';
             continue;
         }
 
