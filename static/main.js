@@ -23,9 +23,8 @@ initPage = function(page){
         return false;
     });
 
-    $('#main').click(function(){
-        $('#editor').focus();
-        return false;
+    $(document.body).click(function(){
+        //$('#editor').focus();
     });
 
 
@@ -205,9 +204,9 @@ function lexer(text){
         newline: /^\n/,
         heading: /^(#{1,6})[^\n]*/,
         blockquote: /^>[^\n]*/,
-        li: /^-[^\n]*/,
+        li: /^(-{1,3})[^\n]*/,
         lh: /^[^\n-]+:\n/,
-        hr: /^-{3,}/,
+        hr: /^-{4,}/,
         pre: /^```((?!```)[\s\S])+(```)?/,
         text: /^[^\n]+/
     };
@@ -271,6 +270,7 @@ function lexer(text){
             text = text.substring(cap[0].length);
             tokens.push({
                 type: 'li',
+                depth: cap[1].length,
                 text: cap[0]
             });
             continue;
@@ -378,7 +378,7 @@ textToHTML = function textToHTML(text){
         }
 
         if (token.type === 'li'){
-            html += '<div class="li">' + inlineHTML(token.text) + '</div>';
+            html += '<div class="li' + token.depth + '">' + inlineHTML(token.text) + '</div>';
             continue;
         }
 

@@ -34,7 +34,9 @@
             <a href="/{{ current_user.id }}">
                 {{ current_user.id }}
             </a>
-            {% block user_header %}/ new page{% end %}
+            {% block user_header %}
+                <span>/ new page</span>
+            {% end %}
         </div>
     {% end %}
     <div id="main">
