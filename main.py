@@ -58,8 +58,8 @@ class Page(Base):
             self.current_user and not self.current_user.is_admin():
             raise tornado.web.HTTPError(401)
         
-        page.text = self.get_argument('text', '')
-
+        page.text = self.get_argument('text', '', strip=False)
+        
         redirect = False if page.id else True
         if self.current_user:
             can_has_chars = 'abcdefghijklmnopqrstuvwxyz0123456789._-'

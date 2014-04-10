@@ -35,7 +35,7 @@ class Page(BaseModel):
     name = peewee.TextField(unique=True, null=True)
     user = peewee.ForeignKeyField(User, null=True, related_name='pages')
     created = peewee.DateTimeField()
-    text = peewee.TextField()
+    text = peewee.TextField(default='')
     public = peewee.BooleanField(default=True)
     encrypted = peewee.BooleanField(default=False)
 

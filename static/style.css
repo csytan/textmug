@@ -87,9 +87,14 @@ select {
 }
 #page_name {
     display: inline-block;
+    color: #888;
     background: none;
     padding: 5px;
     margin: 0;
+}
+#page_name:hover,
+#page_name:focus {
+    background: #111;
 }
 
 
@@ -221,12 +226,12 @@ select {
 }
 
 #editor .li {
-    padding-left: 50px;
+    padding-left: 35px;
     padding-bottom: 4px;
 }
-#editor .li .dash {
-    float: left;
-    margin-left: -20px;
+#editor .li2 {
+    padding-left: 35px;
+    padding-bottom: 4px;
 }
 
 #editor .hr {
