@@ -1,17 +1,8 @@
 {% extends "base.html" %}
 
 
-{% block user_header %}
-    / my pages
-{% end %}
-
-
 {% block main %}
-    {% if current_user == user %}
-        <h1>My pages</h1>
-    {% else %}
-        <h1>{{ user.id }}</h1>
-    {% end %}
+    <h1>{{ user.id }}</h1>
 
     <div id="controls">
         {% if current_user and user == current_user %}

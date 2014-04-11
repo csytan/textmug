@@ -13,17 +13,27 @@
 {% end %}
 
 
-{% block user_header %}
-    {% if current_user %}
-        / <input id="page_name" type="text" 
-            placeholder="new_page_name" value="{{ page.page_name if page.page_name else '' }}">
-    {% else %}
-        / new_page
-    {% end %}
-{% end %}
-
-
 {% block main %}
+    <div id="user_header">
+        {% if page.id %}
+            {% if page.user %}
+                <a href="/{{ page.user.id }}">
+                    {{ page.user.id }}
+                </a>
+                <span>/</span>
+            {% end %}
+
+            {% if current_user and current_user == page.user %}
+                <input id="page_name" type="text" placeholder="new_page_name" 
+                    value="{{ page.page_name if page.page_name else '' }}">
+            {% else %}
+                {{ page.page_name or '# ' + str(page.id) }}
+            {% end %}
+        {% else %}
+            new page
+        {% end %}
+    </div>
+
     <div id="controls">
         <a class="menu_btn save icon-save"></a>
         {% if current_user %}
@@ -41,7 +51,7 @@
     </div>
 
     <form id="settings_dialog" method="post">
-        <h1>Page Settings</h1>
+        <h1>Settings</h1>
 
         <label>Sharing</label>
         <select name="public">
@@ -60,6 +70,8 @@
             <label>Password</label>
             <input type="password" placeholder="password">
         </div>
+
+        <input class="btn" type="submit" value="Save">
     </form>
 
     <div id="editor" contenteditable="true">{{ page.text }}</div>
