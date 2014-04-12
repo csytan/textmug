@@ -59,7 +59,7 @@ class Page(Base):
             raise tornado.web.HTTPError(401)
         
         page.text = self.get_argument('text', '', strip=False)
-        
+
         redirect = False if page.id else True
         if self.current_user:
             can_has_chars = 'abcdefghijklmnopqrstuvwxyz0123456789._-'
@@ -155,10 +155,11 @@ settings = {
 }
 
 app = tornado.web.Application([
-    (r'/', Page),
+    (r'(?P<name>/)', Page),
     (r'/login', Login),
     (r'/signup', SignUp),
     (r'/logout', Logout),
+    (r'/new', Page),
     (r'/(?P<name>about)', Page),
     (r'/(?P<id>\d+)', Page),
     (r'/(?P<name>.+/.+)', Page),

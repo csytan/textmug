@@ -15,27 +15,34 @@
 
 {% block main %}
     <div id="user_header">
-        {% if page.id %}
-            {% if page.user %}
-                <a href="/{{ page.user.id }}">
-                    {{ page.user.id }}
-                </a>
-                <span>/</span>
-            {% end %}
+        {% if page.user %}
+            <a href="/{{ page.user.id }}">
+                {{ page.user.id }}
+            </a>
+            <span>/</span>
+        {% elif current_user and not page.id %}
+            <a href="/{{ current_user.id }}">
+                {{ current_user.id }}
+            </a>
+            <span>/</span>
+        {% end %}
 
-            {% if current_user and current_user == page.user %}
-                <input id="page_name" type="text" placeholder="new_page_name" 
-                    value="{{ page.page_name if page.page_name else '' }}">
-            {% else %}
-                {{ page.page_name or '# ' + str(page.id) }}
-            {% end %}
+        {% if current_user and page.editable(current_user) %}
+            <input id="page_name" type="text" placeholder="my-page" 
+                {% if not page.id %}class="active"{% end %}
+                value="{{ page.page_name if page.page_name else '' }}">
+        {% elif page.id %}
+            {{ page.page_name or '# ' + str(page.id) }}
         {% else %}
-            new page
+            <span>new page - write something!</span>
         {% end %}
     </div>
 
     <div id="controls">
-        <a class="menu_btn save icon-save"></a>
+        {% if page.editable(current_user) %}
+            <a class="menu_btn save icon-save"></a>
+        {% end %}
+
         {% if current_user %}
             <a class="menu_btn locked icon-locked"></a>
             <a class="menu_btn unlocked icon-unlocked"></a>

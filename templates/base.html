@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>textmug</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <link href="/static/font_styles.css" rel="stylesheet" type="text/css">
     <link href="/static/style.css" rel="stylesheet" type="text/css">
     <script src="/static/jquery.min.js"></script>
@@ -20,6 +21,7 @@
                 href="/"
             {% end %}></a>
         <div class="items">
+            <a href="/new" class="item">new</a>            
             <a href="/about" class="item">about</a>
             {% if current_user %}
                 <a href="/logout" class="item">logout</a>

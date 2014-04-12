@@ -25,7 +25,6 @@ a:hover {
 }
 
 h1, h2, h3 {
-    font-weight: normal;
     margin-top: 0;
     margin-bottom: 0.8em;
 }
@@ -52,7 +51,7 @@ textarea {
 }
 
 ::-webkit-input-placeholder {
-    color: #777;
+    color: rgba(255,255,255,0.2);
 }
 
 
@@ -135,23 +134,25 @@ select {
     position: absolute;
     top: 25px;
     color: #666;
-    font-size: 18px;
+    font-family: Monaco, "Lucida Console", monospace;
+    font-size: 17px;
     height: 25px;
 }
 #page_name {
     display: inline-block;
     width: 200px;
     color: #888;
+    font-size: 17px;
     padding: 5px 10px;
     margin-top: -5px;
-    margin-left: -5px;
+    margin-left: -10px;
     background: none;
 }
 #page_name:hover,
-#page_name:focus {
+#page_name:focus,
+#page_name.active {
     background: #111;
 }
-
 
 #controls {
     position: fixed;

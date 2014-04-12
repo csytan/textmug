@@ -52,6 +52,13 @@ class Page(BaseModel):
         if self.user:
             return self.name.split('/')[1]
 
+    def editable(self, user):
+        if not self.id or \
+            (user and user.is_admin) or \
+            (user and self._data['user'] == user.id):
+            return True
+        return False
+
 
 
 peewee.create_model_tables([User, Page], fail_silently=True)
