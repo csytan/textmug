@@ -69,7 +69,7 @@ initPage = function(page){
         var data = {
             text: domToText($('#editor')[0]),
             page_name: $('#page_name').val(),
-            _xsrf: getCookie('_xsrf')
+            _xsrf: /_xsrf=([^;]+);/.exec(document.cookie)[1]
         };
         console.log(data);
         $.post('', data, function(response){
@@ -99,49 +99,31 @@ initPage = function(page){
                 var offsets = getCaretPositions(this);
                 var text = domToText(this);
 
-                // delete selected text if exists
+                // Delete selected text if exists
                 text = text.slice(0, offsets[0]) + text.slice(offsets[1]);
-
-                // insert newline at first offset
+                // Insert newline at first offset
                 text = text.slice(0, offsets[0]) + '\n' + text.slice(offsets[0]);
-
-                // increment caret position
+                // Increment caret position
                 offsets = [offsets[0] + 1, offsets[0] + 1];
 
                 this.innerHTML = textToHTML(text);
                 setCaretPositions(offsets, this);
 
-                var text2 = domToText(this);
-                if (text2 != text){
-                    console.log('Mismatch!------------');
-                    console.log('DOM --> TXT:');
-                    console.log(text);
-                    console.log('TXT --> HTML:')
-                    console.log(this.innerHTML);
-                    console.log('HTML --> DOM --> TXT:');
-                    console.log(text2);
-                }
+                checkMismatch(this, text);
                 return false;
             }
         })
         .keyup(function(e){
+            if (e.keyCode >= 37 && e.keyCode <= 40){
+                // Skip arrow keys
+                return;
+            }
             var offsets = getCaretPositions(this);
             var text = domToText(this);
             var html = textToHTML(text);
             this.innerHTML = html;
-
-            var text2 = domToText(this);
-            if (text2 != text){
-                console.log('Mismatch!------------');
-                console.log('DOM --> TXT:');
-                console.log(text);
-                console.log('TXT --> HTML:')
-                console.log(this.innerHTML);
-                console.log('HTML --> DOM --> TXT:');
-                console.log(text2);
-            }
-
             setCaretPositions(offsets, this);
+            checkMismatch(this, text);
         })
         .focus()
         .on('click', 'a', function(){
@@ -149,10 +131,26 @@ initPage = function(page){
         });
 }
 
+function checkMismatch(container, text){
+    var text2 = domToText(container);
+    if (text2 != text){
+        console.log('Mismatch!------------');
+        console.log('DOM --> TXT:');
+        console.log(text);
+        console.log('TXT --> HTML:')
+        console.log(container.innerHTML);
+        console.log('HTML --> DOM --> TXT:');
+        console.log(text2);
+    }
+}
 
-function getCookie(name) {
-    var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
-    return r ? r[1] : undefined;
+
+function partialUpdates(){
+    // Ideas for only modifying part of the editor contents when text is modified
+
+    // Make an HTML token list. Diff tokens lists first before modifying individual elements
+    
+    // Use html token list?
 }
 
 
@@ -165,7 +163,7 @@ function isBlockElement(node){
 }
 
 
-domToText = function domToText(container){
+function domToText(container){
     var text = '';
 
     function traverse(node){
@@ -305,7 +303,7 @@ function lexer(text){
 };
 
 
-textToHTML = function textToHTML(text){
+function textToHTML(text){
     var tokens = lexer(text);
     var html = '';
 
@@ -332,26 +330,24 @@ textToHTML = function textToHTML(text){
             var next = tokens[i + 1];
 
             if (i === 0 && allNewlines()){
-                /* If text is all newlines add an extra new line
-                    \n          <div><br></div>
-                                <div><br></div>
-
-                    \n\n        <div><br></div>
-                                <div><br></div>
-                                <div><br></div>
-                */
+                // If text is all newlines add an extra new line
+                //  \n          <div><br></div>
+                //              <div><br></div>
+                //
+                //  \n\n        <div><br></div>
+                //              <div><br></div>
+                //              <div><br></div>
+                //
                 html += '<div><br></div>';
             } else if (next && next.type !== 'newline' && hasPrevBlock(i)){
-                /*  Skip a newline if next element is a block element
-                    and there is previous block element before this one
-
-                    a\na        <div>a</div>
-                                <div>a</div>
-                    
-                    a\n\na      <div>a</div>
-                                <div><br></div>
-                                <div>a</div>
-                */
+                // Skip a newline if next element is a block element
+                // and there is previous block element before this one
+                // a\na        <div>a</div>
+                //             <div>a</div>
+                // 
+                // a\n\na      <div>a</div>
+                //             <div><br></div>
+                //             <div>a</div>
                 continue;
             }
             html += '<div><br></div>';

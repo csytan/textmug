@@ -67,18 +67,17 @@ select {
     cursor: pointer;
     border: none;
     outline: none;
-    font-size: 15px;
-    color: #ccc;
-    background: rgba(0,0,0,0.3);
-    padding: 10px 25px;
+    color: #aaa;
+    background: rgba(255,255,255,0.08);
+    padding: 8px 25px;
     border-radius: 7px;
-    margin: 0;
+    margin-top: 7px;
 }
 .btn.inline {
     display: inline-block;
 }
 .btn:hover {
-    background: rgba(0,0,0,0.5);
+    background: rgba(255,255,255,0.15);
 }
 
 
