@@ -165,17 +165,11 @@ app = tornado.web.Application([
     (r'/(?P<id>\d+)', Page),
     (r'/(?P<name>.+/.+)', Page),
     (r'/(.+)', User)
-])
+], **settings)
 
 
 if __name__ == '__main__':
-    if 'debug' in sys.argv:
-        port = 8888
-        settings['debug'] = True
-    else:
-        port = 80
-    app.settings = settings
-    app.listen(port)
+    app.listen(8888)
     tornado.ioloop.IOLoop.instance().start()
 
 
