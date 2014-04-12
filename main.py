@@ -1,6 +1,7 @@
 import datetime
 import logging
 import os
+import sys
 import threading
 
 import bcrypt
@@ -149,7 +150,7 @@ settings = {
     'template_path': os.path.join(os.path.dirname(__file__), 'templates'),
     'static_path': os.path.join(os.path.dirname(__file__), 'static'),
     'login_url': '/login',
-    'debug': True,
+    'debug': False,
     'xsrf_cookies': True,
     'cookie_secret': '9e333fa1-c53e-4509-baa3-83aba7230ec4'
 }
@@ -164,11 +165,17 @@ app = tornado.web.Application([
     (r'/(?P<id>\d+)', Page),
     (r'/(?P<name>.+/.+)', Page),
     (r'/(.+)', User)
-], **settings)
+])
 
 
 if __name__ == '__main__':
-    app.listen(8888)
+    if 'debug' in sys.argv:
+        port = 8888
+        settings['debug'] = True
+    else:
+        port = 80
+    app.settings = settings
+    app.listen(port)
     tornado.ioloop.IOLoop.instance().start()
 
 
