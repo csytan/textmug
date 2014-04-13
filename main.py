@@ -146,16 +146,7 @@ class Logout(Base):
         self.redirect('/')
 
 
-settings = {
-    'template_path': os.path.join(os.path.dirname(__file__), 'templates'),
-    'static_path': os.path.join(os.path.dirname(__file__), 'static'),
-    'login_url': '/login',
-    'debug': False,
-    'xsrf_cookies': True,
-    'cookie_secret': '9e333fa1-c53e-4509-baa3-83aba7230ec4'
-}
-
-app = tornado.web.Application([
+routes = [
     (r'(?P<name>/)', Page),
     (r'/login', Login),
     (r'/signup', SignUp),
@@ -165,10 +156,22 @@ app = tornado.web.Application([
     (r'/(?P<id>\d+)', Page),
     (r'/(?P<name>.+/.+)', Page),
     (r'/(.+)', User)
-], **settings)
+]
+
+settings = {
+    'template_path': os.path.join(os.path.dirname(__file__), 'templates'),
+    'login_url': '/login',
+    'debug': False,
+    'xsrf_cookies': True,
+    'cookie_secret': '9e333fa1-c53e-4509-baa3-83aba7230ec4'
+}
 
 
 if __name__ == '__main__':
+    if 'debug' in sys.argv:
+        settings['debug'] = True
+        settings['static_path'] = os.path.join(os.path.dirname(__file__), 'static')
+    app = tornado.web.Application(routes, **settings)
     app.listen(8888)
     tornado.ioloop.IOLoop.instance().start()
 
