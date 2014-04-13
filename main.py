@@ -172,7 +172,7 @@ if __name__ == '__main__':
         settings['debug'] = True
         settings['static_path'] = os.path.join(os.path.dirname(__file__), 'static')
     app = tornado.web.Application(routes, **settings)
-    app.listen(8888)
+    app.listen(8888, address='127.0.0.1')
     tornado.ioloop.IOLoop.instance().start()
 
 
