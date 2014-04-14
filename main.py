@@ -55,8 +55,8 @@ class Page(Base):
                 user=self.current_user,
                 created=datetime.datetime.now())
 
-        if page.user and page.user != self.current_user or \
-            self.current_user and not self.current_user.is_admin():
+        if page.user and (page.user != self.current_user) or \
+            (self.current_user and not self.current_user.is_admin()):
             raise tornado.web.HTTPError(401)
         
         page.text = self.get_argument('text', '', strip=False)
@@ -147,11 +147,10 @@ class Logout(Base):
 
 
 routes = [
-    (r'(?P<name>/)', Page),
+    (r'/', Page),
     (r'/login', Login),
     (r'/signup', SignUp),
     (r'/logout', Logout),
-    (r'/new', Page),
     (r'/(?P<name>about)', Page),
     (r'/(?P<id>\d+)', Page),
     (r'/(?P<name>.+/.+)', Page),
