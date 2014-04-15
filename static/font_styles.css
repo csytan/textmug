@@ -53,15 +53,12 @@
 .icon-unlocked:before {
   content: "f";
 }
-.icon-logo-2:before {
-  content: "j";
-}
-.icon-logo:before {
-  content: "d";
-}
 .icon-file-add:before {
   content: "g";
 }
 .icon-folder-add:before {
   content: "h";
+}
+.icon-logo:before {
+  content: "d";
 }
