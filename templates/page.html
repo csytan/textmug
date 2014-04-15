@@ -14,7 +14,7 @@
 
 
 {% block main %}
-    <div id="user_header">
+    <div class="user_header">
         {% if page.user %}
             <a href="/{{ page.user.id }}">
                 {{ page.user.id }}
@@ -28,7 +28,7 @@
         {% end %}
 
         {% if current_user and page.editable(current_user) %}
-            <input id="page_name" type="text" placeholder="my-page" 
+            <input id="page_name" type="text" placeholder="new-page" 
                 {% if not page.id %}class="active"{% end %}
                 value="{{ page.page_name if page.page_name else '' }}">
         {% elif page.id %}

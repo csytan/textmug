@@ -7,8 +7,8 @@
 
 
 {% block main %}
-    <h1>Log in</h1>
-    
+    <h1 class="title">Log in</h1>
+
     <form method="post">
         {% raw xsrf_form_html() %}
         <input id="bot" type="hidden" name="bot" value="true">
