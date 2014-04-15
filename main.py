@@ -55,7 +55,8 @@ class Page(Base):
                 user=self.current_user,
                 created=datetime.datetime.now())
 
-        if page.user and (page.user != self.current_user) or \
+        if page and page.user and \
+            (page.user != self.current_user) or \
             (self.current_user and not self.current_user.is_admin()):
             raise tornado.web.HTTPError(401)
         
