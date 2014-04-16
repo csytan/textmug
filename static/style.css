@@ -9,7 +9,7 @@ https://github.com/chriskempson/tomorrow-theme
 
 
 body {
-    font-family: 'Lucida Grande', 'Lucida Sans Unicode', sans-serif;
+    font-family: 'Lucida Grande', Ubuntu, 'Lucida Sans Unicode', sans-serif;
     font-size: 16px;
     color: #c5c8c6;
     background: #1d1f21;
@@ -134,7 +134,7 @@ select {
 }
 
 .user_header {
-    margin: 40px 0 50px;
+    padding: 40px 0 50px;
     color: #666;
     font-family: Monaco, "Lucida Console", monospace;
     font-size: 17px;
@@ -206,6 +206,7 @@ select {
 }
 
 #editor blockquote {
+    display: block;
     position: relative;
     color: #aaa;
     font-style: italic;
@@ -227,12 +228,14 @@ select {
 }
 
 #editor pre {
+    display: block;
     background: rgba(0,0,0,0.3);
     padding: 10px 20px;
     border-radius: 7px;
 }
 
 #editor code {
+    display: inline;
     background: rgba(0,0,0,0.3);
     border-radius: 4px;
     padding: 4px 5px;
@@ -310,7 +313,6 @@ select {
     }
 
     .user_header {
-        font-size: 15px;
         margin: 80px 0 20px;
     }
 }
