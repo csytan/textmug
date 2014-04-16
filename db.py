@@ -8,6 +8,19 @@ database = peewee.SqliteDatabase('database')
 database.connect()
 
 
+def init():
+    peewee.create_model_tables([User, Page], fail_silently=True)
+    pages = [
+        dict(name='', created=datetime.datetime.now()),
+        dict(name='about', created=datetime.datetime.now())
+    ]
+    for page in pages:
+        try:
+            Page.create(**page)
+        except peewee.IntegrityError:
+            pass
+
+
 class BaseModel(peewee.Model):
     class Meta:
         database = database
@@ -51,6 +64,9 @@ class Page(BaseModel):
     def page_name(self):
         if self.user:
             return self.name.split('/')[1]
+        elif self.name is not None:
+            return self.name
+        return str(self.id)
 
     def editable(self, user):
         if not self.id or \
@@ -60,6 +76,4 @@ class Page(BaseModel):
         return False
 
 
-
-peewee.create_model_tables([User, Page], fail_silently=True)
-
+init()

@@ -15,26 +15,31 @@
 
 {% block main %}
     <div class="user_header">
-        {% if page.user %}
-            <a href="/{{ page.user.id }}">
-                {{ page.user.id }}
-            </a>
-            <span>/</span>
-        {% elif current_user and not page.id %}
-            <a href="/{{ current_user.id }}">
-                {{ current_user.id }}
-            </a>
-            <span>/</span>
-        {% end %}
+        {% if page.id %}
+            {% if page.user %}
+                <a href="/{{ page.user.id }}">
+                    {{ page.user.id }}
+                </a>
+                <span>/</span>
+            {% end %}
 
-        {% if current_user and page.editable(current_user) %}
-            <input id="page_name" type="text" placeholder="new-page" 
-                {% if not page.id %}class="active"{% end %}
-                value="{{ page.page_name if page.page_name else '' }}">
-        {% elif page.id %}
-            {{ page.page_name or '# ' + str(page.id) }}
+            {% if current_user and page.user == current_user %}
+                <input id="page_name" type="text" placeholder="new-page" 
+                    value="{{ page.page_name }}">
+            {% else %}
+                <span>{{ page.page_name }}</span>
+            {% end %}
         {% else %}
-            <span>new page - write something!</span>
+            {# new page #}
+            {% if current_user %}
+                <a href="/{{ current_user.id }}">
+                    {{ current_user.id }}
+                </a>
+                <span>/</span>
+                <input id="page_name" type="text" placeholder="new-page" class="active">
+            {% else %}
+                <span>new page - write something!</span>
+            {% end %}
         {% end %}
     </div>
 

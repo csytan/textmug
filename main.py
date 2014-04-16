@@ -35,27 +35,33 @@ class User(Base):
 
 
 class Page(Base):
-    def get(self, id=None, name=None):
+    def get(self, name=None, id=None):
         page = None
-        if id:
+        if name == 'new':
+            page = db.Page()
+        elif id:
             page = db.Page.get_by_id(int(id))
-        elif name:
+        elif name is not None:
             page = db.Page.get_by_name(name)
         if not page:
-            page = db.Page()
+            raise tornado.web.HTTPError(404)
         self.render('page.html', page=page)
         
-    def post(self, id=None, name=None):        
-        if id:
-            page = db.Page.get_by_id(int(id))
-        elif name:
-            page = db.Page.get_by_name(name)
-        else:
+    def post(self, name=None, id=None):
+        page = None
+        if name == 'new':
             page = db.Page(
                 user=self.current_user,
                 created=datetime.datetime.now())
+        elif id:
+            page = db.Page.get_by_id(int(id))
+        elif name is not None:
+            page = db.Page.get_by_name(name)
 
-        if page and page.user and \
+        if not page:
+            raise tornado.web.HTTPError(404)
+
+        if page.user and \
             (page.user != self.current_user) or \
             (self.current_user and not self.current_user.is_admin()):
             raise tornado.web.HTTPError(401)
@@ -67,10 +73,11 @@ class Page(Base):
             can_has_chars = 'abcdefghijklmnopqrstuvwxyz0123456789._-'
             page_name = self.get_argument('page_name', '').lower()
             page_name = ''.join(s for s in page_name if s in can_has_chars)
-            page_name = self.current_user.id + '/' + page_name[:30]
-            if page_name != page.name:
-                redirect = True
-            page.name = page_name
+            if page_name:
+                page_name = self.current_user.id + '/' + page_name[:30]
+                if page_name != page.name:
+                    redirect = True
+                page.name = page_name
 
             page.encrypted = bool(self.get_argument('encrypted', False))
             page.public = bool(self.get_argument('public', False))
@@ -148,13 +155,14 @@ class Logout(Base):
 
 
 routes = [
-    (r'/', Page),
+    (r'/()', Page),
     (r'/login', Login),
     (r'/signup', SignUp),
     (r'/logout', Logout),
-    (r'/(?P<name>about)', Page),
+    (r'/(new)', Page),
+    (r'/(about)', Page),
     (r'/(?P<id>\d+)', Page),
-    (r'/(?P<name>.+/.+)', Page),
+    (r'/(.+/.+)', Page),
     (r'/(.+)', User)
 ]
 
