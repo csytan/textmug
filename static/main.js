@@ -203,8 +203,8 @@ function lexer(text){
         heading: /^(#{1,6})[^\n]*/,
         blockquote: /^>[^\n]*/,
         li: /^(-{1,3})[^\n]*/,
-        lh: /^[^\n-]+:\n/,
         hr: /^-{4,}/,
+        lh: /^[^\n]+:\n/,
         pre: /^```((?!```)[\s\S])+(```)?/,
         text: /^[^\n]+/
     };
@@ -251,6 +251,17 @@ function lexer(text){
             });
             continue;
         }
+        
+        // List elements
+        if (cap = rules.li.exec(text)){
+            text = text.substring(cap[0].length);
+            tokens.push({
+                type: 'li',
+                depth: cap[1].length,
+                text: cap[0]
+            });
+            continue;
+        }
 
         // List headers
         if (cap = rules.lh.exec(text)){
@@ -263,16 +274,6 @@ function lexer(text){
             continue;
         }
 
-        // List elements
-        if (cap = rules.li.exec(text)){
-            text = text.substring(cap[0].length);
-            tokens.push({
-                type: 'li',
-                depth: cap[1].length,
-                text: cap[0]
-            });
-            continue;
-        }
 
         // Code blocks
         if (cap = rules.pre.exec(text)){
