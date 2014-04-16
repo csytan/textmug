@@ -313,7 +313,7 @@ select {
     }
 
     .user_header {
-        margin: 80px 0 20px;
+        padding: 80px 0 20px;
     }
 }
 
