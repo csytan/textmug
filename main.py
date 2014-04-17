@@ -3,6 +3,7 @@ import logging
 import os
 import sys
 import threading
+import uuid
 
 import bcrypt
 import tornado.ioloop
@@ -171,7 +172,7 @@ settings = {
     'login_url': '/login',
     'debug': False,
     'xsrf_cookies': True,
-    'cookie_secret': '9e333fa1-c53e-4509-baa3-83aba7230ec4'
+    'cookie_secret': str(uuid.uuid4())
 }
 
 
