@@ -31,8 +31,9 @@ class Index(Base):
 class User(Base):
     def get(self, id):
         user = db.User.get_by_id(id)
-        pages = user.pages
-        self.render('user.html', user=user, pages=pages)
+        if not user:
+            raise tornado.web.HTTPError(404)
+        self.render('user.html', user=user, pages=user.pages)
 
 
 class Page(Base):
