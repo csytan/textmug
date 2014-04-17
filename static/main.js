@@ -88,14 +88,44 @@ initPage = function(page){
     });
     
 
-    $('#editor')
-        .keypress(function(e){
-            // Browser normalization
-            if (e.keyCode === 13){
-                // Return key. Browsers use different elements as their 'empty' element.
-                // More info:
-                // http://lists.whatwg.org/pipermail/whatwg-whatwg.org/2011-May/031577.html
+undoStack = [];
 
+function undo(){
+    var state = undoStack.pop();
+    if (state){
+        var html = state[0];
+        var offsets = state[1];
+        this.innerHTML = html;
+        setCaretPositions(offsets, this);
+    }
+    console.log('undo');
+    return false;
+}
+
+function redo(){
+    console.log('redo');
+    return false;
+}
+
+function updateUndoStack(html, caretOffsets){
+    var prev = undoStack[undoStack.length - 1];
+    if (!prev || Math.abs(prev[0].length - html.length) > 10){
+        undoStack.push([html, caretOffsets]);
+    }
+}
+
+
+    $('#editor')
+        .on('keydown', null, 'meta+z', undo)
+        .on('keydown', null, 'ctrl+z', undo)
+        .on('keydown', null, 'meta+shift+z', redo)
+        .on('keydown', null, 'ctrl+shift+z', redo)
+        .keypress(function(e){
+            // Return key Browser normalization.
+            // Browsers use different elements as their 'empty' element.
+            // More info:
+            // http://lists.whatwg.org/pipermail/whatwg-whatwg.org/2011-May/031577.html
+            if (e.keyCode === 13){
                 var offsets = getCaretPositions(this);
                 var text = domToText(this);
 
@@ -109,6 +139,7 @@ initPage = function(page){
                 this.innerHTML = textToHTML(text);
                 setCaretPositions(offsets, this);
 
+                updateUndoStack(this.innerHTML, offsets);
                 checkMismatch(this, text);
                 return false;
             }
@@ -123,6 +154,8 @@ initPage = function(page){
             var html = textToHTML(text);
             this.innerHTML = html;
             setCaretPositions(offsets, this);
+
+            updateUndoStack(this.innerHTML, offsets);
             checkMismatch(this, text);
         })
         .focus()
