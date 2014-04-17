@@ -8,13 +8,6 @@ database = peewee.SqliteDatabase('database')
 database.connect()
 
 
-def init():
-    peewee.create_model_tables([User, Page], fail_silently=True)
-    if not Page.get_by_id(1):
-        # Create index
-        Page.create(created=datetime.datetime.now())
-
-
 class BaseModel(peewee.Model):
     class Meta:
         database = database
@@ -70,4 +63,5 @@ class Page(BaseModel):
         return False
 
 
-init()
+peewee.create_model_tables([User, Page], fail_silently=True)
+
