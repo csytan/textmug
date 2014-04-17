@@ -10,15 +10,9 @@ database.connect()
 
 def init():
     peewee.create_model_tables([User, Page], fail_silently=True)
-    pages = [
-        dict(name='', created=datetime.datetime.now()),
-        dict(name='about', created=datetime.datetime.now())
-    ]
-    for page in pages:
-        try:
-            Page.create(**page)
-        except peewee.IntegrityError:
-            pass
+    if not Page.get_by_id(1):
+        # Create index
+        Page.create(created=datetime.datetime.now())
 
 
 class BaseModel(peewee.Model):

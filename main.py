@@ -37,31 +37,10 @@ class User(Base):
 
 class Page(Base):
     def get(self, name=None, id=None):
-        page = None
-        if name == 'new':
-            page = db.Page()
-        elif id:
-            page = db.Page.get_by_id(int(id))
-        elif name is not None:
-            page = db.Page.get_by_name(name)
-        if not page:
-            raise tornado.web.HTTPError(404)
-        self.render('page.html', page=page)
+        self.render('page.html', page=self.fetch_page(name, id))
         
     def post(self, name=None, id=None):
-        page = None
-        if name == 'new':
-            page = db.Page(
-                user=self.current_user,
-                created=datetime.datetime.now())
-        elif id:
-            page = db.Page.get_by_id(int(id))
-        elif name is not None:
-            page = db.Page.get_by_name(name)
-
-        if not page:
-            raise tornado.web.HTTPError(404)
-
+        page = self.fetch_page(name, id)
         if page.user and \
             (page.user != self.current_user) or \
             (self.current_user and not self.current_user.is_admin()):
@@ -89,6 +68,23 @@ class Page(Base):
             self.write('/' + (page.name or str(page.id)))
         else:
             self.write('1')
+
+    def fetch_page(self, name=None, id=None):
+        page = None
+        if name == '/':
+            page = db.Page.get_by_id(1)
+        elif name == '/new':
+            page = db.Page(
+                user=self.current_user,
+                created=datetime.datetime.now())
+        elif id:
+            page = db.Page.get_by_id(int(id))
+        elif name is not None:
+            page = db.Page.get_by_name(name)
+
+        if not page:
+            raise tornado.web.HTTPError(404)
+        return page
 
 
 class SignUp(Base):
@@ -156,12 +152,11 @@ class Logout(Base):
 
 
 routes = [
-    (r'/()', Page),
+    (r'(/)', Page),
     (r'/login', Login),
     (r'/signup', SignUp),
     (r'/logout', Logout),
-    (r'/(new)', Page),
-    (r'/(about)', Page),
+    (r'(/new)', Page),
     (r'/(?P<id>\d+)', Page),
     (r'/(.+/.+)', Page),
     (r'/(.+)', User)
