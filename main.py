@@ -5,9 +5,9 @@ import sys
 import threading
 import uuid
 
-import bcrypt
 import tornado.ioloop
 import tornado.web
+import tornado.gen
 
 import db
 
@@ -92,22 +92,21 @@ class SignUp(Base):
     def get(self):
         self.render('signup.html')
 
-    @tornado.web.asynchronous
+    @tornado.gen.coroutine
     def post(self):
         username = self.get_argument('username', None)
         email = self.get_argument('email', None)
-        password = self.get_argument('password', '').encode('utf-8')
-        thread = threading.Thread(target=self.hash_password, args=(username, password))
-        thread.start()
+        password = self.get_argument('password', None)
 
-    def hash_password(self, username, password):
-        hashed = bcrypt.hashpw(password, bcrypt.gensalt())
-        tornado.ioloop.IOLoop.instance().add_callback(
-            self.post2, username, hashed)
+        if not username or not password:
+            self.set_secure_cookie('flash', 'Please enter a username and password')
+            self.reload()
+            raise tornado.gen.Return()
 
-    def post2(self, username, hashed):
-        user = db.User(id=username, password=hashed, joined=datetime.datetime.now())
+        user = db.User(id=username, joined=datetime.datetime.now())
+        yield user.set_password(password)
         user.save(force_insert=True)
+
         if user.id:
             self.set_secure_cookie('user', user.id)
             self.redirect('/' + user.id)
@@ -119,31 +118,30 @@ class Login(Base):
     def get(self):
         self.render('login.html')
 
-    @tornado.web.asynchronous
+    @tornado.gen.coroutine
     def post(self):
-        username = self.get_argument('username', '').encode('utf8')
+        username = self.get_argument('username', None)
         email = self.get_argument('email', None)
-        password = self.get_argument('password', '').encode('utf8')
+        password = self.get_argument('password', None)
+
+        if not username or not password:
+            self.set_secure_cookie('flash', 'Username or Password Incorrect')
+            self.reload()
+            raise tornado.gen.Return()
+
         user = db.User.get_by_id(username)
         if not user:
             self.set_secure_cookie('flash', 'Username or Password Incorrect')
-            return self.reload()
-        thread = threading.Thread(target=self.check_password, args=(user, password))
-        thread.start()
+            self.reload()
+            raise tornado.gen.Return()
 
-    def check_password(self, user, password):
-        db_password = user.password.encode('utf8')
-        if not bcrypt.hashpw(password, db_password) == db_password:
-            user = None
-        tornado.ioloop.IOLoop.instance().add_callback(
-            self.post2, user)
-
-    def post2(self, user):
-        if user:
+        correct_password = yield user.check_password(password)
+        if correct_password:
             self.set_secure_cookie('user', user.id)
             self.redirect('/' + user.id)
         else:
-            self.redirect('/login')
+            self.set_secure_cookie('flash', 'Username or Password Incorrect')
+            self.reload()
 
 
 class Logout(Base):
@@ -165,6 +163,7 @@ routes = [
 
 settings = {
     'template_path': os.path.join(os.path.dirname(__file__), 'templates'),
+    'static_path': os.path.join(os.path.dirname(__file__), 'static'),
     'login_url': '/login',
     'debug': False,
     'xsrf_cookies': True,
@@ -175,7 +174,6 @@ settings = {
 if __name__ == '__main__':
     if 'debug' in sys.argv:
         settings['debug'] = True
-        settings['static_path'] = os.path.join(os.path.dirname(__file__), 'static')
     app = tornado.web.Application(routes, **settings)
     app.listen(8888, address='127.0.0.1')
     tornado.ioloop.IOLoop.instance().start()

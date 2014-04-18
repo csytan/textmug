@@ -1,11 +1,23 @@
+import concurrent.futures
 import datetime
 import os
 
+import bcrypt
 import peewee
+
 
 
 database = peewee.SqliteDatabase('database')
 database.connect()
+
+thread_pool = concurrent.futures.ThreadPoolExecutor(max_workers=4)
+
+
+def future_thread(func):
+    def wrapper(*args, **kwargs):
+        return thread_pool.submit(func, *args, **kwargs)
+    return wrapper
+
 
 
 class BaseModel(peewee.Model):
@@ -14,9 +26,9 @@ class BaseModel(peewee.Model):
 
 
 class User(BaseModel):
-    id = peewee.TextField(primary_key=True)
+    id = peewee.CharField(primary_key=True, max_length=20)
     email = peewee.TextField(unique=True, null=True)
-    password = peewee.TextField()
+    password_hash = peewee.TextField()
     joined = peewee.DateTimeField()
 
     @classmethod
@@ -28,6 +40,13 @@ class User(BaseModel):
             return True
         return False
 
+    @future_thread
+    def set_password(self, password):
+        self.password_hash = bcrypt.hashpw(password, bcrypt.gensalt())
+
+    @future_thread
+    def check_password(self, password):
+        return bcrypt.checkpw(password, self.password_hash)
 
 
 class Page(BaseModel):
