@@ -84,6 +84,9 @@ select {
 }
 
 
+/* base.html
+======================================================== */
+
 #menu {
     position: fixed;
     top: 0;
@@ -133,6 +136,10 @@ select {
     margin-bottom: 100px;
 }
 
+
+/* user.html, page.html
+======================================================== */
+
 .user_header {
     padding: 40px 0 50px;
     color: #666;
@@ -153,6 +160,27 @@ select {
 .user_header #page_name.active {
     background: #111;
 }
+
+
+/* user.html
+======================================================== */
+
+.page {
+    font-size: 21px;
+    margin: 15px 0;
+}
+
+.page .info {
+    color: #555;
+    font-size: 13px;
+    font-weight: bold;
+    padding: 5px 0;
+}
+
+
+
+/* page.html
+======================================================== */
 
 #controls {
     position: fixed;
@@ -296,11 +324,6 @@ select {
     display: none;
 }
 
-
-.page {
-    font-size: 20px;
-    margin: 15px 0;
-}
 
 
 @media (max-width: 600px) {

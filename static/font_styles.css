@@ -62,3 +62,12 @@
 .icon-logo:before {
   content: "d";
 }
+.icon-public:before {
+  content: "i";
+}
+.icon-file:before {
+  content: "j";
+}
+.icon-folder:before {
+  content: "k";
+}

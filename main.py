@@ -19,8 +19,34 @@ class Base(tornado.web.RequestHandler):
         if username:
             return db.User.get_by_id(username)
 
-    def reload(self):
+    def reload(self, message):
+        self.set_secure_cookie('flash', message)
         self.redirect(self.request.path)
+
+    def get_template_namespace(self):
+        namespace = super(Base, self).get_template_namespace()
+        namespace.update({
+            'relative_date': self.relative_date
+        })
+        return namespace
+
+    @staticmethod
+    def relative_date(date):
+        td = datetime.datetime.now() - date
+        if td.days == 1:
+            return '1 day ago'
+        elif td.days:
+            return str(td.days) + ' days ago'
+        elif td.seconds / 60 / 60 == 1:
+            return '1 hour ago'
+        elif td.seconds > 60 * 60:
+            return str(td.seconds / 60 / 60) + ' hours ago'
+        elif td.seconds / 60 == 1:
+            return '1 minute ago'
+        elif td.seconds > 60:
+            return str(td.seconds / 60) + ' minutes ago'
+        else:
+            return str(td.seconds) + ' seconds ago'
 
 
 class Index(Base):
@@ -99,8 +125,7 @@ class SignUp(Base):
         password = self.get_argument('password', None)
 
         if not username or not password:
-            self.set_secure_cookie('flash', 'Please enter a username and password')
-            self.reload()
+            self.reload('Please enter a username and password')
             raise tornado.gen.Return()
 
         user = db.User(id=username, joined=datetime.datetime.now())

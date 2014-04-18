@@ -25,7 +25,7 @@
 
             {% if current_user and page.user == current_user %}
                 <input id="page_name" type="text" placeholder="new-page" 
-                    value="{{ page.page_name }}">
+                    value="{{ page.page_name }}" maxlength="40">
             {% else %}
                 <span>{{ page.page_name }}</span>
             {% end %}
@@ -36,7 +36,7 @@
                     {{ current_user.id }}
                 </a>
                 <span>/</span>
-                <input id="page_name" type="text" placeholder="new-page" class="active">
+                <input id="page_name" type="text" placeholder="new-page" maxlength="40" class="active">
             {% else %}
                 <span>new page - write something!</span>
             {% end %}
