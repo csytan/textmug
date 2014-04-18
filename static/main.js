@@ -27,6 +27,10 @@ initPage = function(page){
         //$('#editor').focus();
     });
 
+    $('#page_name').keyup(function(){
+        this.value = this.value.toLowerCase().replace(/[^a-z0-9\_-]+/, '');
+    });
+
 
     $('#settings_dialog select[name="encrypt"]').change(function(){
         var encrypt = $(this).find('option:selected').val();
