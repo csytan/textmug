@@ -131,7 +131,7 @@ select {
 
 #main {
     width: 80%;
-    max-width: 700px;
+    max-width: 650px;
     margin: auto;
     margin-bottom: 100px;
 }
@@ -209,8 +209,7 @@ select {
 #editor {
     color: #c5c8c6;
     font-size: 18px;
-    line-height: 1.6em;
-    display: block;
+    line-height: 1.65;
     width: 100%;
     min-height: 50px;
     border: none;

@@ -442,9 +442,8 @@ function escape(text) {
 
 function inlineHTML(text){
     var rules = {
-        link: /^https?:\/\/[^\s<]+[^<.,:;"'\]\s]/,
-        link: /^((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/,
-        email: /^\S+@\S+/,
+        link: /^https?:\/\/[^\s<]+[^<.,:;"')\]\s]/,
+        email: /^\S+@[a-z0-9-\.]+[a-z]/,
         code: /^`[^`]+`/,
         strong: /^\*\*[^\*]+?\*\*/,
         em: /^\*[^\*]+\*/
@@ -455,14 +454,14 @@ function inlineHTML(text){
         // Links
         if (cap = rules.link.exec(text)){
             text = text.substring(cap[0].length);
-            html += '<a href="' + escape(cap[0]) + '">' + escape(cap[0]) + '</a>';
+            html += '<a href="' + escape(cap[0]) + '" rel="nofollow">' + escape(cap[0]) + '</a>';
             continue;
         }
 
         // Email
         if (cap = rules.email.exec(text)){
             text = text.substring(cap[0].length);
-            html += '<a class="email" href="mailto:' + escape(cap[0]) + '">' + 
+            html += '<a class="email" rel="nofollow" href="mailto:' + escape(cap[0]) + '">' + 
                 escape(cap[0]) + 
             '</a>';
             continue;
