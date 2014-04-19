@@ -244,11 +244,12 @@ select {
 }
 #editor blockquote:before {
     position: absolute;
-    top: 17px;
+    top: 10px;
     left: 5px;
     color: #333;
-    content: open-quote;
     font-size: 50px;
+    line-height: 1;
+    content: open-quote;
 }
 #editor blockquote:after {
     content: no-close-quote;
