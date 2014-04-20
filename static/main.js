@@ -116,6 +116,8 @@ function save(){
 
 
     $('#editor')
+        .on('keydown', null, 'meta+s', save)
+        .on('keydown', null, 'ctrl+s', save)
         .on('keydown', null, 'meta+z', undo)
         .on('keydown', null, 'ctrl+z', undo)
         .on('keydown', null, 'meta+shift+z', redo)
