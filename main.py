@@ -98,9 +98,9 @@ class Page(Base):
 
     def fetch_page(self, name=None, id=None):
         page = None
-        if name == '/':
+        if self.request.path == '/':
             page = db.Page.get_by_id(1)
-        elif name == '/new':
+        elif self.request.path == '/new':
             page = db.Page(
                 user=self.current_user,
                 created=datetime.datetime.now())
@@ -127,8 +127,10 @@ class SignUp(Base):
         if not username or not password:
             self.reload('Please enter a username and password')
             raise tornado.gen.Return()
-
-        user = db.User(id=username, joined=datetime.datetime.now())
+            
+        user = db.User(
+            id=''.join(c for c in username.lower() if c.isalnum())[:20],
+            joined=datetime.datetime.now())
         yield user.set_password(password)
         user.save(force_insert=True)
 
@@ -176,11 +178,11 @@ class Logout(Base):
 
 
 routes = [
-    (r'(/)', Page),
+    (r'/', Page),
     (r'/login', Login),
     (r'/signup', SignUp),
     (r'/logout', Logout),
-    (r'(/new)', Page),
+    (r'/new', Page),
     (r'/(?P<id>\d+)', Page),
     (r'/(.+/.+)', Page),
     (r'/(.+)', User)
