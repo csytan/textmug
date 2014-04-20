@@ -45,14 +45,14 @@
 
     <div id="controls">
         {% if page.id == 1 %}
-            <a class="menu_btn icon-file-add" href="/new"></a>
+            <a class="control icon-plus-circled" href="/new"></a>
         {% end %}
         
         {% if page.editable(current_user) %}
-            <a class="menu_btn save icon-save"></a>
-            <a class="menu_btn locked icon-locked"></a>
-            <a class="menu_btn unlocked icon-unlocked"></a>
-            <a class="menu_btn settings icon-settings"></a>
+            <a class="control save icon-floppy"></a>
+            <a class="control locked icon-lock"></a>
+            <a class="control unlocked icon-lock-open"></a>
+            <a class="control settings icon-cog"></a>
         {% end %}
     </div>
 

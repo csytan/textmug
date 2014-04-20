@@ -28,9 +28,8 @@ h1, h2, h3 {
     margin-top: 0;
     margin-bottom: 0.8em;
 }
-
-h1.title {
-    margin: 100px 0 50px;
+h1 {
+    margin-bottom: 35px;
 }
 
 label {
@@ -100,7 +99,7 @@ select {
     display: inline-block;
     font-size: 40px;
     color: #aaa;
-    padding: 20px;
+    padding: 25px 20px;
     padding-bottom: 5px;
     line-height: 0;
 }
@@ -109,6 +108,13 @@ select {
 }
 #menu:hover .logo {
     -webkit-transform: rotate(-25deg);
+}
+#menu .status {
+    position: absolute;
+    color: #555;
+    left: 85px;
+    top: 33px;
+    width: 200px;
 }
 #menu .items {
     display: none;
@@ -132,8 +138,8 @@ select {
 #main {
     width: 80%;
     max-width: 650px;
+    padding: 90px 0 100px;
     margin: auto;
-    margin-bottom: 100px;
 }
 
 
@@ -141,10 +147,10 @@ select {
 ======================================================== */
 
 .user_header {
-    padding: 40px 0 50px;
     color: #666;
-    font-family: Monaco, "Lucida Console", monospace;
     font-size: 17px;
+    font-family: Monaco, "Lucida Console", monospace;
+    margin-bottom: 35px;
 }
 .user_header #page_name {
     display: inline-block;
@@ -167,7 +173,7 @@ select {
 
 .page {
     font-size: 21px;
-    margin-bottom: 13px;
+    margin-bottom: 18px;
 }
 
 .page .info {
@@ -184,25 +190,23 @@ select {
 
 #controls {
     position: fixed;
-    top: 15px;
-    right: 10px;
-    width: 50px;
+    top: 20px;
+    right: 20px;
+    width: 47px;
 }
-#controls .menu_btn {
+.control {
     display: inline-block;
-    color: #666;
+    color: #888;
     font-size: 33px;
-    padding: 10px;
+    padding: 7px;
     line-height: 0;
     cursor: pointer;
     text-decoration: none;
+    margin-bottom: 7px;
 }
-#controls .menu_btn:hover {
+.control:hover,
+.control.active {
     color: #eee;
-}
-#controls .locked,
-#controls .unlocked {
-    display: none;
 }
 
 
@@ -326,13 +330,22 @@ select {
 
 
 
-@media (max-width: 600px) {
+@media (max-width: 800px) {
     #main {
         width: 90%;
     }
 
-    .user_header {
-        padding: 80px 0 20px;
+    #menu, #controls {
+        position: absolute;
+    }
+
+    #controls {
+        width: auto;
+    }
+    .control {
+        float: right;
+        margin: 0;
+        margin-left: 7px;
     }
 }
 

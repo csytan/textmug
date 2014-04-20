@@ -2,16 +2,12 @@
 
 
 initPage = function(page){
-    if (page.encrypted){
-        $('#editor').hide();
-        $('#lock_unlock').show();
-    } else {
-        var text = domToText($('#editor')[0]);
-        var html = textToHTML(text);
-        $('#editor').html(html)
-            .focus();
-    }
+    var text = domToText($('#editor')[0]);
+    var html = textToHTML(text);
+    $('#editor').html(html)
+        .focus();
 
+    $('.locked, .unlocked').hide();
 
     $('.locked').click(function(){
         $('#decrypt_dialog, #editor').toggle();
@@ -21,10 +17,6 @@ initPage = function(page){
     $('.unlocked').click(function(){
         $('#encrypt_dialog, #editor').toggle();
         return false;
-    });
-
-    $(document.body).click(function(){
-        //$('#editor').focus();
     });
 
     $('#page_name').keyup(function(){
@@ -69,22 +61,7 @@ initPage = function(page){
     });
 
 
-    $('.save').click(function(){
-        var data = {
-            text: domToText($('#editor')[0]),
-            page_name: $('#page_name').val(),
-            _xsrf: /_xsrf=([^;]+);/.exec(document.cookie)[1]
-        };
-        console.log(data);
-        $.post('', data, function(response){
-            if (response == 1){
-                console.log('saved');
-            } else {
-                window.location.href = response;
-            }
-        });
-        return false; 
-    });
+    $('.save').click(save);
 
     $('.settings').click(function(){
         $('#settings_dialog, #editor').toggle();
@@ -116,6 +93,25 @@ function updateUndoStack(html, caretOffsets){
     if (!prev || Math.abs(prev[0].length - html.length) > 10){
         undoStack.push([html, caretOffsets]);
     }
+}
+
+function save(){
+    var data = {
+        text: domToText($('#editor')[0]),
+        page_name: $('#page_name').val(),
+        _xsrf: /_xsrf=([^;]+);/.exec(document.cookie)[1]
+    };
+    console.log(data);
+    $('.status').text('saving...');
+    $.post('', data, function(response){
+        if (response == 1){
+            console.log('saved');
+        } else {
+            window.location.href = response;
+        }
+        $('.status').text('saved');
+    });
+    return false; 
 }
 
 
