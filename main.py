@@ -19,9 +19,15 @@ class Base(tornado.web.RequestHandler):
         if username:
             return db.User.get_by_id(username)
 
-    def reload(self, message):
-        self.set_secure_cookie('flash', message)
+    def reload(self, flash=None):
+        if flash:
+            self.set_secure_cookie('flash', flash)
         self.redirect(self.request.path)
+
+    def get_and_clear_flash(self):
+        flash = self.get_secure_cookie('flash')
+        self.clear_cookie('flash')
+        return flash
 
     def get_template_namespace(self):
         namespace = super(Base, self).get_template_namespace()
@@ -125,9 +131,9 @@ class SignUp(Base):
         password = self.get_argument('password', None)
 
         if not username or not password:
-            self.reload('Please enter a username and password')
+            self.reload('Incorrect login')
             raise tornado.gen.Return()
-            
+
         user = db.User(
             id=''.join(c for c in username.lower() if c.isalnum())[:20],
             joined=datetime.datetime.now())
@@ -150,25 +156,20 @@ class Login(Base):
         username = self.get_argument('username', None)
         email = self.get_argument('email', None)
         password = self.get_argument('password', None)
-
-        if not username or not password:
-            self.set_secure_cookie('flash', 'Username or Password Incorrect')
-            self.reload()
-            raise tornado.gen.Return()
-
-        user = db.User.get_by_id(username)
-        if not user:
-            self.set_secure_cookie('flash', 'Username or Password Incorrect')
-            self.reload()
-            raise tornado.gen.Return()
-
-        correct_password = yield user.check_password(password)
-        if correct_password:
-            self.set_secure_cookie('user', user.id)
-            self.redirect('/' + user.id)
-        else:
-            self.set_secure_cookie('flash', 'Username or Password Incorrect')
-            self.reload()
+        try:
+            if not username or not password:
+                raise tornado.gen.Return()
+            user = db.User.get_by_id(username)
+            if not user:
+                raise tornado.gen.Return()
+            correct_password = yield user.check_password(password)
+            if correct_password:
+                self.set_secure_cookie('user', user.id)
+                self.redirect('/' + user.id)
+            else:
+                raise tornado.gen.Return()
+        except tornado.gen.Return:
+            self.reload('Incorrect Login')
 
 
 class Logout(Base):

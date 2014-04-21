@@ -17,7 +17,10 @@
             {% else %}
                 href="/"
             {% end %}></a>
-        <div class="status"></div>
+        <div class="status">
+            {% set flash = handler.get_and_clear_flash() %}
+            {% if flash %}{{ flash }}{% end %}
+        </div>
         <div class="items">
             <a href="/new" class="item">new</a>
             {% if current_user %}

@@ -68,7 +68,7 @@ class Page(BaseModel):
 
     @property
     def page_name(self):
-        if self.user:
+        if self.user and self.name:
             return self.name.split('/')[1]
         elif self.name is not None:
             return self.name
