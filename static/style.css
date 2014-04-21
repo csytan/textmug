@@ -259,18 +259,24 @@ select {
     content: no-close-quote;
 }
 
+#editor pre,
+#editor code {
+    font-family: Monaco, "Lucida Console", monospace;
+    background: rgba(0,0,0,0.3);
+}
+
 #editor pre {
     display: block;
-    background: rgba(0,0,0,0.3);
+    font-size: 17px;
     padding: 10px 20px;
     border-radius: 7px;
 }
 
 #editor code {
     display: inline;
-    background: rgba(0,0,0,0.3);
+    font-size: 16px;
     border-radius: 4px;
-    padding: 4px 5px;
+    padding: 3px 5px;
 }
 
 #editor .lh {
