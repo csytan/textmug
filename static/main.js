@@ -102,12 +102,12 @@ function save(){
         _xsrf: /_xsrf=([^;]+);/.exec(document.cookie)[1]
     };
     console.log(data);
-    showStatus('saving...');
+    $('.status').text('Saving...');
     $.post('', data, function(response){
         if (response.indexOf('/') === 0){
             window.location.href = response;
         }
-        showStatus('saved');
+        $('.status').text('Saved');
     });
     return false; 
 }
@@ -184,16 +184,6 @@ function partialUpdates(){
     // Make an HTML token list. Diff tokens lists first before modifying individual elements
     
     // Use html token list?
-}
-
-
-function showStatus(msg){
-    $('.status')
-        .clearQueue()
-        .text(msg)
-        .show()
-        .delay(3000)
-        .fadeOut();
 }
 
 
