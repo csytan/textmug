@@ -267,14 +267,14 @@ select {
 
 #editor pre {
     display: block;
-    font-size: 17px;
+    font-size: 16px;
     padding: 10px 20px;
     border-radius: 7px;
 }
 
 #editor code {
     display: inline;
-    font-size: 16px;
+    font-size: 17px;
     border-radius: 4px;
     padding: 3px 5px;
 }
