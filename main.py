@@ -74,13 +74,13 @@ class Page(Base):
         
     def post(self, name=None, id=None):
         page = self.fetch_page(name, id)
-        if page.user and \
-            (page.user != self.current_user) or \
-            (self.current_user and not self.current_user.is_admin()):
-            raise tornado.web.HTTPError(401)
+        
+        if page.user != self.current_user:
+            if not self.current_user or not self.current_user.is_admin():
+                raise tornado.web.HTTPError(401)
         
         page.text = self.get_argument('text', '', strip=False)
-
+        
         redirect = False if page.id else True
         if self.current_user:
             can_has_chars = 'abcdefghijklmnopqrstuvwxyz0123456789._-'
