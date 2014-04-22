@@ -111,6 +111,7 @@ select {
 }
 #menu .status {
     position: absolute;
+    font-size: 15px;
     color: #555;
     left: 85px;
     top: 33px;
@@ -330,8 +331,21 @@ select {
     display: none;
 }
 
-.encrypt_password {
+#settings_dialog  .encrypt_password {
     display: none;
+}
+#settings_dialog .delete {
+    float: left;
+    margin-top: -33px;
+    margin-left: 100px;
+    cursor: pointer;
+    font-size: 20px;
+    color: #777;
+    padding: 5px 10px;
+    border-radius: 7px;
+}
+#settings_dialog .delete:hover {
+    color: #eee;
 }
 
 

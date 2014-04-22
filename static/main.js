@@ -4,6 +4,8 @@
 initPage = function(page){
     var text = domToText($('#editor')[0]);
     var html = textToHTML(text);
+    var xsrf = /_xsrf=([^;]+);/.exec(document.cookie)[1];
+
     $('#editor').html(html)
         .focus();
 
@@ -67,6 +69,20 @@ initPage = function(page){
         $('#settings_dialog, #editor').toggle();
         return false;
     });
+
+    $('#settings_dialog .delete').click(function(){
+        if (confirm('Are you sure?')){
+            $('.status').text('Deleting...');
+            $.post('', {action: 'delete', _xsrf: xsrf}, function(response){
+                if (response.indexOf('/') === 0){
+                    window.location.href = response;
+                } else {
+                    $('.status').text(response);
+                }
+            });
+        }
+        return false;
+    });
     
 
 undoStack = [];
@@ -97,9 +113,10 @@ function updateUndoStack(html, caretOffsets){
 
 function save(){
     var data = {
+        action: 'save',
         text: domToText($('#editor')[0]),
         page_name: $('#page_name').val(),
-        _xsrf: /_xsrf=([^;]+);/.exec(document.cookie)[1]
+        _xsrf: xsrf
     };
     console.log(data);
     $('.status').text('Saving...');

@@ -74,33 +74,38 @@ class Page(Base):
         
     def post(self, name=None, id=None):
         page = self.fetch_page(name, id)
-        
         if page.user != self.current_user:
             if not self.current_user or not self.current_user.is_admin():
                 raise tornado.web.HTTPError(401)
         
-        page.text = self.get_argument('text', '', strip=False)
-        
-        redirect = False if page.id else True
-        if self.current_user:
-            can_has_chars = 'abcdefghijklmnopqrstuvwxyz0123456789._-'
-            page_name = self.get_argument('page_name', '').lower()
-            page_name = ''.join(c for c in page_name if c in can_has_chars)
-            if not page_name:
-                page.save()
-                page_name = str(page.id)
-            page_name = self.current_user.id + '/' + page_name[:30]
-            if page_name != page.name:
-                redirect = True
-            page.name = page_name
-            page.encrypted = bool(self.get_argument('encrypted', False))
-            page.public = bool(self.get_argument('public', False))
-        page.save()
+        action = self.get_argument('action', None)
+        if action == 'save':
+            page.text = self.get_argument('text', '', strip=False)
+            
+            redirect = False if page.id else True
+            if self.current_user:
+                can_has_chars = 'abcdefghijklmnopqrstuvwxyz0123456789._-'
+                page_name = self.get_argument('page_name', '').lower()
+                page_name = ''.join(c for c in page_name if c in can_has_chars)
+                if not page_name:
+                    page.save()
+                    page_name = str(page.id)
+                page_name = self.current_user.id + '/' + page_name[:30]
+                if page_name != page.name:
+                    redirect = True
+                page.name = page_name
+                page.encrypted = bool(self.get_argument('encrypted', False))
+                page.public = bool(self.get_argument('public', False))
+            page.save()
 
-        if redirect:
-            self.write('/' + (page.name or str(page.id)))
-        else:
-            self.write('1')
+            if redirect:
+                self.write('/' + (page.name or str(page.id)))
+            else:
+                self.write('1')
+        elif action == 'delete':
+            page.delete_instance()
+            self.set_secure_cookie('flash', 'Page deleted')
+            self.write('/' + self.current_user.id)
 
     def fetch_page(self, name=None, id=None):
         page = None
