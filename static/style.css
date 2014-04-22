@@ -353,6 +353,11 @@ select {
 @media (max-width: 800px) {
     #main {
         width: 90%;
+        padding-top: 100px;
+    }
+
+    .user_header {
+        margin-bottom: 22px;
     }
 
     #menu, #controls {
