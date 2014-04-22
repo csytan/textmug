@@ -85,16 +85,16 @@ class Page(Base):
         if self.current_user:
             can_has_chars = 'abcdefghijklmnopqrstuvwxyz0123456789._-'
             page_name = self.get_argument('page_name', '').lower()
-            page_name = ''.join(s for s in page_name if s in can_has_chars)
-            if page_name:
-                page_name = self.current_user.id + '/' + page_name[:30]
-                if page_name != page.name:
-                    redirect = True
-                page.name = page_name
-
+            page_name = ''.join(c for c in page_name if c in can_has_chars)
+            if not page_name:
+                page.save()
+                page_name = str(page.id)
+            page_name = self.current_user.id + '/' + page_name[:30]
+            if page_name != page.name:
+                redirect = True
+            page.name = page_name
             page.encrypted = bool(self.get_argument('encrypted', False))
             page.public = bool(self.get_argument('public', False))
-
         page.save()
 
         if redirect:
