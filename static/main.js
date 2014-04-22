@@ -4,8 +4,8 @@
 initPage = function(page){
     var text = domToText($('#editor')[0]);
     var html = textToHTML(text);
-    var xsrf = /_xsrf=([^;]+);/.exec(document.cookie)[1];
-
+    var xsrf = /_xsrf=([a-z0-9]+)/.exec(document.cookie)[1];
+    
     $('#editor').html(html)
         .focus();
 
