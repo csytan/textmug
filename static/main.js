@@ -1,6 +1,5 @@
 (function(){
 
-
 window.Editor = {};
 
 Editor.init = function(container){
@@ -261,7 +260,6 @@ Editor.textToHTML = function(text){
     for (var i=0, token; token=tokens[i]; i++){
         if (token.type === 'newline'){
             var next = tokens[i + 1];
-
             if (i === 0 && allNewlines()){
                 // If text is all newlines add an extra new line
                 //  \n          <div><br></div>
@@ -285,37 +283,30 @@ Editor.textToHTML = function(text){
             }
             html += '<div><br></div>';
         }
-
         if (token.type === 'heading'){
             html += '<h' + token.depth + '>' + this.inlineHTML(token.text) + '</h' + token.depth + '>';
             continue;
         }
-
         if (token.type === 'blockquote'){
             html += '<blockquote>' + this.inlineHTML(token.text) + '</blockquote>';
             continue;
         }
-
         if (token.type === 'hr'){
             html += '<div class="hr">' + this.inlineHTML(token.text) + '</div>';
             continue;
         }
-
         if (token.type === 'lh'){
             html += '<div class="lh">' + this.inlineHTML(token.text) + '</div>';
             continue;
         }
-
         if (token.type === 'li'){
             html += '<div class="li' + token.depth + '">' + this.inlineHTML(token.text) + '</div>';
             continue;
         }
-
         if (token.type === 'pre'){
             html += '<pre>' + this.escape(token.text) + '</pre>';
             continue;
         }
-
         if (token.type === 'div'){
             html += '<div>' + this.inlineHTML(token.text) + '</div>';
             continue;
@@ -347,7 +338,6 @@ Editor.lexer = function(text){
             });
             continue;
         }
-
         // Headings
         if (cap = rules.heading.exec(text)){
             text = text.substring(cap[0].length);
@@ -358,7 +348,6 @@ Editor.lexer = function(text){
             });
             continue;
         }
-
         // Block quotes
         if (cap = rules.blockquote.exec(text)){
             text = text.substring(cap[0].length);
@@ -368,7 +357,6 @@ Editor.lexer = function(text){
             });
             continue;
         }
-
         // Horizontal rules
         if (cap = rules.hr.exec(text)){
             text = text.substring(cap[0].length);
@@ -378,7 +366,6 @@ Editor.lexer = function(text){
             });
             continue;
         }
-        
         // List elements
         if (cap = rules.li.exec(text)){
             text = text.substring(cap[0].length);
@@ -389,7 +376,6 @@ Editor.lexer = function(text){
             });
             continue;
         }
-
         // List headers
         if (cap = rules.lh.exec(text)){
             var capTxt = cap[0].replace('\n', '');
@@ -400,8 +386,6 @@ Editor.lexer = function(text){
             });
             continue;
         }
-
-
         // Code blocks
         if (cap = rules.pre.exec(text)){
             text = text.substring(cap[0].length);
@@ -412,7 +396,6 @@ Editor.lexer = function(text){
             tokens.push(token);
             continue;
         }
-
         // Text
         if (cap = rules.text.exec(text)){
             text = text.substring(cap[0].length);
@@ -422,7 +405,6 @@ Editor.lexer = function(text){
             });
             continue;
         }
-
         if (text){
             alert('Big problems!!');
         }
@@ -455,7 +437,6 @@ Editor.inlineHTML = function(text){
             html += '<a href="' + this.escape(cap[0]) + '" rel="nofollow">' + this.escape(cap[0]) + '</a>';
             continue;
         }
-
         // Email
         if (cap = rules.email.exec(text)){
             text = text.substring(cap[0].length);
@@ -464,28 +445,24 @@ Editor.inlineHTML = function(text){
             '</a>';
             continue;
         }
-
         // Code
         if (cap = rules.code.exec(text)){
             text = text.substring(cap[0].length);
             html += '<code>' + this.escape(cap[0]) + '</code>';
             continue;
         }
-
         // Strong
         if (cap = rules.strong.exec(text)){
             text = text.substring(cap[0].length);
             html += '<strong>' + this.escape(cap[0]) + '</strong>';
             continue;
         }
-
         // Em
         if (cap = rules.em.exec(text)){
             text = text.substring(cap[0].length);
             html += '<em>' + this.escape(cap[0]) + '</em>';
             continue;
         }
-
         // Text
         html += this.escape(text[0]);
         text = text.substring(1);
@@ -588,7 +565,6 @@ Editor.setCaretPositions = function(offsets, element){
 
     var range = document.createRange();
     var sel = window.getSelection();
-    
     var startOffset = findOffset(element, offsets[0]);
     range.setStart(startOffset[0], startOffset[1]);
 
