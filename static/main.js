@@ -1,30 +1,41 @@
 (function(){
 
 
-initPage = function(page){
-    var text = domToText($('#editor')[0]);
-    var html = textToHTML(text);
-    var xsrf = /_xsrf=([a-z0-9]+)/.exec(document.cookie)[1];
-    
-    $('#editor').html(html)
+window.Editor = {};
+
+Editor.init = function(container){
+    this.undoStack = [];
+    this.container = container;
+
+    var text = this.domToText(container);
+    var html = this.textToHTML(text);
+    $(container)
+        .html(html)
+        .on('keydown', null, 'meta+s', this.save)
+        .on('keydown', null, 'ctrl+s', this.save)
+        .on('keydown', null, 'meta+z', this.undo)
+        .on('keydown', null, 'ctrl+z', this.undo)
+        .on('keydown', null, 'meta+shift+z', this.redo)
+        .on('keydown', null, 'ctrl+shift+z', this.redo)
+        .keypress(this.keypress)
+        .keyup(this.keyup)
+        .on('click', 'a', function(){
+            window.open(this.href,'_blank');
+        })
         .focus();
 
     $('.locked, .unlocked').hide();
-
     $('.locked').click(function(){
         $('#decrypt_dialog, #editor').toggle();
         return false;
     });
-
     $('.unlocked').click(function(){
         $('#encrypt_dialog, #editor').toggle();
         return false;
     });
-
     $('#page_name').keyup(function(){
         this.value = this.value.toLowerCase().replace(/[^a-z0-9\_\.-]+/, '');
     });
-
 
     $('#settings_dialog select[name="encrypt"]').change(function(){
         var encrypt = $(this).find('option:selected').val();
@@ -38,85 +49,58 @@ initPage = function(page){
         console.log(encrypt);
     });
 
-
-    $('.encrypt').click(function(){
-        var password = $(this).parent().find('input[type="password"]').val();
-        var plainText = domToText($('#editor')[0]);
-        var cipherJSON = sjcl.encrypt(password, plainText);
-        console.log(cipherJSON);
-        page.text = JSON.stringify(cipherJSON);
-        page.encrypted = true;
-        $('#encrypt_dialog, .unlocked').hide();
-        $('#decrypt_dialog, .locked').show();
-        return false;
-    });
-
-    $('.decrypt').click(function(){
-        var password = $(this).parent().find('input[type="password"]').val();
-        var cipherJSON = $.parseJSON(page.text);
-        var plainText = sjcl.decrypt(password, cipherJSON);
-        $('#editor').html(textToHTML(plainText));
-        $('#decrypt_dialog, .locked').hide();
-        $('.unlocked').show();
-        $('#editor').show().focus();
-        return false;
-    });
-
-
-    $('.save').click(save);
-
+    $('.encrypt').click(this.encrypt);
+    $('.decrypt').click(this.decrypt);
+    $('.save').click(this.save);
     $('.settings').click(function(){
         $('#settings_dialog, #editor').toggle();
         return false;
     });
 
-    $('#settings_dialog .delete').click(function(){
-        if (confirm('Are you sure?')){
-            $('.status').text('Deleting...');
-            $.post('', {action: 'delete', _xsrf: xsrf}, function(response){
-                if (response.indexOf('/') === 0){
-                    window.location.href = response;
-                } else {
-                    $('.status').text(response);
-                }
-            });
-        }
+    $('#settings_dialog .delete').click(this.delete);
+};
+
+Editor.keypress = function(e){
+    // Return key Browser normalization.
+    // Browsers use different elements as their 'empty' element:
+    // http://lists.whatwg.org/pipermail/whatwg-whatwg.org/2011-May/031577.html
+    if (e.keyCode === 13){
+        var offsets = Editor.getCaretPositions(this);
+        var text = Editor.domToText(this);
+
+        // Delete selected text if exists
+        text = text.slice(0, offsets[0]) + text.slice(offsets[1]);
+        // Insert newline at first offset
+        text = text.slice(0, offsets[0]) + '\n' + text.slice(offsets[0]);
+        // Increment caret position
+        offsets = [offsets[0] + 1, offsets[0] + 1];
+
+        this.innerHTML = Editor.textToHTML(text);
+        Editor.setCaretPositions(offsets, this);
+        Editor.updateUndoStack(this.innerHTML, offsets);
+        Editor.checkMismatch(this, text);
         return false;
-    });
-    
-
-undoStack = [];
-
-function undo(){
-    var state = undoStack.pop();
-    if (state){
-        var html = state[0];
-        var offsets = state[1];
-        this.innerHTML = html;
-        setCaretPositions(offsets, this);
     }
-    console.log('undo');
-    return false;
-}
+};
 
-function redo(){
-    console.log('redo');
-    return false;
-}
+Editor.keyup = function(e){
+    // Skip arrow keys
+    if (e.keyCode >= 37 && e.keyCode <= 40) return;
+    var offsets = Editor.getCaretPositions(this);
+    var text = Editor.domToText(this);
+    var html = Editor.textToHTML(text);
+    this.innerHTML = html;
+    Editor.setCaretPositions(offsets, this);
+    Editor.updateUndoStack(this.innerHTML, offsets);
+    Editor.checkMismatch(this, text);
+};
 
-function updateUndoStack(html, caretOffsets){
-    var prev = undoStack[undoStack.length - 1];
-    if (!prev || Math.abs(prev[0].length - html.length) > 10){
-        undoStack.push([html, caretOffsets]);
-    }
-}
-
-function save(){
+Editor.save = function(){
     var data = {
         action: 'save',
-        text: domToText($('#editor')[0]),
+        text: Editor.domToText(Editor.container),
         page_name: $('#page_name').val(),
-        _xsrf: xsrf
+        _xsrf: Editor.xsrf()
     };
     console.log(data);
     $('.status').text('Saving...');
@@ -127,62 +111,76 @@ function save(){
         $('.status').text('Saved');
     });
     return false; 
-}
+};
 
-
-    $('#editor')
-        .on('keydown', null, 'meta+s', save)
-        .on('keydown', null, 'ctrl+s', save)
-        .on('keydown', null, 'meta+z', undo)
-        .on('keydown', null, 'ctrl+z', undo)
-        .on('keydown', null, 'meta+shift+z', redo)
-        .on('keydown', null, 'ctrl+shift+z', redo)
-        .keypress(function(e){
-            // Return key Browser normalization.
-            // Browsers use different elements as their 'empty' element.
-            // More info:
-            // http://lists.whatwg.org/pipermail/whatwg-whatwg.org/2011-May/031577.html
-            if (e.keyCode === 13){
-                var offsets = getCaretPositions(this);
-                var text = domToText(this);
-
-                // Delete selected text if exists
-                text = text.slice(0, offsets[0]) + text.slice(offsets[1]);
-                // Insert newline at first offset
-                text = text.slice(0, offsets[0]) + '\n' + text.slice(offsets[0]);
-                // Increment caret position
-                offsets = [offsets[0] + 1, offsets[0] + 1];
-
-                this.innerHTML = textToHTML(text);
-                setCaretPositions(offsets, this);
-
-                updateUndoStack(this.innerHTML, offsets);
-                checkMismatch(this, text);
-                return false;
+Editor.delete = function(){
+    if (confirm('Are you sure?')){
+        $('.status').text('Deleting...');
+        $.post('', {action: 'delete', _xsrf: Editor.xsrf()}, function(response){
+            if (response.indexOf('/') === 0){
+                window.location.href = response;
+            } else {
+                $('.status').text(response);
             }
-        })
-        .keyup(function(e){
-            if (e.keyCode >= 37 && e.keyCode <= 40){
-                // Skip arrow keys
-                return;
-            }
-            var offsets = getCaretPositions(this);
-            var text = domToText(this);
-            var html = textToHTML(text);
-            this.innerHTML = html;
-            setCaretPositions(offsets, this);
-
-            updateUndoStack(this.innerHTML, offsets);
-            checkMismatch(this, text);
-        })
-        .focus()
-        .on('click', 'a', function(){
-            window.open(this.href,'_blank');
         });
-}
+    }
+    return false;
+};
 
-function checkMismatch(container, text){
-    var text2 = domToText(container);
+Editor.xsrf = function(){
+    return /_xsrf=([a-z0-9]+)/.exec(document.cookie)[1];
+};
+
+Editor.encrypt = function(){
+    var password = $(this).parent().find('input[type="password"]').val();
+    var plainText = domToText($('#editor')[0]);
+    var cipherJSON = sjcl.encrypt(password, plainText);
+    console.log(cipherJSON);
+    page.text = JSON.stringify(cipherJSON);
+    page.encrypted = true;
+    $('#encrypt_dialog, .unlocked').hide();
+    $('#decrypt_dialog, .locked').show();
+    return false;
+};
+
+
+Editor.decrypt = function(){
+    var password = $(this).parent().find('input[type="password"]').val();
+    var cipherJSON = $.parseJSON(page.text);
+    var plainText = sjcl.decrypt(password, cipherJSON);
+    $('#editor').html(textToHTML(plainText));
+    $('#decrypt_dialog, .locked').hide();
+    $('.unlocked').show();
+    $('#editor').show().focus();
+    return false;
+};
+
+Editor.undo = function(){
+    var state = Editor.undoStack.pop();
+    if (state){
+        var html = state[0];
+        var offsets = state[1];
+        this.innerHTML = html;
+        Editor.setCaretPositions(offsets, this);
+    }
+    console.log('undo');
+    return false;
+};
+
+Editor.redo = function(){
+    console.log('redo');
+    return false;
+};
+
+Editor.updateUndoStack = function(html, caretOffsets){
+    var prev = Editor.undoStack[Editor.undoStack.length - 1];
+    if (!prev || Math.abs(prev[0].length - html.length) > 10){
+        Editor.undoStack.push([html, caretOffsets]);
+    }
+};
+
+Editor.checkMismatch = function(container, text){
+    var text2 = Editor.domToText(container);
     if (text2 != text){
         console.log('Mismatch!------------');
         console.log('DOM --> TXT:');
@@ -192,37 +190,32 @@ function checkMismatch(container, text){
         console.log('HTML --> DOM --> TXT:');
         console.log(text2);
     }
-}
+};
 
-
-function partialUpdates(){
+Editor.partialUpdates = function(){
     // Ideas for only modifying part of the editor contents when text is modified
-
     // Make an HTML token list. Diff tokens lists first before modifying individual elements
-    
     // Use html token list?
-}
+};
 
-
-function isBlockElement(node){
+Editor.isBlockElement = function(node){
     var blockElements = 'H1,H2,H3,H4,H5,H6,DIV,BLOCKQUOTE,PRE';
     if (blockElements.indexOf(node.tagName) === -1){
         return false;
     }
     return true;
-}
+};
 
-
-function domToText(container){
+Editor.domToText = function(container){
     var text = '';
-
+    var that = this;
     function traverse(node){
         if (node.nodeType === 3){
             // Text Node
             text += node.nodeValue;
         }
 
-        if (node !== container && isBlockElement(node) && node.innerText === '\n'){
+        if (node !== container && that.isBlockElement(node) && node.innerText === '\n'){
             // Chrome uses block elements that only contain a <br>
             // as 'filler' for the caret after a new line
             // <div><br></div>, <pre><br></pre>, etc.
@@ -233,21 +226,105 @@ function domToText(container){
             }
         }
 
-        if (node !== container && isBlockElement(node) && node.nextSibling){
+        if (node !== container && that.isBlockElement(node) && node.nextSibling){
             // Add a new line at the end of block elements
             // if the element is followed by another block element
             text += '\n';
         }
     }
-
     traverse(container);
     return text;
-}
+};
 
+Editor.textToHTML = function(text){
+    var tokens = this.lexer(text);
+    var html = '';
 
+    function allNewlines(){
+        for (var i=0, token; token=tokens[i]; i++){
+            if (token.type !== 'newline'){
+                return false;
+            }
+        }
+        return true;
+    }
 
+    function hasPrevBlock(index){
+        for (var i=index, token; token=tokens[i]; i--){
+            if (token.type !== 'newline'){
+                return true;
+            }
+        }
+        return false;
+    }
 
-function lexer(text){
+    for (var i=0, token; token=tokens[i]; i++){
+        if (token.type === 'newline'){
+            var next = tokens[i + 1];
+
+            if (i === 0 && allNewlines()){
+                // If text is all newlines add an extra new line
+                //  \n          <div><br></div>
+                //              <div><br></div>
+                //
+                //  \n\n        <div><br></div>
+                //              <div><br></div>
+                //              <div><br></div>
+                //
+                html += '<div><br></div>';
+            } else if (next && next.type !== 'newline' && hasPrevBlock(i)){
+                // Skip a newline if next element is a block element
+                // and there is previous block element before this one
+                // a\na        <div>a</div>
+                //             <div>a</div>
+                // 
+                // a\n\na      <div>a</div>
+                //             <div><br></div>
+                //             <div>a</div>
+                continue;
+            }
+            html += '<div><br></div>';
+        }
+
+        if (token.type === 'heading'){
+            html += '<h' + token.depth + '>' + this.inlineHTML(token.text) + '</h' + token.depth + '>';
+            continue;
+        }
+
+        if (token.type === 'blockquote'){
+            html += '<blockquote>' + this.inlineHTML(token.text) + '</blockquote>';
+            continue;
+        }
+
+        if (token.type === 'hr'){
+            html += '<div class="hr">' + this.inlineHTML(token.text) + '</div>';
+            continue;
+        }
+
+        if (token.type === 'lh'){
+            html += '<div class="lh">' + this.inlineHTML(token.text) + '</div>';
+            continue;
+        }
+
+        if (token.type === 'li'){
+            html += '<div class="li' + token.depth + '">' + this.inlineHTML(token.text) + '</div>';
+            continue;
+        }
+
+        if (token.type === 'pre'){
+            html += '<pre>' + this.escape(token.text) + '</pre>';
+            continue;
+        }
+
+        if (token.type === 'div'){
+            html += '<div>' + this.inlineHTML(token.text) + '</div>';
+            continue;
+        }
+    }
+    return html;
+};
+
+Editor.lexer = function(text){
     var rules = {
         newline: /^\n/,
         heading: /^(#{1,6})[^\n]*/,
@@ -353,97 +430,7 @@ function lexer(text){
     return tokens;
 };
 
-
-function textToHTML(text){
-    var tokens = lexer(text);
-    var html = '';
-
-    function allNewlines(){
-        for (var i=0, token; token=tokens[i]; i++){
-            if (token.type !== 'newline'){
-                return false;
-            }
-        }
-        return true;
-    }
-
-    function hasPrevBlock(index){
-        for (var i=index, token; token=tokens[i]; i--){
-            if (token.type !== 'newline'){
-                return true;
-            }
-        }
-        return false;
-    }
-
-    for (var i=0, token; token=tokens[i]; i++){
-        if (token.type === 'newline'){
-            var next = tokens[i + 1];
-
-            if (i === 0 && allNewlines()){
-                // If text is all newlines add an extra new line
-                //  \n          <div><br></div>
-                //              <div><br></div>
-                //
-                //  \n\n        <div><br></div>
-                //              <div><br></div>
-                //              <div><br></div>
-                //
-                html += '<div><br></div>';
-            } else if (next && next.type !== 'newline' && hasPrevBlock(i)){
-                // Skip a newline if next element is a block element
-                // and there is previous block element before this one
-                // a\na        <div>a</div>
-                //             <div>a</div>
-                // 
-                // a\n\na      <div>a</div>
-                //             <div><br></div>
-                //             <div>a</div>
-                continue;
-            }
-            html += '<div><br></div>';
-        }
-
-        if (token.type === 'heading'){
-            html += '<h' + token.depth + '>' + inlineHTML(token.text) + '</h' + token.depth + '>';
-            continue;
-        }
-
-        if (token.type === 'blockquote'){
-            html += '<blockquote>' + inlineHTML(token.text) + '</blockquote>';
-            continue;
-        }
-
-        if (token.type === 'hr'){
-            html += '<div class="hr">' + inlineHTML(token.text) + '</div>';
-            continue;
-        }
-
-        if (token.type === 'lh'){
-            html += '<div class="lh">' + inlineHTML(token.text) + '</div>';
-            continue;
-        }
-
-        if (token.type === 'li'){
-            html += '<div class="li' + token.depth + '">' + inlineHTML(token.text) + '</div>';
-            continue;
-        }
-
-        if (token.type === 'pre'){
-            html += '<pre>' + escape(token.text) + '</pre>';
-            continue;
-        }
-
-        if (token.type === 'div'){
-            html += '<div>' + inlineHTML(token.text) + '</div>';
-            continue;
-        }
-    }
-    return html;
-}
-
-
-function escape(text) {
+Editor.escape = function(text) {
     return text.replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
@@ -451,9 +438,7 @@ function escape(text) {
         .replace(/'/g, '&#39;');
 };
 
-
-
-function inlineHTML(text){
+Editor.inlineHTML = function(text){
     var rules = {
         link: /^https?:\/\/[^\s<]+[^<.,:;"')\]\s]/,
         email: /^\S+@[a-z0-9-\.]+[a-z]/,
@@ -467,15 +452,15 @@ function inlineHTML(text){
         // Links
         if (cap = rules.link.exec(text)){
             text = text.substring(cap[0].length);
-            html += '<a href="' + escape(cap[0]) + '" rel="nofollow">' + escape(cap[0]) + '</a>';
+            html += '<a href="' + this.escape(cap[0]) + '" rel="nofollow">' + this.escape(cap[0]) + '</a>';
             continue;
         }
 
         // Email
         if (cap = rules.email.exec(text)){
             text = text.substring(cap[0].length);
-            html += '<a class="email" rel="nofollow" href="mailto:' + escape(cap[0]) + '">' + 
-                escape(cap[0]) + 
+            html += '<a class="email" rel="nofollow" href="mailto:' + this.escape(cap[0]) + '">' + 
+                this.escape(cap[0]) + 
             '</a>';
             continue;
         }
@@ -483,34 +468,32 @@ function inlineHTML(text){
         // Code
         if (cap = rules.code.exec(text)){
             text = text.substring(cap[0].length);
-            html += '<code>' + escape(cap[0]) + '</code>';
+            html += '<code>' + this.escape(cap[0]) + '</code>';
             continue;
         }
 
         // Strong
         if (cap = rules.strong.exec(text)){
             text = text.substring(cap[0].length);
-            html += '<strong>' + escape(cap[0]) + '</strong>';
+            html += '<strong>' + this.escape(cap[0]) + '</strong>';
             continue;
         }
 
         // Em
         if (cap = rules.em.exec(text)){
             text = text.substring(cap[0].length);
-            html += '<em>' + escape(cap[0]) + '</em>';
+            html += '<em>' + this.escape(cap[0]) + '</em>';
             continue;
         }
 
         // Text
-        html += escape(text[0]);
+        html += this.escape(text[0]);
         text = text.substring(1);
     }
     return html;
-}
+};
 
-
-
-function getCaretPositions(element){
+Editor.getCaretPositions = function(element){
     // Returns the 0-indexed character offsets of the caret in
     // a contenteditable element.
     // 
@@ -556,7 +539,7 @@ function getCaretPositions(element){
             }
         }
 
-        if (isBlockElement(node)){
+        if (Editor.isBlockElement(node)){
             // The end of <h1> or <div> counts as new line
             offset += 1;
         }
@@ -567,10 +550,9 @@ function getCaretPositions(element){
     var endOffset = findOffset(element, range.endContainer, range.endOffset);
 
     return [startOffset, endOffset];
-}
+};
 
-
-function setCaretPositions(offsets, element){
+Editor.setCaretPositions = function(offsets, element){
     // Sets the caret positions on a content editable DOM element
 
     function findOffset(node, offset){
@@ -596,7 +578,7 @@ function setCaretPositions(offsets, element){
             }
         } 
 
-        if (isBlockElement(node)){
+        if (Editor.isBlockElement(node)){
             // The end of <h1> or <div> counts as new line
             offset -= 1;
         }
@@ -619,7 +601,7 @@ function setCaretPositions(offsets, element){
 
     sel.removeAllRanges();
     sel.addRange(range);
-}
+};
 
 
 })();
