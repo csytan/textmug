@@ -7,9 +7,8 @@ Editor.init = function(container){
     this.container = container;
 
     var text = this.domToText(container);
-    var html = this.textToHTML(text);
+    container.innerHTML = this.textToHTML(text);
     $(container)
-        .html(html)
         .on('keydown', null, 'meta+s', this.save)
         .on('keydown', null, 'ctrl+s', this.save)
         .on('keydown', null, 'meta+z', this.undo)
