@@ -302,10 +302,13 @@ select {
 }
 
 #editor .hr {
-    color: rgba(255,255,255,0.15);
-    margin: 5px 0;
+    color: #333;
+    margin-bottom: 10px;
     font-weight: bold;
-    letter-spacing: 3px;
+    letter-spacing: -6px;
+    text-align: center;
+    font-size: 27px;
+    line-height: 1;
 }
 
 #editor strong {
