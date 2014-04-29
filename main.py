@@ -81,8 +81,8 @@ class Page(Base):
         action = self.get_argument('action', None)
         if action == 'save':
             page.text = self.get_argument('text', '', strip=False)
-            
             redirect = False if page.id else True
+
             if self.current_user:
                 can_has_chars = 'abcdefghijklmnopqrstuvwxyz0123456789._-'
                 page_name = self.get_argument('page_name', '').lower()
@@ -94,14 +94,17 @@ class Page(Base):
                 if page_name != page.name:
                     redirect = True
                 page.name = page_name
-                page.encrypted = bool(self.get_argument('encrypted', False))
-                page.public = bool(self.get_argument('public', False))
             page.save()
 
             if redirect:
                 self.write('/' + (page.name or str(page.id)))
             else:
                 self.write('1')
+        elif action == 'settings':
+            page.encrypted = True if self.get_argument('encrypted', None) == 'true' else False
+            page.public = True if self.get_argument('public', None) == 'true' else False
+            page.save()
+            self.write('1')
         elif action == 'delete':
             page.delete_instance()
             self.set_secure_cookie('flash', 'Page deleted')

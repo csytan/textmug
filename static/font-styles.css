@@ -38,54 +38,42 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-.icon-locked:before {
-  content: "b";
-}
-.icon-unlocked:before {
-  content: "c";
-}
 .icon-logo:before {
   content: "f";
 }
 .icon-cog:before {
   content: "s";
 }
-.icon-lock:before {
+.icon-locked:before {
   content: "t";
 }
 .icon-trash:before {
   content: "u";
 }
-.icon-user:before {
-  content: "v";
-}
-.icon-users:before {
+.icon-public:before {
   content: "w";
 }
-.icon-folder-1:before {
+.icon-folder:before {
   content: "x";
 }
 .icon-floppy:before {
   content: "y";
 }
-.icon-doc-text:before {
+.icon-document:before {
   content: "z";
 }
-.icon-cancel:before {
+.icon-close:before {
   content: "A";
 }
-.icon-check-1:before {
+.icon-check:before {
   content: "B";
 }
-.icon-lock-open:before {
+.icon-unlocked:before {
   content: "a";
 }
-.icon-plus-circled:before {
+.icon-plus:before {
   content: "g";
 }
-.icon-plus-squared:before {
-  content: "j";
-}
-.icon-eye:before {
+.icon-private:before {
   content: "d";
 }

@@ -2,10 +2,12 @@
 
 window.Editor = {};
 
-Editor.init = function(container){
+Editor.init = function(container, options){
     this.undoStack = [];
     this.container = container;
+    this.options = options || {encrypted: false, public: true};
 
+    // Editor
     var text = this.domToText(container);
     container.innerHTML = this.textToHTML(text);
     $(container)
@@ -22,6 +24,7 @@ Editor.init = function(container){
         })
         .focus();
 
+    // Controls
     $('.locked, .unlocked').hide();
     $('.locked').click(function(){
         $('#decrypt_dialog, #editor').toggle();
@@ -34,19 +37,6 @@ Editor.init = function(container){
     $('#page_name').keyup(function(){
         this.value = this.value.toLowerCase().replace(/[^a-z0-9\_\.-]+/, '');
     });
-
-    $('#settings_dialog select[name="encrypt"]').change(function(){
-        var encrypt = $(this).find('option:selected').val();
-        encrypt = parseInt(encrypt);
-        page.encrypted = encrypt;
-        if (encrypt === 1){
-            $('#settings_dialog .encrypt_password').show();
-        } else {
-            $('#settings_dialog .encrypt_password').hide();
-        }
-        console.log(encrypt);
-    });
-
     $('.encrypt').click(this.encrypt);
     $('.decrypt').click(this.decrypt);
     $('.save').click(this.save);
@@ -55,7 +45,33 @@ Editor.init = function(container){
         return false;
     });
 
-    $('#settings_dialog .delete').click(this.delete);
+    // Settings Dialog
+    $('#settings_dialog')
+        .submit(this.saveSettings)
+        .find('select[name="encrypted"]')
+            .find('option[value="' + this.options.encrypted + '"]')
+                .prop('selected', true)
+            .end()
+            .change(function(){
+                var encrypted = $(this).find('option:selected').val();
+                if (encrypted === 'true'){
+                    $('.encrypt_password').show();
+                } else {
+                    $('.encrypt_password').hide();
+                }
+            })
+        .end()
+        .find('select[name="public"] option[value="' + this.options.public + '"]')
+            .prop('selected', true)
+        .end()
+        .find('.delete')
+            .click(this.delete)
+        .end()
+        .find('.close')
+            .click(function(){
+                $('#editor, .dialog:visible').toggle();
+                return false;
+            });
 };
 
 Editor.keypress = function(e){
@@ -102,13 +118,27 @@ Editor.save = function(){
     };
     console.log(data);
     $('.status').text('Saving...');
-    $.post('', data, function(response){
+    $.post(location.href, data, function(response){
         if (response.indexOf('/') === 0){
             window.location.href = response;
         }
         $('.status').text('Saved');
     });
     return false; 
+};
+
+Editor.saveSettings = function(){
+    var data = {action: 'settings'};
+    $(this)
+        .serializeArray()
+        .map(function(input){
+            data[input.name] = input.value;
+        });
+    $('.status').text('Saving settings...');
+    $.post(location.href, data, function(response){
+        $('.status').text('Settings saved');
+    });
+    return false;
 };
 
 Editor.delete = function(){

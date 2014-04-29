@@ -3,7 +3,10 @@
 
 {% block script %}
     <script>
-        Editor.init(document.getElementById('editor'));
+        Editor.init(document.getElementById('editor'), {
+            public: {{ json_encode(page.public) }},
+            encrypted: {{ json_encode(page.encrypted) }}
+        });
     </script>
 {% end %}
 
@@ -42,39 +45,40 @@
 
     <div id="controls">
         {% if page.id == 1 %}
-            <a class="control icon-plus-circled" href="/new"></a>
+            <a class="control icon-plus" href="/new"></a>
         {% end %}
         
         {% if page.editable(current_user) %}
             <a class="control save icon-floppy"></a>
             <a class="control locked icon-lock"></a>
-            <a class="control unlocked icon-lock-open"></a>
+            <a class="control unlocked icon-unlocked"></a>
             <a class="control settings icon-cog"></a>
         {% end %}
     </div>
 
-    <div id="decrypt_dialog">
+    <div id="decrypt_dialog" class="dialog">
         <h2>This page is encrypted</h2>
         Enter a password to decrypt.
         <input id="password" class="text_input" type="password" placeholder="password">
         <a class="btn decrypt">decrypt</a>
     </div>
 
-    <form id="settings_dialog" method="post">
+    <form id="settings_dialog" class="dialog" method="post">
+        <div class="close icon-close"></div>
         {% raw xsrf_form_html() %}
         <h1>Settings</h1>
 
         <label>Sharing</label>
         <select name="public">
-            <option value="0">Display publically</option>
-            <option value="1">Keep this page private</option>
+            <option value="true">Display publically</option>
+            <option value="false">Keep this page private</option>
         </select>
         <br>
 
         <label>Encryption</label>
-        <select name="encrypt">
-            <option value="0">Don't encrypt this page</option>
-            <option value="1">Enable client side encryption</option>
+        <select name="encrypted">
+            <option value="false">Don't encrypt this page</option>
+            <option value="true">Enable client side encryption</option>
         </select>
 
         <div class="encrypt_password">
