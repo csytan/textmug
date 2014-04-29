@@ -101,7 +101,7 @@ class Page(Base):
             else:
                 self.write('1')
         elif action == 'settings':
-            page.encrypted = True if self.get_argument('encrypted', None) == 'true' else False
+            #page.encrypted = True if self.get_argument('encrypted', None) == 'true' else False
             page.public = True if self.get_argument('public', None) == 'true' else False
             page.save()
             self.write('1')
