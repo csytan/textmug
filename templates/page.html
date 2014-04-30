@@ -4,8 +4,9 @@
 {% block script %}
     <script>
         Editor.init(document.getElementById('editor'), {
-            public: {{ json_encode(page.public) }},
-            encrypted: {{ json_encode(page.encrypted) }}
+            public: {% raw json_encode(page.public) %},
+            encrypted: {% raw json_encode(page.encrypted) %},
+            cipherJSON: {% raw json_encode(page.text if page.encrypted else None) %}
         });
     </script>
 {% end %}
@@ -23,7 +24,7 @@
                 {% end %}
 
                 {% if current_user and page.user == current_user %}
-                    <input id="page_name" type="text" placeholder="new-page" 
+                    <input id="page_name" class="input" type="text" placeholder="new-page" 
                         value="{{ page.page_name }}" maxlength="40">
                 {% else %}
                     <span>{{ page.page_name }}</span>
@@ -35,7 +36,7 @@
                         {{ current_user.id }}
                     </a>
                     <span>/</span>
-                    <input id="page_name" type="text" placeholder="new-page" maxlength="40" class="active">
+                    <input id="page_name" class="input" type="text" placeholder="new-page" maxlength="40" class="active">
                 {% else %}
                     <span>new page - write something!</span>
                 {% end %}
@@ -50,17 +51,17 @@
         
         {% if page.editable(current_user) %}
             <a class="control save icon-floppy"></a>
-            <a class="control locked icon-lock"></a>
+            <a class="control locked icon-locked"></a>
             <a class="control unlocked icon-unlocked"></a>
             <a class="control settings icon-cog"></a>
         {% end %}
     </div>
 
     <div id="decrypt_dialog" class="dialog">
-        <h2>This page is encrypted</h2>
-        Enter a password to decrypt.
-        <input id="password" class="text_input" type="password" placeholder="password">
-        <a class="btn decrypt">decrypt</a>
+        <h1>Page locked</h1>
+        <label>Password</label>
+        <input name="page_password" class="input" type="password" placeholder="password">
+        <input class="btn unlock" type="submit" value="Unlock">
     </div>
 
     <form id="settings_dialog" class="dialog" method="post">
@@ -73,23 +74,22 @@
             <option value="true">Display publically</option>
             <option value="false">Keep this page private</option>
         </select>
-        <br>
-
+        
         <label>Encryption</label>
         <select name="encrypted">
             <option value="false">Don't encrypt this page</option>
             <option value="true">Enable client side encryption</option>
         </select>
-
+        
         <div class="encrypt_password">
             <label>Password</label>
-            <input type="password" placeholder="password">
+            <input name="password" class="input" type="password" placeholder="password">
         </div>
 
         <input class="btn" type="submit" value="Save">
         <a class="delete icon-trash"></a>
     </form>
 
-    <div id="editor" contenteditable="true">{{ page.text }}</div>
+    <div id="editor" contenteditable="true">{% if not page.encrypted %}{{ page.text }}{% end %}</div>
 {% end %}
 

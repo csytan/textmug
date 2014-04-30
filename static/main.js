@@ -1,57 +1,64 @@
 (function(){
 
-window.Editor = {};
+window.Editor = {
+    password: null,
+    cipherJSON: null,
+    saved: true
+};
 
 Editor.init = function(container, options){
-    this.undoStack = [];
-    this.container = container;
-    this.options = options || {encrypted: false, public: true};
+    var self = this;
+    self.undoStack = [];
+    self.container = container;
+    self.options = options || {encrypted: false, public: true};
+
+    if (options.encrypted) self.lock();
 
     // Editor
-    var text = this.domToText(container);
-    container.innerHTML = this.textToHTML(text);
+    var text = self.domToText(container);
+    container.innerHTML = self.textToHTML(text);
     $(container)
-        .on('keydown', null, 'meta+s', this.save)
-        .on('keydown', null, 'ctrl+s', this.save)
-        .on('keydown', null, 'meta+z', this.undo)
-        .on('keydown', null, 'ctrl+z', this.undo)
-        .on('keydown', null, 'meta+shift+z', this.redo)
-        .on('keydown', null, 'ctrl+shift+z', this.redo)
-        .keypress(this.keypress)
-        .keyup(this.keyup)
+        .on('keydown', null, 'meta+s', self.save)
+        .on('keydown', null, 'ctrl+s', self.save)
+        .on('keydown', null, 'meta+z', self.undo)
+        .on('keydown', null, 'ctrl+z', self.undo)
+        .on('keydown', null, 'meta+shift+z', self.redo)
+        .on('keydown', null, 'ctrl+shift+z', self.redo)
+        .keypress(self.keypress)
+        .keyup(self.keyup)
         .on('click', 'a', function(){
             window.open(this.href,'_blank');
         })
         .focus();
 
     // Controls
-    $('.locked, .unlocked').hide();
-    $('.locked').click(function(){
-        $('#decrypt_dialog, #editor').toggle();
-        return false;
-    });
-    $('.unlocked').click(function(){
-        $('#encrypt_dialog, #editor').toggle();
-        return false;
-    });
+    $('.unlocked').click(self.lock);
     $('#page_name').keyup(function(){
         this.value = this.value.toLowerCase().replace(/[^a-z0-9\_\.-]+/, '');
     });
-    $('.encrypt').click(this.encrypt);
-    $('.decrypt').click(this.decrypt);
-    $('.save').click(this.save);
+    $('.save').click(self.save);
+    $('.delete').click(self.delete);
     $('.settings').click(function(){
-        $('#settings_dialog, #editor').toggle();
+        $('#editor').toggle();
+        $('#settings_dialog')
+            .toggle()
+            .find('input[type="password"]')
+                .val(self.password)
+            .end()
+            .find('select[name="public"] option[value="' + self.options.public + '"]')
+                .prop('selected', true)
+            .end()
+            .find('select[name="encrypted"] option[value="' + self.options.encrypted + '"]')
+                .prop('selected', true)
+                .closest('select')
+                .change();
         return false;
     });
 
-    // Settings Dialog
+    // Dialogs
     $('#settings_dialog')
-        .submit(this.saveSettings)
+        .submit(self.saveSettings)
         .find('select[name="encrypted"]')
-            .find('option[value="' + this.options.encrypted + '"]')
-                .prop('selected', true)
-            .end()
             .change(function(){
                 var encrypted = $(this).find('option:selected').val();
                 if (encrypted === 'true'){
@@ -59,19 +66,13 @@ Editor.init = function(container, options){
                 } else {
                     $('.encrypt_password').hide();
                 }
-            })
-        .end()
-        .find('select[name="public"] option[value="' + this.options.public + '"]')
-            .prop('selected', true)
-        .end()
-        .find('.delete')
-            .click(this.delete)
-        .end()
-        .find('.close')
-            .click(function(){
-                $('#editor, .dialog:visible').toggle();
-                return false;
             });
+    $('.lock').click(self.lock);
+    $('.unlock').click(self.unlock);
+    $('.close').click(function(){
+        $('#editor, .dialog:visible').toggle();
+        return false;
+    });
 };
 
 Editor.keypress = function(e){
@@ -90,6 +91,8 @@ Editor.keypress = function(e){
         offsets = [offsets[0] + 1, offsets[0] + 1];
 
         this.innerHTML = Editor.textToHTML(text);
+        Editor.saved = false;
+        $('.save').css('display', 'inline-block');
         Editor.setCaretPositions(offsets, this);
         Editor.updateUndoStack(this.innerHTML, offsets);
         Editor.checkMismatch(this, text);
@@ -104,47 +107,95 @@ Editor.keyup = function(e){
     var text = Editor.domToText(this);
     var html = Editor.textToHTML(text);
     this.innerHTML = html;
+    Editor.saved = false;
+    $('.save').css('display', 'inline-block');
     Editor.setCaretPositions(offsets, this);
     Editor.updateUndoStack(this.innerHTML, offsets);
     Editor.checkMismatch(this, text);
 };
 
 Editor.save = function(){
+    if (Editor.saved) return;
+
     var data = {
         action: 'save',
-        text: Editor.domToText(Editor.container),
+        _xsrf: Editor.xsrf(),
         page_name: $('#page_name').val(),
-        _xsrf: Editor.xsrf()
+        text: Editor.domToText(Editor.container)
     };
+    $.extend(data, Editor.options);
+
+    if (data.encrypted){
+        var cipherJSON = JSON.stringify(
+            sjcl.encrypt(Editor.password, data.text));
+        data.text = cipherJSON;
+        Editor.options.cipherJSON = cipherJSON;
+    } else {
+        Editor.password = null;
+        Editor.options.cipherJSON = null;
+    }
     console.log(data);
+
     $('.status').text('Saving...');
     $.post(location.href, data, function(response){
         if (response.indexOf('/') === 0){
             window.location.href = response;
         }
         $('.status').text('Saved');
+        $('.save').hide();
+        Editor.saved = true;
     });
     return false; 
 };
 
 Editor.saveSettings = function(){
-    var data = {action: 'settings'};
+    var options = {};
     $(this)
         .serializeArray()
         .map(function(input){
-            data[input.name] = input.value;
+            options[input.name] = input.value;
         });
-    $('.status').text('Saving settings...');
-    $.post(location.href, data, function(response){
-        $('.status').text('Settings saved');
-    });
+    Editor.options.encrypted = options.encrypted === 'true' ? true : false;
+    Editor.options.public = options.public === 'true' ? true : false;
+    Editor.password = options.password;
+    Editor.saved = false;
+    Editor.save();
+    $('#settings_dialog, #editor').toggle();
+    if (options.encrypted){
+        $('.unlocked').hide();
+    }
+    return false;
+};
+
+Editor.lock = function(){
+    Editor.save();
+    $('#editor, .unlocked, .save').hide();
+    $('input[type="password"]').val('');
+    $('#decrypt_dialog')
+        .show()
+        .focus();
+    return false;
+};
+
+Editor.unlock = function(){
+    var $password = $(this).parent().find('input[type="password"]');
+    var password = $password.val();
+    $password.val('');
+    var cipherJSON = $.parseJSON(Editor.options.cipherJSON);
+    var text = sjcl.decrypt(password, cipherJSON);
+    Editor.password = password;
+    Editor.container.innerHTML = Editor.textToHTML(text);
+    $('#decrypt_dialog').hide();
+    $('.unlocked').css('display', 'inline-block');
+    $('#editor').show().focus();
     return false;
 };
 
 Editor.delete = function(){
+    var self = this;
     if (confirm('Are you sure?')){
         $('.status').text('Deleting...');
-        $.post('', {action: 'delete', _xsrf: Editor.xsrf()}, function(response){
+        $.post('', {action: 'delete', _xsrf: self.xsrf()}, function(response){
             if (response.indexOf('/') === 0){
                 window.location.href = response;
             } else {
@@ -157,30 +208,6 @@ Editor.delete = function(){
 
 Editor.xsrf = function(){
     return /_xsrf=([a-z0-9]+)/.exec(document.cookie)[1];
-};
-
-Editor.encrypt = function(){
-    var password = $(this).parent().find('input[type="password"]').val();
-    var plainText = domToText($('#editor')[0]);
-    var cipherJSON = sjcl.encrypt(password, plainText);
-    console.log(cipherJSON);
-    page.text = JSON.stringify(cipherJSON);
-    page.encrypted = true;
-    $('#encrypt_dialog, .unlocked').hide();
-    $('#decrypt_dialog, .locked').show();
-    return false;
-};
-
-
-Editor.decrypt = function(){
-    var password = $(this).parent().find('input[type="password"]').val();
-    var cipherJSON = $.parseJSON(page.text);
-    var plainText = sjcl.decrypt(password, cipherJSON);
-    $('#editor').html(textToHTML(plainText));
-    $('#decrypt_dialog, .locked').hide();
-    $('.unlocked').show();
-    $('#editor').show().focus();
-    return false;
 };
 
 Editor.undo = function(){

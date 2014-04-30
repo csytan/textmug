@@ -37,10 +37,9 @@ label {
     margin-bottom: 10px;
 }
 
-input[type="text"],
-input[type="password"],
-textarea {
+.input {
     display: block;
+    box-sizing: border-box;
     font-family: Monaco, "Lucida Console", monospace;
     font-size: 17px;
     color: #ddd;
@@ -50,6 +49,7 @@ textarea {
     background: #333;
     border-radius: 4px;
     width: 275px;
+    max-width: 100%;
     margin-bottom: 25px;
 }
 
@@ -59,13 +59,14 @@ textarea {
 
 
 select {
+    display: block;
     font-size: 18px;
     color: #444;
-    margin: 5px 0 20px;
+    margin-bottom: 25px;
 }
 
 .btn {
-    display: block;
+    display: inline-block;
     cursor: pointer;
     border: none;
     outline: none;
@@ -209,7 +210,9 @@ select {
 .control.active {
     color: #eee;
 }
-
+.locked, .unlocked {
+    display: none;
+}
 
 #editor {
     color: #c5c8c6;
@@ -226,10 +229,6 @@ select {
     padding-top: 5px;
     margin-top: 10px;
     margin-left: -20px;
-}
-
-#editor div {
-    margin-bottom: 10px;
 }
 
 #editor h1,
@@ -356,9 +355,9 @@ select {
     display: none;
 }
 #settings_dialog .delete {
-    float: left;
-    margin-top: -28px;
-    margin-left: 108px;
+    position: relative;
+    top: 6px;
+    left: 20px;
     cursor: pointer;
     font-size: 24px;
     color: #777;

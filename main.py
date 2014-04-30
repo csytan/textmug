@@ -65,12 +65,19 @@ class User(Base):
         user = db.User.get_by_id(id)
         if not user:
             raise tornado.web.HTTPError(404)
-        self.render('user.html', user=user, pages=user.pages)
+        if self.current_user == user:
+            pages = user.pages
+        else:
+            pages = user.pages.where(db.Page.public == True)
+        self.render('user.html', user=user, pages=pages)
 
 
 class Page(Base):
     def get(self, name=None, id=None):
-        self.render('page.html', page=self.fetch_page(name, id))
+        page = self.fetch_page(name, id)
+        if not page or (not page.public and not page.editable(self.current_user)):
+            raise tornado.web.HTTPError(404)
+        self.render('page.html', page=page)
         
     def post(self, name=None, id=None):
         page = self.fetch_page(name, id)
@@ -94,17 +101,14 @@ class Page(Base):
                 if page_name != page.name:
                     redirect = True
                 page.name = page_name
+                page.encrypted = True if self.get_argument('encrypted', None) == 'true' else False
+                page.public = True if self.get_argument('public', None) == 'true' else False
             page.save()
 
             if redirect:
                 self.write('/' + (page.name or str(page.id)))
             else:
                 self.write('1')
-        elif action == 'settings':
-            #page.encrypted = True if self.get_argument('encrypted', None) == 'true' else False
-            page.public = True if self.get_argument('public', None) == 'true' else False
-            page.save()
-            self.write('1')
         elif action == 'delete':
             page.delete_instance()
             self.set_secure_cookie('flash', 'Page deleted')

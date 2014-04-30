@@ -21,9 +21,9 @@
     <form method="post">
         {% raw xsrf_form_html() %}
         <label>Username</label>
-        <input type="text" name="username" placeholder="frank" maxlength="20" required>
+        <input type="text" class="input" name="username" placeholder="frank" maxlength="20" required>
         <label>Password</label>
-        <input type="password" placeholder="underwood" name="password" required>
+        <input type="password" class="input" placeholder="underwood" name="password" required>
         <input class="btn" type="submit" value="Login">
     </form>
 {% end %}
