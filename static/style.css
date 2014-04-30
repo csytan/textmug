@@ -189,7 +189,7 @@ select {
     float: left;
     color: #888;
     font-size: 28px;
-    background: rgba(0,0,0,0.08);
+    background: rgba(255,255,255,0.02);
     line-height: 0;
     padding: 10px;
     margin-right: 12px;
