@@ -70,7 +70,7 @@ Editor.init = function(container, options){
     $('.lock').click(self.lock);
     $('.unlock').click(self.unlock);
     $('.close').click(function(){
-        $('#editor, .dialog:visible').toggle();
+        $(this).closest('.dialog').hide();
         return false;
     });
 };
@@ -161,7 +161,9 @@ Editor.saveSettings = function(){
     Editor.saved = false;
     Editor.save();
     $('#settings_dialog, #editor').toggle();
-    if (options.encrypted){
+    if (Editor.options.encrypted){
+        $('.unlocked').css('display', 'inline-block');
+    } else {
         $('.unlocked').hide();
     }
     return false;
