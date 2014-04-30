@@ -2,15 +2,12 @@ import datetime
 import logging
 import os
 import sys
-import threading
-import uuid
 
 import tornado.ioloop
 import tornado.web
 import tornado.gen
 
 import db
-
 
 
 class Base(tornado.web.RequestHandler):
@@ -207,7 +204,7 @@ settings = {
     'login_url': '/login',
     'debug': False,
     'xsrf_cookies': True,
-    'cookie_secret': str(uuid.uuid4())
+    'cookie_secret': db.Settings.get_setting('cookie_secret')
 }
 
 

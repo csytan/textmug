@@ -1,6 +1,8 @@
 import concurrent.futures
 import datetime
+import json
 import os
+import uuid
 
 import bcrypt
 import peewee
@@ -23,6 +25,23 @@ def future_thread(func):
 class BaseModel(peewee.Model):
     class Meta:
         database = database
+
+
+class Settings(BaseModel):
+    id = peewee.PrimaryKeyField()
+    value = peewee.TextField()
+
+    @classmethod
+    def get_setting(cls, arg):
+        try:
+            settings = cls.get(cls.id == '1')
+        except peewee.DoesNotExist:
+            defaults = json.dumps({
+                'cookie_secret': str(uuid.uuid4())
+            })
+            settings = cls.create(value=defaults)
+        settings = json.loads(settings.value)
+        return settings['cookie_secret']
 
 
 class User(BaseModel):
@@ -82,5 +101,5 @@ class Page(BaseModel):
         return False
 
 
-peewee.create_model_tables([User, Page], fail_silently=True)
+peewee.create_model_tables([Settings, User, Page], fail_silently=True)
 
