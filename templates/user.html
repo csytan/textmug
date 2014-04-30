@@ -12,8 +12,10 @@
 
     {% for page in pages %}
         <div class="page">
+            <div class="icon icon-document"></div>
             <a href="/{{ page.name }}">{{ page.page_name }}</a>
             <div class="info">{{ relative_date(page.created) }}</div>
+            <div style="clear:both"></div>
         </div>
     {% end %}
 {% end %}

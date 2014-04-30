@@ -174,10 +174,27 @@ select {
 ======================================================== */
 
 .page {
-    font-size: 21px;
-    margin-bottom: 18px;
+    font-size: 20px;
+    padding: 10px;
+    border-radius: 7px;
+    margin-left: -10px;
 }
-
+.page:hover {
+    background: rgba(0,0,0,0.1);
+}
+.page:hover .icon {
+    background: rgba(255,255,255,0.03);
+}
+.page .icon {
+    float: left;
+    color: #888;
+    font-size: 28px;
+    background: rgba(0,0,0,0.08);
+    line-height: 0;
+    padding: 10px;
+    margin-right: 12px;
+    border-radius: 7px;
+}
 .page .info {
     color: #555;
     font-size: 13px;
