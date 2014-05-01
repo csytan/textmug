@@ -1,20 +1,25 @@
-(function(){
 
-window.Editor = {
+Editor = {
+    editable: true,
     password: null,
     cipherJSON: null,
-    saved: true
+    saved: true,
+    locked: false,
+    encrypted: false,
+    public: true,
+    undoStack: []
 };
 
 Editor.init = function(container, options){
     var self = this;
-    self.undoStack = [];
     self.container = container;
-    self.options = options || {encrypted: false, public: true};
-
-    if (options.encrypted) self.lock();
+    if (options){
+        $.extend(self, options);
+        self.locked = self.encrypted ? true : false;
+    }
 
     // Editor
+    self.updateView();
     var text = self.domToText(container);
     container.innerHTML = self.textToHTML(text);
     $(container)
@@ -27,7 +32,7 @@ Editor.init = function(container, options){
         .keypress(self.keypress)
         .keyup(self.keyup)
         .on('click', 'a', function(){
-            window.open(this.href,'_blank');
+            window.open(this.href, '_blank');
         })
         .focus();
 
@@ -39,19 +44,25 @@ Editor.init = function(container, options){
     $('.save').click(self.save);
     $('.delete').click(self.delete);
     $('.settings').click(function(){
-        $('#editor').toggle();
         $('#settings_dialog')
             .toggle()
             .find('input[type="password"]')
                 .val(self.password)
             .end()
-            .find('select[name="public"] option[value="' + self.options.public + '"]')
+            .find('select[name="public"] option[value="' + self.public + '"]')
                 .prop('selected', true)
             .end()
-            .find('select[name="encrypted"] option[value="' + self.options.encrypted + '"]')
+            .find('select[name="encrypted"] option[value="' + self.encrypted + '"]')
                 .prop('selected', true)
                 .closest('select')
                 .change();
+        if (self.locked){
+            $('#decrypt_dialog').toggle();
+            $('#settings_dialog .encryption').hide();
+        } else {
+            $('#editor').toggle();
+            $('#settings_dialog .encryption').show();
+        }
         return false;
     });
 
@@ -71,6 +82,11 @@ Editor.init = function(container, options){
     $('.unlock').click(self.unlock);
     $('.close').click(function(){
         $(this).closest('.dialog').hide();
+        if (self.locked){
+            $('#decrypt_dialog').show();
+        } else {
+            $('#editor').show();
+        }
         return false;
     });
 };
@@ -115,24 +131,26 @@ Editor.keyup = function(e){
 };
 
 Editor.save = function(){
-    if (Editor.saved) return;
+    if (Editor.saved) return false;
 
     var data = {
         action: 'save',
         _xsrf: Editor.xsrf(),
         page_name: $('#page_name').val(),
-        text: Editor.domToText(Editor.container)
+        encrypted: Editor.encrypted,
+        public: Editor.public
     };
-    $.extend(data, Editor.options);
 
-    if (data.encrypted){
-        var cipherJSON = JSON.stringify(
-            sjcl.encrypt(Editor.password, data.text));
-        data.text = cipherJSON;
-        Editor.options.cipherJSON = cipherJSON;
+    // Set the text/cipherJSON
+    if (Editor.locked){
+        data.text = Editor.cipherJSON;
+    } else if (Editor.encrypted){
+        var text = Editor.domToText(Editor.container);
+        var cipherObj = sjcl.encrypt(Editor.password, text);
+        Editor.cipherJSON = JSON.stringify(cipherObj);
+        data.text = Editor.cipherJSON;
     } else {
-        Editor.password = null;
-        Editor.options.cipherJSON = null;
+        data.text = Editor.domToText(Editor.container);
     }
     console.log(data);
 
@@ -145,7 +163,7 @@ Editor.save = function(){
         $('.save').hide();
         Editor.saved = true;
     });
-    return false; 
+    return false;
 };
 
 Editor.saveSettings = function(){
@@ -155,49 +173,42 @@ Editor.saveSettings = function(){
         .map(function(input){
             options[input.name] = input.value;
         });
-    Editor.options.encrypted = options.encrypted === 'true' ? true : false;
-    Editor.options.public = options.public === 'true' ? true : false;
+    Editor.encrypted = options.encrypted === 'true' ? true : false;
+    Editor.public = options.public === 'true' ? true : false;
     Editor.password = options.password;
     Editor.saved = false;
     Editor.save();
-    $('#settings_dialog, #editor').toggle();
-    if (Editor.options.encrypted){
-        $('.unlocked').css('display', 'inline-block');
-    } else {
-        $('.unlocked').hide();
-    }
+    $('#settings_dialog').hide();
+    Editor.updateView();
     return false;
 };
 
 Editor.lock = function(){
+    Editor.locked = true;
     Editor.save();
-    $('#editor, .unlocked, .save').hide();
     $('input[type="password"]').val('');
-    $('#decrypt_dialog')
-        .show()
-        .focus();
+    Editor.updateView();
     return false;
 };
 
 Editor.unlock = function(){
-    var $password = $(this).parent().find('input[type="password"]');
+    var $password = $('#decrypt_dialog input[type="password"]');
     var password = $password.val();
     $password.val('');
-    var cipherJSON = $.parseJSON(Editor.options.cipherJSON);
+    var cipherJSON = $.parseJSON(Editor.cipherJSON);
     var text = sjcl.decrypt(password, cipherJSON);
-    Editor.password = password;
     Editor.container.innerHTML = Editor.textToHTML(text);
+    Editor.password = password;
+    Editor.locked = false;
+    Editor.updateView();
     $('#decrypt_dialog').hide();
-    $('.unlocked').css('display', 'inline-block');
-    $('#editor').show().focus();
     return false;
 };
 
 Editor.delete = function(){
-    var self = this;
     if (confirm('Are you sure?')){
         $('.status').text('Deleting...');
-        $.post('', {action: 'delete', _xsrf: self.xsrf()}, function(response){
+        $.post('', {action: 'delete', _xsrf: Editor.xsrf()}, function(response){
             if (response.indexOf('/') === 0){
                 window.location.href = response;
             } else {
@@ -227,6 +238,33 @@ Editor.undo = function(){
 Editor.redo = function(){
     console.log('redo');
     return false;
+};
+
+Editor.updateView = function(){
+    // Shows and hides ui elements based on state
+    if (!this.editable){
+        $('.controls').hide();
+        return;
+    }
+
+    if (this.locked){
+        $('#editor, .unlocked, .save').hide();
+        $('#decrypt_dialog')
+            .show()
+            .focus();
+    } else {
+        if (this.encrypted){
+            $('.unlocked').css('display', 'inline-block');
+        } else {
+            $('.unlocked').hide();
+        }
+        if (this.saved){
+            $('.save').css('display', 'inline-block');
+        } else {
+            $('.save').hide();
+        }
+        $('#editor').show().focus();
+    }
 };
 
 Editor.updateUndoStack = function(html, caretOffsets){
@@ -617,7 +655,6 @@ Editor.setCaretPositions = function(offsets, element){
             // The end of <h1> or <div> counts as new line
             offset -= 1;
         }
-
         return [null, offset];
     }
 
@@ -636,10 +673,6 @@ Editor.setCaretPositions = function(offsets, element){
     sel.removeAllRanges();
     sel.addRange(range);
 };
-
-
-})();
-
 
 
 

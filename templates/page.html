@@ -59,7 +59,7 @@
 
     <div id="decrypt_dialog" class="dialog">
         <h1>Page locked</h1>
-        <label>Password</label>
+        <p class="help">Please enter a password</p>
         <input name="page_password" class="input" type="password" placeholder="password">
         <input class="btn unlock" type="submit" value="Unlock">
     </div>
@@ -75,19 +75,24 @@
             <option value="false">Keep this page private</option>
         </select>
         
-        <label>Encryption</label>
-        <select name="encrypted">
-            <option value="false">Don't encrypt this page</option>
-            <option value="true">Enable client side encryption</option>
-        </select>
-        
-        <div class="encrypt_password">
-            <label>Password</label>
-            <input name="password" class="input" type="password" placeholder="password">
+        <div class="encryption">
+            <label>Encryption</label>
+            <select name="encrypted">
+                <option value="false">Don't encrypt this page</option>
+                <option value="true">Enable client side encryption</option>
+            </select>
+            
+            <div class="encrypt_password">
+                <label>Password</label>
+                <input name="password" class="input" type="password" placeholder="password">
+            </div>
         </div>
 
-        <input class="btn" type="submit" value="Save">
-        <a class="delete icon-trash"></a>
+        <label>Deletion</label>
+        <a class="btn delete">Delete page</a> 
+        <div></div>
+
+        <input class="btn" type="submit" value="Save settings">
     </form>
 
     <div id="editor" contenteditable="true">{% if not page.encrypted %}{{ page.text }}{% end %}</div>

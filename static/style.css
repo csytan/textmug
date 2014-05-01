@@ -28,13 +28,19 @@ h1, h2, h3 {
     margin-top: 0;
     margin-bottom: 0.8em;
 }
-h1 {
+h1.title {
     margin-bottom: 35px;
 }
 
 label {
     display: block;
     margin-bottom: 10px;
+}
+
+.help {
+    color: #666;
+    margin-top: 0;
+    margin-bottom: 22px;
 }
 
 .input {
@@ -75,9 +81,7 @@ select {
     padding: 8px 25px;
     border-radius: 7px;
     margin-top: 7px;
-}
-.btn.inline {
-    display: inline-block;
+    user-select: none;
 }
 .btn:hover {
     background: rgba(255,255,255,0.15);
@@ -212,6 +216,9 @@ select {
     top: 20px;
     right: 20px;
     width: 47px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
 }
 .control {
     display: inline-block;
@@ -372,15 +379,13 @@ select {
     display: none;
 }
 #settings_dialog .delete {
-    position: relative;
-    top: 6px;
-    left: 20px;
-    cursor: pointer;
-    font-size: 24px;
-    color: #777;
+    margin: 0 0 20px;
+    font-size: 13px;
+    padding: 7px 14px;
+    background: rgba(255, 153, 153, 0.2);
 }
 #settings_dialog .delete:hover {
-    color: #eee;
+    background: rgba(255, 153, 153, 0.4);
 }
 
 
