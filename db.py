@@ -54,6 +54,10 @@ class User(BaseModel):
     def get_by_id(cls, id):
         return cls.select().where(cls.id == id).first()
 
+    @classmethod
+    def get_users(cls):
+        return cls.select().order_by(cls.id)
+
     def is_admin(self):
         if self.id == 'csytan':
             return True
@@ -66,6 +70,13 @@ class User(BaseModel):
     @future_thread
     def check_password(self, password):
         return bcrypt.checkpw(password, self.password_hash)
+
+    def get_pages(self, current_user=False):
+        q = self.pages.order_by(Page.name)
+        if not current_user:
+            q = q.where(Page.public == True)
+        return [p for p in q]
+
 
 
 class Page(BaseModel):
@@ -85,6 +96,10 @@ class Page(BaseModel):
     def get_by_name(cls, name):
         return cls.select().where(cls.name == name).first()
 
+    @classmethod
+    def get_recent(cls):
+        return cls.select().where(cls.public == True).order_by(cls.created.desc())
+
     @property
     def page_name(self):
         if self.user and self.name:
@@ -95,7 +110,7 @@ class Page(BaseModel):
 
     def editable(self, user):
         if not self.id or \
-            (user and user.is_admin) or \
+            (user and user.is_admin()) or \
             (user and self._data['user'] == user.id):
             return True
         return False

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+
+{% block main %}
+    <h1 class="title">Users</h1>
+
+    {% for user in users %}
+        <div class="user">
+            <a href="/{{ user.id }}">{{ user.id }}</a>
+            <div class="info">{{ relative_date(user.joined) }}</div>
+            <div style="clear:both"></div>
+        </div>
+    {% end %}
+{% end %}

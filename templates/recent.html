@@ -2,17 +2,7 @@
 
 
 {% block main %}
-    <h1 class="title">{{ user.id }}</h1>
-
-    <div id="controls">
-        {% if current_user and user == current_user %}
-            <a class="control icon-plus" href="/new"></a>
-        {% end %}
-    </div>
-
-    {% if not pages %}
-        <p class="help">There's nothing here.</p>
-    {% end %}
+    <h1 class="title">Recent</h1>
 
     {% for page in pages %}
         <div class="page">
@@ -23,3 +13,4 @@
         </div>
     {% end %}
 {% end %}
+

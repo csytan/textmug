@@ -57,15 +57,22 @@ class Index(Base):
         self.render('index.html', text=None)
 
 
+class Recent(Base):
+    def get(self):
+        self.render('recent.html', pages=db.Page.get_recent())
+
+
+class Users(Base):
+    def get(self):
+        self.render('users.html', users=db.User.get_users())
+
+
 class User(Base):
     def get(self, id):
         user = db.User.get_by_id(id)
         if not user:
             raise tornado.web.HTTPError(404)
-        if self.current_user == user:
-            pages = user.pages
-        else:
-            pages = user.pages.where(db.Page.public == True)
+        pages = user.get_pages(user == self.current_user)
         self.render('user.html', user=user, pages=pages)
 
 
@@ -78,7 +85,7 @@ class Page(Base):
         
     def post(self, name=None, id=None):
         page = self.fetch_page(name, id)
-        if page.user != self.current_user:
+        if page.user != self.current_user or page.id == 1:
             if not self.current_user or not self.current_user.is_admin():
                 raise tornado.web.HTTPError(401)
         
@@ -135,16 +142,17 @@ class SignUp(Base):
 
     @tornado.gen.coroutine
     def post(self):
-        username = self.get_argument('username', None)
+        username = self.get_argument('username', '')
+        username = ''.join(c for c in username.lower() if c.isalnum())[:20]
         email = self.get_argument('email', None)
         password = self.get_argument('password', None)
 
-        if not username or not password:
+        if not username or username.isdigit() or not password:
             self.reload('Incorrect login')
             raise tornado.gen.Return()
 
         user = db.User(
-            id=''.join(c for c in username.lower() if c.isalnum())[:20],
+            id=username,
             joined=datetime.datetime.now())
         yield user.set_password(password)
         user.save(force_insert=True)
@@ -192,6 +200,8 @@ routes = [
     (r'/login', Login),
     (r'/signup', SignUp),
     (r'/logout', Logout),
+    (r'/recent', Recent),
+    (r'/users', Users),
     (r'/new', Page),
     (r'/(?P<id>\d+)', Page),
     (r'/(.+/.+)', Page),
