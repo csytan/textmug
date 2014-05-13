@@ -125,6 +125,7 @@ class Page(Base):
         elif self.request.path == '/new':
             page = db.Page(
                 user=self.current_user,
+                public=False if self.current_user else True,
                 created=datetime.datetime.now())
         elif id:
             page = db.Page.get_by_id(int(id))
