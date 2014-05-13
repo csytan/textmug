@@ -332,7 +332,7 @@ Editor.domToText = function(container){
 };
 
 Editor.textToHTML = function(text){
-    var tokens = this.lexer(text);
+    var tokens = this.tokenize(text);
     var html = '';
 
     function allNewlines(){
@@ -411,7 +411,7 @@ Editor.textToHTML = function(text){
     return html;
 };
 
-Editor.lexer = function(text){
+Editor.tokenize = function(text){
     var rules = {
         newline: /^\n/,
         heading: /^(#{1,6})[^\n]*/,
