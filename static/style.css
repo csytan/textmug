@@ -1,0 +1,400 @@
+/*! normalize.css v3.0.1 | MIT License | git.io/normalize */
+html{font-family:sans-serif;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}body{margin:0}article,aside,details,figcaption,figure,footer,header,hgroup,main,nav,section,summary{display:block}audio,canvas,progress,video{display:inline-block;vertical-align:baseline}audio:not([controls]){display:none;height:0}[hidden],template{display:none}a{background:transparent}a:active,a:hover{outline:0}abbr[title]{border-bottom:1px dotted}b,strong{font-weight:bold}dfn{font-style:italic}h1{font-size:2em;margin:.67em 0}mark{background:#ff0;color:#000}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sup{top:-0.5em}sub{bottom:-0.25em}img{border:0}svg:not(:root){overflow:hidden}figure{margin:1em 40px}hr{-moz-box-sizing:content-box;box-sizing:content-box;height:0}pre{overflow:auto}code,kbd,pre,samp{font-family:monospace,monospace;font-size:1em}button,input,optgroup,select,textarea{color:inherit;font:inherit;margin:0}button{overflow:visible}button,select{text-transform:none}button,html input[type="button"],input[type="reset"],input[type="submit"]{-webkit-appearance:button;cursor:pointer}button[disabled],html input[disabled]{cursor:default}button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0}input{line-height:normal}input[type="checkbox"],input[type="radio"]{box-sizing:border-box;padding:0}input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-outer-spin-button{height:auto}input[type="search"]{-webkit-appearance:textfield;-moz-box-sizing:content-box;-webkit-box-sizing:content-box;box-sizing:content-box}input[type="search"]::-webkit-search-cancel-button,input[type="search"]::-webkit-search-decoration{-webkit-appearance:none}fieldset{border:1px solid silver;margin:0 2px;padding:.35em .625em .75em}legend{border:0;padding:0}textarea{overflow:auto}optgroup{font-weight:bold}table{border-collapse:collapse;border-spacing:0}td,th{padding:0}
+
+body {
+    font-family: 'Source Sans Pro', sans-serif;
+    font-size: 20px;
+    color: #444;
+    background: #eee;
+    margin: 0;
+    line-height: 1.4;
+}
+
+h1, h2, h3, h4 {
+    line-height: 1.25;
+    font-weight: bold;
+    margin: 0;
+    margin-bottom: 0.6em;
+}
+
+a {
+    color: #1883A5;
+    text-decoration: none;
+    cursor: pointer;
+}
+a:hover {
+    color: #30B3DD;
+}
+
+blockquote {
+    display: block;
+    position: relative;
+    color: #555;
+    font-style: italic;
+    margin: 0;
+    padding: 25px 40px;
+    border-left: 10px solid rgba(0,0,0,.17);
+    background: rgba(0,0,0,.2);
+}
+blockquote:before {
+    position: absolute;
+    top: 10px;
+    left: 5px;
+    color: #757575;
+    font-size: 45px;
+    line-height: 1;
+    content: open-quote;
+}
+blockquote:after {
+    content: no-close-quote;
+}
+
+pre, code {
+    font-family: Menlo, Monaco, "Lucida Console", monospace;
+    background: rgba(0,0,0,0.3);
+}
+
+pre {
+    display: block;
+    color: #ddd;
+    background: #333;
+    font-size: 15px;
+    padding: 10px 15px;
+    border-radius: 5px;
+}
+
+code {
+    display: inline;
+    font-size: 16px;
+    border-radius: 3px;
+    padding: 1px 4px;
+    background: #f0f6fc;
+    border: 1px dashed rgba(0,0,0,0.3);
+}
+
+.lh {
+    font-size: 1.05em;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.li1, .li2, .li3 {
+    padding-bottom: 8px;
+}
+.li1 {
+    padding-left: 20px;
+}
+.li2 {
+    padding-left: 40px;
+}
+.li3 {
+    padding-left: 60px;
+}
+
+.hr {
+    color: #ddd;
+    margin-bottom: 10px;
+    text-align: center;
+    line-height: 1;
+}
+
+
+
+label {
+    display: block;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.help {
+    color: #666;
+    margin-top: 0;
+    margin-bottom: 22px;
+}
+
+.input {
+    display: block;
+    box-sizing: border-box;
+    font-family: Monaco, "Lucida Console", monospace;
+    font-size: 17px;
+    padding: 10px;
+    border: none;
+    outline: none;
+    background: rgba(0,0,0,.04);
+    border: 2px solid rgba(0,0,0,0.1);
+    border-radius: 4px;
+    width: 275px;
+    max-width: 100%;
+    margin-bottom: 20px;
+}
+
+
+select {
+    display: block;
+    font-size: 18px;
+    color: #444;
+    margin-bottom: 20px;
+}
+
+.btn {
+    display: inline-block;
+    cursor: pointer;
+    text-decoration: none;
+    user-select: none;
+    outline: none;
+    color: #fff !important;
+    font-size: 18px;
+    text-shadow: 0 1px 2px rgba(0,0,0,.2);
+    background: #51C5D6;
+    padding: .4em 1.3em;
+    border: 0;
+    border-radius: 2px;
+    border-bottom: 3px solid rgba(0,0,0,0.2);
+    margin-top: 10px;
+}
+.btn:hover {
+    background: #5BCFE0;
+}
+.btn:active {
+    margin-top: 8px;
+    border-bottom-width: 1px;
+}
+
+.btn.delete {
+    font-size: 0.7em;
+    margin-top: 0;
+    background: rgb(209, 101, 101);
+}
+.btn.delete:hover {
+    background: rgb(223, 120, 120);
+}
+
+
+/* base.html
+======================================================== */
+
+#menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 10;
+}
+#menu:hover {
+    background: #444;
+}
+#menu .logo {
+    display: inline-block;
+    font-size: 38px;
+    color: #555;
+    padding: 15px;
+    padding-bottom: 5px;
+    line-height: 0;
+}
+#menu:hover .logo {
+    color: #ddd;
+    -webkit-transform: rotate(-25deg);
+}
+#menu .items {
+    display: none;
+    padding: 10px 0;
+}
+#menu .item {
+    display: block;
+    color: #ddd;
+    padding: 4px 20px;
+    font-size: 17px;
+    text-decoration: none;
+}
+#menu .item:hover {
+    background: #111;
+}
+#menu:hover .items {
+    display: block;
+}
+
+
+#status {
+    position: fixed;
+    font-size: 15px;
+    color: #555;
+    left: 85px;
+    top: 10px;
+    width: 200px;
+}
+
+
+#main {
+    width: 80%;
+    max-width: 650px;
+    padding: 70px 0 100px;
+    margin: auto;
+}
+
+
+/* user.html, page.html
+======================================================== */
+
+.user_header {
+    color: #666;
+    font-size: 17px;
+    font-family: Monaco, "Lucida Console", monospace;
+    margin-bottom: 20px;
+    margin-left: 25px;
+}
+.user_header a {
+    color: #666;
+}
+.user_header a:hover {
+    color: #444;
+}
+.user_header #page_name {
+    display: inline-block;
+    width: 60%;
+    color: #666;
+    font-size: inherit;
+    padding: 5px 10px;
+    margin: -5px 0 0 -10px;
+    background: none;
+    border-color: transparent;
+}
+.user_header #page_name:hover,
+.user_header #page_name:focus,
+.user_header #page_name.active {
+    background: rgba(0,0,0,.04);
+    border: 2px solid rgba(0,0,0,0.1);
+}
+
+
+/* user.html
+======================================================== */
+
+.page {
+    padding: 10px;
+    padding-right: 15px;
+    background: #fff;
+    margin-bottom: 2px;
+}
+.page:hover {
+    background: #f5f5f5;
+}
+.page:hover .icon {
+    background: rgba(255,255,255,0.03);
+}
+.page .icon {
+    float: left;
+    color: #555;
+    font-size: 33px;
+    line-height: 0;
+    margin-right: 12px;
+}
+.page_name {
+    color: #444;
+    float: left;
+    font-size: 20px;
+}
+.page_created {
+    float: right;
+    color: #888;
+    font-size: 15px;
+    margin-top: 4px;
+}
+
+
+
+/* page.html
+======================================================== */
+
+#controls {
+    position: absolute;
+    top: 10px;
+    right: 7px;
+    width: 47px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+}
+.control {
+    display: inline-block;
+    color: #777;
+    font-size: 30px;
+    padding: 7px;
+    line-height: 0;
+    cursor: pointer;
+    text-decoration: none;
+    margin-bottom: 7px;
+}
+.control:hover,
+.control.active {
+    color: #111;
+}
+.locked, .unlocked {
+    display: none;
+}
+
+#editor {
+    min-height: 50px;
+    border: none;
+    outline: none;
+    background: none;
+    overflow-y: hidden;
+    border-left: 2px dotted rgba(0,0,0,.2);
+    padding: 25px;
+    background: #fff;
+    box-sizing: border-box;
+}
+
+#editor > div {
+    margin-bottom: 0.2em;
+}
+
+
+.dialog {
+    display: none;
+    position: relative;
+    padding: 25px;
+    padding-bottom: 40px;
+    border: 1px dashed rgba(0,0,0,0.2);
+    background: #fefefe;
+}
+.dialog .close {
+    cursor: pointer;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 35px;
+    padding: 10px;
+    color: #888;
+    line-height: 0;
+}
+.dialog .close:hover {
+    color: #333;
+}
+
+#settings_dialog .encrypt_password {
+    display: none;
+}
+#settings_dialog .delete {
+    margin-bottom: 20px;
+}
+
+
+
+@media (max-width: 800px) {
+    #main {
+        width: 90%;
+    }
+
+    #menu, #controls {
+        position: absolute;
+    }
+
+    #controls {
+        width: auto;
+    }
+    .control {
+        float: right;
+        margin: 0;
+        margin-left: 7px;
+    }
+}
+
