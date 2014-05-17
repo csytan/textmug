@@ -386,7 +386,7 @@ select {
 
 @media (max-width: 800px) {
     #main {
-        width: 100%;
+        width: 95%;
     }
 
     #editor {
