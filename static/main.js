@@ -39,7 +39,12 @@ Editor.init = function(container, options){
     // Controls
     $('.unlocked').click(self.lock);
     $('#page_name').keyup(function(){
-        this.value = this.value.toLowerCase().replace(/[^a-z0-9\_\.-]+/, '');
+        var value = this.value.toLowerCase()
+            .replace(/\s+/, '-')
+            .replace(/[^a-z0-9\_\.-]+/, '');
+        if (value !== this.value){
+            this.value = value;
+        }
     });
     $('.save').click(self.save);
     $('.delete').click(self.delete);
@@ -154,12 +159,12 @@ Editor.save = function(){
     }
     console.log(data);
 
-    $('.status').text('Saving...');
+    $('#status').text('Saving...');
     $.post(location.href, data, function(response){
         if (response.indexOf('/') === 0){
             window.location.href = response;
         }
-        $('.status').text('Saved');
+        $('#status').text('Saved');
         $('.save').hide();
         Editor.saved = true;
     });
@@ -207,12 +212,12 @@ Editor.unlock = function(){
 
 Editor.delete = function(){
     if (confirm('Are you sure?')){
-        $('.status').text('Deleting...');
+        $('#status').text('Deleting...');
         $.post('', {action: 'delete', _xsrf: Editor.xsrf()}, function(response){
             if (response.indexOf('/') === 0){
                 window.location.href = response;
             } else {
-                $('.status').text(response);
+                $('#status').text(response);
             }
         });
     }
