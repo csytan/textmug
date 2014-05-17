@@ -386,7 +386,11 @@ select {
 
 @media (max-width: 800px) {
     #main {
-        width: 90%;
+        width: 100%;
+    }
+
+    #editor {
+        padding: 15px;
     }
 
     #menu, #controls {
