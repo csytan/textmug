@@ -13,36 +13,35 @@
 
 
 {% block main %}
-    {% if page.id != 1 %}
-        <div class="user_header">
-            {% if page.id %}
-                {% if page.user %}
-                    <a href="/{{ page.user.id }}">
-                        {{ page.user.id }}
-                    </a>
-                    <span>/</span>
-                {% end %}
-
-                {% if current_user and page.user == current_user %}
-                    <input id="page_name" class="input" type="text" placeholder="new-page" 
-                        value="{{ page.page_name }}" maxlength="40">
-                {% else %}
-                    <span>{{ page.page_name }}</span>
-                {% end %}
-            {% else %}
-                {# new page #}
-                {% if current_user %}
-                    <a href="/{{ current_user.id }}">
-                        {{ current_user.id }}
-                    </a>
-                    <span>/</span>
-                    <input id="page_name" class="input" type="text" placeholder="new-page" maxlength="40" class="active">
-                {% else %}
-                    <span>new page - write something!</span>
-                {% end %}
+    <div class="user_header">
+        {% if page.id == 1 %}
+        {% elif page.id %}
+            {% if page.user %}
+                <a href="/{{ page.user.id }}">
+                    {{ page.user.id }}
+                </a>
+                <span>/</span>
             {% end %}
-        </div>
-    {% end %}
+
+            {% if current_user and page.user == current_user %}
+                <input id="page_name" class="input" type="text" placeholder="new-page" 
+                    value="{{ page.page_name }}" maxlength="40">
+            {% else %}
+                <span>{{ page.page_name }}</span>
+            {% end %}
+        {% else %}
+            {# new page #}
+            {% if current_user %}
+                <a href="/{{ current_user.id }}">
+                    {{ current_user.id }}
+                </a>
+                <span>/</span>
+                <input id="page_name" class="input" type="text" placeholder="new-page" maxlength="40" class="active">
+            {% else %}
+                <span>new page - write something!</span>
+            {% end %}
+        {% end %}
+    </div>
 
     <div id="controls">
         {% if page.id == 1 %}

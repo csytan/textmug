@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600" rel="stylesheet" type="text/css">
     <link href="/static/font-styles.css" rel="stylesheet" type="text/css">
     <link href="/static/style.css" rel="stylesheet" type="text/css">
 </head>
@@ -17,10 +18,6 @@
             {% else %}
                 href="/"
             {% end %}></a>
-        <div class="status">
-            {% set flash = handler.get_and_clear_flash() %}
-            {% if flash %}{{ flash }}{% end %}
-        </div>
         <div class="items">
             <a href="/new" class="item">new</a>
             <a href="/recent" class="item">recent</a>
@@ -33,6 +30,10 @@
             {% end %}
         </div>
     </div>
+    <div id="status">
+        {% set flash = handler.get_and_clear_flash() %}
+        {% if flash %}{{ flash }}{% end %}
+    </div>    
     <div id="main">
         {% block main %}{% end %}
     </div>
