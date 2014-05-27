@@ -102,51 +102,21 @@ Editor.keypress = function(e){
     // http://lists.whatwg.org/pipermail/whatwg-whatwg.org/2011-May/031577.html
     if (e.keyCode === 13){
         var editor = document.getElementById('editor');
-        var selection = Editor.getSelection();
-        console.log(selection);
+        var range = window.getSelection().getRangeAt(0);
+        range.deleteContents();
 
-        var start = selection[0];
-        var startOffset = selection[1];
-        var end = selection[2];
-        var endOffset = selection[3];
+        var caret = Editor.getCaretPosition();
+        var text = Editor.domToText(caret.node);
 
-        // Gather text from start to end node
-        var text = '';
-        var siblings = [];
-        for (var node=start; node !== end.nextSibling; node=node.nextSibling){
-            var nodeText = Editor.domToText(node);
-            text += nodeText;
-            if (node === end){
-                break;
-            } else {
-                endOffset += nodeText.length;
-            }
-            if (node !== start){
-                siblings.push(node);
-            }
-        }
-
-        console.log('pre-deletion', text.replace(/\n/g, 'N'));
-
-        // Delete selected text if exists
-        text = text.slice(0, startOffset) + text.slice(endOffset);
         // Insert newline at first offset
-        text = text.slice(0, startOffset) + '\n' + text.slice(endOffset);
+        text = text.slice(0, caret.offset) + '\n' + text.slice(caret.offset);
         // Increment caret position
-        startOffset++;
+        caret.offset++;
 
-        console.log('post-deletion', text.replace(/\n/g, 'N'), startOffset, endOffset)
-
-        // Delete anything that isn't container
-        for (var i=0, node; node=siblings[i]; i++){
-            console.log('remove child', node)
-            editor.removeChild(node);
-        }
-
-        var container = start;
+        var container = caret.node;
         for (var containerIndex=0, n=container; n=n.previousSibling; containerIndex++);
-
         var firstNode = container.previousSibling ? false : true;
+
         var newContainer = document.createElement('div');
         editor.replaceChild(newContainer, container);
         var html = Editor.textToHTML(text, firstNode);
@@ -156,9 +126,8 @@ Editor.keypress = function(e){
         Editor.saved = false;
         $('.save').css('display', 'inline-block');
 
-
         newContainer = editor.childNodes[containerIndex];
-        Editor.setCaretPosition2(newContainer, startOffset);
+        Editor.setCaretPosition2(newContainer, caret.offset);
 
         //Editor.updateUndoStack(this.innerHTML, offsets);
         //Editor.checkMismatch(this, text);
@@ -171,12 +140,11 @@ Editor.keyup = function(e){
     if (e.keyCode >= 37 && e.keyCode <= 40 || e.keyCode === 13) return;
 
     var editor = document.getElementById('editor');
-    var selection = Editor.getSelection();
-    var container = selection[0];
-    var offset = selection[1];
+    var caret = Editor.getCaretPosition();
+    var container = caret.node;
     var containerIndex = Array.prototype.indexOf.call(editor.childNodes, container);
 
-    var text = Editor.domToText(container, container);
+    var text = Editor.domToText(container);
     var firstNode = container.previousSibling ? false : true;
     var html = Editor.textToHTML(text, firstNode);
 
@@ -188,9 +156,8 @@ Editor.keyup = function(e){
     $('.save').css('display', 'inline-block');
 
     newContainer = editor.childNodes[containerIndex];
-    //console.log('new container', newContainer, offset);
 
-    Editor.setCaretPosition2(newContainer, offset);
+    Editor.setCaretPosition2(newContainer, caret.offset);
     //Editor.updateUndoStack(this.innerHTML, offsets);
     //Editor.checkMismatch(this, text);
 };
@@ -693,56 +660,45 @@ Editor.setCaretPosition = function(element, charOffset){
     sel.addRange(range);
 };
 
-Editor.getSelection = function(){
+Editor.getCaretPosition = function(){
     // Returns the 0-indexed character offset of the caret in the editor
-    // start and end nodes are the index of the editor's children 
-
-    var self = this;
     var range = window.getSelection().getRangeAt(0);
     var editor = document.getElementById('editor');
+    var node = range.startContainer;
+    var offset = range.startOffset;
 
-    function findOffset(node, offset){
-        // Traverses up the DOM tree to find the character offset from the editor element.
+    // Traverses up the DOM tree to find the character offset from the editor element.
+    //console.log(1, node, offset)
+    if (node.nodeType === 3){
+        // Text node: offset == n'th character
         // https://developer.mozilla.org/en-US/docs/Web/API/Range.startOffset
-        //
-        // Returns: [node, offset]
-
-        //console.log(1, node, offset)
-        if (node.nodeType === 3){
-            // Text node: offset == n'th character
-        } else {
-            // Non-text node: offset == n'th child node
-            node = node.childNodes[offset];
-            offset = 0;
-        }
-
-        while (node){
-            //console.log(2, node, offset);
-            if (node.parentElement === editor){
-                break;
-            } else if (node.previousSibling){
-                node = node.previousSibling;
-                if (self.isBrNode(node)){
-                    offset++;
-                } else {
-                    offset += node.textContent.length;
-                }
-            } else {
-                node = node.parentElement;
-            }
-        }
-        //console.log(3, node, offset);
-        return [node, offset];
+    } else {
+        // Non-text node: offset == n'th child node
+        node = node.childNodes[offset];
+        offset = 0;
     }
 
-    var start = findOffset(range.startContainer, range.startOffset);
-    var end = range.collapsed ? start : findOffset(range.endContainer, range.endOffset);
-    return start.concat(end);
+    while (node){
+        //console.log(2, node, offset);
+        if (node.parentElement === editor){
+            break;
+        } else if (node.previousSibling){
+            node = node.previousSibling;
+            if (this.isBrNode(node)){
+                offset++;
+            } else {
+                offset += node.textContent.length;
+            }
+        } else {
+            node = node.parentElement;
+        }
+    }
+    return {node: node, offset: offset};
 };
 
 Editor.setCaretPosition2 = function(node, offset){
     // Sets the caret position on a DOM element
-    
+
     // Find offset on first-level element
     while (node){
         var textLen = (node.textContent || node.innerText).length;
@@ -783,7 +739,7 @@ Editor.setCaretPosition2 = function(node, offset){
         }
         return [null, offset];
     }
-
+    
     var range = document.createRange();
     var sel = window.getSelection();
     var textNodeOffset = findTextNodeOffset(node, offset);
@@ -792,8 +748,6 @@ Editor.setCaretPosition2 = function(node, offset){
     sel.removeAllRanges();
     sel.addRange(range);
 };
-
-
 
 
 
