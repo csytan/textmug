@@ -33,8 +33,9 @@ blockquote {
     font-style: italic;
     margin: 0;
     padding: 25px 40px;
-    border-left: 10px solid rgba(0,0,0,.17);
-    background: rgba(0,0,0,.2);
+    border-left: 10px solid rgba(0,0,0,.1);
+    background: rgba(0,0,0,.1);
+    border-radius: 2px;
 }
 blockquote:before {
     position: absolute;
@@ -346,6 +347,13 @@ select {
     padding: 30px;
     background: #fff;
     box-sizing: border-box;
+}
+
+#editor .hidden {
+    display: none;
+}
+#editor .active .hidden {
+    display: inline;
 }
 
 #editor > div {

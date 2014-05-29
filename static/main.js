@@ -103,7 +103,7 @@ Editor.keypress = function(e){
     if (e.keyCode === 13){
         var editor = document.getElementById('editor');
         var range = window.getSelection().getRangeAt(0);
-        range.deleteContents();
+        if (!range.collapsed) range.deleteContents();
 
         var caret = Editor.getCaretPosition();
         var text = Editor.domToText(caret.node);
@@ -114,20 +114,20 @@ Editor.keypress = function(e){
         caret.offset++;
 
         var container = caret.node;
-        for (var containerIndex=0, n=container; n=n.previousSibling; containerIndex++);
+        for (var cIndex=0, n=container; n=n.previousSibling; cIndex++);
         var firstNode = container.previousSibling ? false : true;
 
         var newContainer = document.createElement('div');
         editor.replaceChild(newContainer, container);
         var html = Editor.textToHTML(text, firstNode);
-        console.log(html);
+        console.log(text.replace(/\n/g, 'N'),  html);
         newContainer.outerHTML = html;
 
         Editor.saved = false;
         $('.save').css('display', 'inline-block');
 
-        newContainer = editor.childNodes[containerIndex];
-        Editor.setCaretPosition2(newContainer, caret.offset);
+        newContainer = editor.childNodes[cIndex];
+        Editor.setCaretPosition(newContainer, caret.offset);
 
         //Editor.updateUndoStack(this.innerHTML, offsets);
         //Editor.checkMismatch(this, text);
@@ -137,12 +137,14 @@ Editor.keypress = function(e){
 
 Editor.keyup = function(e){
     // Skip arrow keys and enter key
-    if (e.keyCode >= 37 && e.keyCode <= 40 || e.keyCode === 13) return;
+    //if (e.keyCode >= 37 && e.keyCode <= 40 || e.keyCode === 13) return;
 
     var editor = document.getElementById('editor');
     var caret = Editor.getCaretPosition();
     var container = caret.node;
     var containerIndex = Array.prototype.indexOf.call(editor.childNodes, container);
+
+    $('#editor .active').removeClass('active');
 
     var text = Editor.domToText(container);
     var firstNode = container.previousSibling ? false : true;
@@ -156,8 +158,9 @@ Editor.keyup = function(e){
     $('.save').css('display', 'inline-block');
 
     newContainer = editor.childNodes[containerIndex];
+    $(newContainer).addClass('active');
 
-    Editor.setCaretPosition2(newContainer, caret.offset);
+    Editor.setCaretPosition(newContainer, caret.offset);
     //Editor.updateUndoStack(this.innerHTML, offsets);
     //Editor.checkMismatch(this, text);
 };
@@ -177,12 +180,12 @@ Editor.save = function(){
     if (Editor.locked){
         data.text = Editor.cipherJSON;
     } else if (Editor.encrypted){
-        var text = Editor.domToText(Editor.container);
+        var text = Editor.domToText();
         var cipherObj = sjcl.encrypt(Editor.password, text);
         Editor.cipherJSON = JSON.stringify(cipherObj);
         data.text = Editor.cipherJSON;
     } else {
-        data.text = Editor.domToText(Editor.container);
+        data.text = Editor.domToText();
     }
     console.log(data);
 
@@ -323,55 +326,22 @@ Editor.isBrNode = function(node){
     return node && (node.textContent || node.innerText) === '\n';
 };
 
-Editor.isBlockElement = function(element){
-    var blockElements = 'H1,H2,H3,H4,H5,H6,DIV,BLOCKQUOTE,PRE';
-    if (blockElements.indexOf(element.tagName) === -1){
-        return false;
-    }
-    return true;
-};
-
 Editor.domToText = function(start, end){
     // Converts DOM elements to text
     // Start and end (optional): DOM elements that are first-level children
     // of the Editor
+    start = start || this.container.childNodes[0];
     end = end || null;
     var text = '';
 
     for (var node=start; node;){
         if (this.isBrNode(node)){
             // BR elements
-
-            // If this is the first node and all other nodes are newlines, then skip this newline
-            //  <div><br></div>     \n\n
-            //  <div><br></div>         
-            //  <div><br></div>     
-            if (!node.previousSibling){
-                for (var next=node; this.isBrNode(next);){
-                    next = next.nextSibling;
-                }
-                if (!next) continue;
-            }
-
-            // Add extra newline if previous and next elements are block elements
-            //  <div>a</div>        a\n\na
-            //  <div><br></div>
-            //  <div>a</div>
-            if (!this.isBrNode(node.previousSibling) && !this.isBrNode(node.nextSibling)){
-                text += '\n';
-            }
             text += '\n';
         } else {
             // Block elements (everything but BRs)
             // innerText for IE < 9
             text += node.textContent || node.innerText;
-
-            // If this and the next element are block elements, add a newline
-            //  <div>a</div>        a\na
-            //  <div>a</div>
-            if (this.nextSibling && !this.isBrNode(node.nextSibling)){
-                text += '\n';
-            }
         }
 
         if (end === null || node === end){
@@ -383,18 +353,9 @@ Editor.domToText = function(start, end){
     return text;
 };
 
-Editor.textToHTML = function(text, firstNode){
+Editor.textToHTML = function(text){
     var tokens = this.tokenize(text);
     var html = '';
-
-    function allNewlines(){
-        for (var i=0, token; token=tokens[i]; i++){
-            if (token.type !== 'newline'){
-                return false;
-            }
-        }
-        return true;
-    }
 
     function hasPrevBlock(index){
         for (var i=index, token; token=tokens[i]; i--){
@@ -408,17 +369,7 @@ Editor.textToHTML = function(text, firstNode){
     for (var i=0, token; token=tokens[i]; i++){
         if (token.type === 'newline'){
             var next = tokens[i + 1];
-            if (firstNode && i === 0 && allNewlines()){
-                // If text is all newlines add an extra new line
-                //  \n          <div><br></div>
-                //              <div><br></div>
-                //
-                //  \n\n        <div><br></div>
-                //              <div><br></div>
-                //              <div><br></div>
-                //
-                html += '<div class="br"><br></div>';
-            } else if (next && next.type !== 'newline' && hasPrevBlock(i)){
+            if (next && next.type !== 'newline' && hasPrevBlock(i)){
                 // Skip a newline if next element is a block element
                 // and there is a previous block element
                 // a\na        <div>a</div>
@@ -432,7 +383,8 @@ Editor.textToHTML = function(text, firstNode){
             html += '<div class="br"><br></div>';
         }
         if (token.type === 'heading'){
-            html += '<h' + token.depth + '>' + this.inlineHTML(token.text) + '</h' + token.depth + '>';
+            html += '<h' + token.depth + '><span class="hidden">' + token.hashes + '</span>' +
+                this.inlineHTML(token.text) + '</h' + token.depth + '>';
             continue;
         }
         if (token.type === 'blockquote'){
@@ -466,11 +418,11 @@ Editor.textToHTML = function(text, firstNode){
 Editor.tokenize = function(text){
     var rules = {
         newline: /^\n/,
-        heading: /^(#{1,6})[^\n]*/,
+        heading: /^(#{1,6})([^\n]*)/,
         blockquote: /^>[^\n]*/,
         li: /^(-{1,3})[^\n]*/,
         hr: /^-{4,}/,
-        lh: /^[^\n]+:\n/,
+        lh: /^([^\n]+:)(\n|$)/,
         pre: /^```((?!```)[\s\S])+(```)?/,
         text: /^[^\n]+/
     };
@@ -492,7 +444,8 @@ Editor.tokenize = function(text){
             tokens.push({
                 type: 'heading',
                 depth: cap[1].length,
-                text: cap[0]
+                hashes: cap[1],
+                text: cap[2]
             });
             continue;
         }
@@ -526,11 +479,10 @@ Editor.tokenize = function(text){
         }
         // List headers
         if (cap = rules.lh.exec(text)){
-            var capTxt = cap[0].replace('\n', '');
-            text = text.substring(capTxt.length);
+            text = text.substring(cap[1].length);
             tokens.push({
                 type: 'lh',
-                text: capTxt
+                text: cap[1]
             });
             continue;
         }
@@ -573,7 +525,7 @@ Editor.inlineHTML = function(text){
         link: /^https?:\/\/[^\s<]+[^<.,:;"')\]\s]/,
         email: /^\S+@[a-z0-9-\.]+[a-z]/,
         code: /^`[^`]+`/,
-        strong: /^\*\*[^\*]+?\*\*/,
+        strong: /^\*\*([^\*]+?)\*\*/,
         em: /^\*[^\*]+\*/
     };
     var html = '';
@@ -602,7 +554,8 @@ Editor.inlineHTML = function(text){
         // Strong
         if (cap = rules.strong.exec(text)){
             text = text.substring(cap[0].length);
-            html += '<strong>' + this.escape(cap[0]) + '</strong>';
+            html += '<strong><span class="hidden">**</span>' + this.escape(cap[1]) + 
+                '<span class="hidden">**</span></strong>';
             continue;
         }
         // Em
@@ -618,48 +571,6 @@ Editor.inlineHTML = function(text){
     return html;
 };
 
-Editor.setCaretPosition = function(element, charOffset){
-    // Sets the caret position on a DOM element
-
-    function findOffset(node, offset){
-        if (node.nodeType === 3){
-            // Text node
-            if (offset <= node.nodeValue.length){
-                return [node, offset];
-            }
-            offset -= node.nodeValue.length;
-        }
-
-        if (offset === 0){
-            return [node, offset];
-        }
-
-        if (node.hasChildNodes()){
-            for (var i=0, child; child=node.childNodes[i]; i++){
-                var result = findOffset(child, offset);
-                offset = result[1];
-                if (result[0] !== null){
-                    return result;
-                }
-            }
-        } 
-
-        if (Editor.isBlockElement(node)){
-            // The end of <h1> or <div> counts as new line
-            offset -= 1;
-        }
-        return [null, offset];
-    }
-
-    var range = document.createRange();
-    var sel = window.getSelection();
-    var offset = findOffset(element, charOffset);
-    range.setStart(offset[0], offset[1]);
-    range.collapse(true);
-    sel.removeAllRanges();
-    sel.addRange(range);
-};
-
 Editor.getCaretPosition = function(){
     // Returns the 0-indexed character offset of the caret in the editor
     var range = window.getSelection().getRangeAt(0);
@@ -668,7 +579,6 @@ Editor.getCaretPosition = function(){
     var offset = range.startOffset;
 
     // Traverses up the DOM tree to find the character offset from the editor element.
-    //console.log(1, node, offset)
     if (node.nodeType === 3){
         // Text node: offset == n'th character
         // https://developer.mozilla.org/en-US/docs/Web/API/Range.startOffset
@@ -679,7 +589,6 @@ Editor.getCaretPosition = function(){
     }
 
     while (node){
-        //console.log(2, node, offset);
         if (node.parentElement === editor){
             break;
         } else if (node.previousSibling){
@@ -696,9 +605,8 @@ Editor.getCaretPosition = function(){
     return {node: node, offset: offset};
 };
 
-Editor.setCaretPosition2 = function(node, offset){
+Editor.setCaretPosition = function(node, offset){
     // Sets the caret position on a DOM element
-
     // Find offset on first-level element
     while (node){
         var textLen = (node.textContent || node.innerText).length;
@@ -750,5 +658,60 @@ Editor.setCaretPosition2 = function(node, offset){
 };
 
 
+Editor.getText = function(){
+    if (this.isBrNode(node)){
+        // BR elements
+        
+        // If this is the first node and all other nodes are newlines, then skip this newline
+        //  <div><br></div>     \n\n
+        //  <div><br></div>         
+        //  <div><br></div>     
+        var skip = false;
+        if (!node.previousSibling){
+            for (var next=node; this.isBrNode(next); next=next.nextSibling);
+            if (!next) skip = true;
+        }
+
+        // Add extra newline if previous and next elements are block elements
+        //  <div>a</div>        a\n\na
+        //  <div><br></div>
+        //  <div>a</div>
+        if (false && node.previousSibling && !this.isBrNode(node.previousSibling) && 
+            node.nextSibling && !this.isBrNode(node.nextSibling)){
+            text += '\n';
+        }
+        if (!skip) text += '\n';
+    } else {
+        // Block elements (everything but BRs)
+        // innerText for IE < 9
+        text += node.textContent || node.innerText;
+
+        // If this and the next element are block elements, add a newline
+        //  <div>a</div>        a\na
+        //  <div>a</div>
+        if (false && this.nextSibling && !this.isBrNode(node.nextSibling)){
+            text += '\n';
+        }
+    }
+
+
+
+
+};
+
+
+Editor.loadText = function(){
+    if (false && firstNode && i === 0 && allNewlines()){
+        // If text is all newlines add an extra new line
+        //  \n          <div><br></div>
+        //              <div><br></div>
+        //
+        //  \n\n        <div><br></div>
+        //              <div><br></div>
+        //              <div><br></div>
+        //
+        html += '<div class="br"><br></div>';
+    }
+};
 
 
