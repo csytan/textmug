@@ -3,11 +3,14 @@ html{font-family:sans-serif;-ms-text-size-adjust:100%;-webkit-text-size-adjust:1
 
 body {
     font-family: 'Source Sans Pro', sans-serif;
-    font-size: 19px;
+    font-size: 20px;
     color: #474747;
     background: #eee;
     margin: 0;
     line-height: 1.4;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
 }
 
 h1, h2, h3, h4 {
@@ -15,13 +18,17 @@ h1, h2, h3, h4 {
     font-weight: bold;
     margin: 0;
     margin-bottom: 0.6em;
+    -webkit-font-smoothing: auto;
+}
+
+h1.title {
+    margin-left: 15px;
 }
 
 a {
     color: #e67e22;
     text-decoration: none;
     cursor: pointer;
-    border-bottom: 1px dotted #ccc;
 }
 a:hover {
     color: #d35400;
@@ -35,16 +42,15 @@ blockquote {
     font-style: italic;
     margin: 0;
     padding: 25px 40px;
-    border-left: 10px solid rgba(0,0,0,.1);
-    background: rgba(0,0,0,.1);
-    border-radius: 2px;
+    border-left: 7px solid rgba(0,0,0,.1);
+    background: rgba(0,0,0,.05);
 }
 blockquote:before {
     position: absolute;
-    top: 10px;
-    left: 5px;
-    color: #757575;
-    font-size: 45px;
+    top: 11px;
+    left: 8px;
+    color: #ccc;
+    font-size: 40px;
     line-height: 1;
     content: open-quote;
 }
@@ -359,7 +365,27 @@ select {
 }
 
 #editor ::selection {
-    background: rgba(0,0,0,.07);
+    background: rgba(0,0,0,.05);
+}
+
+#editor a {
+    color: #e67e22;
+    text-decoration: none;
+    cursor: pointer;
+    border-bottom: 1px dotted #ccc;
+}
+#editor a:hover {
+    color: #d35400;
+    border-color: #e67e22;
+}
+
+#editor img {
+    display: block;
+    margin: auto;
+    max-width: 100%;
+}
+#editor .active img {
+    display: none;
 }
 
 #editor span {

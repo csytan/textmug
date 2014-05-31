@@ -462,6 +462,13 @@ Editor.textToHTML = function(text){
             continue;
         }
 
+        // Images
+        if (cap = /^https?:\/\/(i\.imgur\.com\/[a-zA-Z0-9]+\.(?:png|jpg|gif))/.exec(text)){
+            text = text.substring(cap[0].length);
+            html += '<div><span>' + this.escape(cap[0]) + '</span><img src="https://' + this.escape(cap[1]) + '"></div>';
+            continue; 
+        }
+
         // Text
         if (cap = /^[^\n]+/.exec(text)){
             text = text.substring(cap[0].length);
