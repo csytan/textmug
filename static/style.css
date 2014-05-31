@@ -4,7 +4,7 @@ html{font-family:sans-serif;-ms-text-size-adjust:100%;-webkit-text-size-adjust:1
 body {
     font-family: 'Source Sans Pro', sans-serif;
     font-size: 19px;
-    color: #444;
+    color: #474747;
     background: #eee;
     margin: 0;
     line-height: 1.4;
@@ -18,12 +18,14 @@ h1, h2, h3, h4 {
 }
 
 a {
-    color: #1883A5;
+    color: #e67e22;
     text-decoration: none;
     cursor: pointer;
+    border-bottom: 1px dotted #ccc;
 }
 a:hover {
-    color: #30B3DD;
+    color: #d35400;
+    border-color: #e67e22;
 }
 
 blockquote {
@@ -80,17 +82,22 @@ code {
 }
 
 .li1, .li2, .li3 {
-    padding-bottom: 8px;
+    display: list-item;
+    margin-bottom: 8px;
 }
-.li1 {
-    padding-left: 20px;
+
+.li1.active,
+.li2.active,
+.li3.active {
+    display: block;
 }
-.li2 {
-    padding-left: 40px;
-}
-.li3 {
-    padding-left: 60px;
-}
+
+.li1 { margin-left: 20px; }
+.li1.active { margin-left: 10px; }
+.li2 { margin-left: 40px; }
+.li2.active { margin-left: 14px; }
+.li3 { margin-left: 60px; }
+.li3.active { margin-left: 18px; }
 
 .hr {
     color: #ddd;
@@ -248,6 +255,7 @@ select {
 }
 .user_header a {
     color: #666;
+    border: none;
 }
 .user_header a:hover {
     color: #444;
@@ -347,14 +355,20 @@ select {
     padding: 30px;
     background: #fff;
     box-sizing: border-box;
+    white-space: pre-wrap;
 }
 
-#editor .hidden {
+#editor ::selection {
+    background: rgba(0,0,0,.07);
+}
+
+#editor span {
     display: none;
 }
-#editor .active .hidden {
+#editor .active span {
     display: inline;
 }
+
 
 #editor > div {
     margin-bottom: 0.2em;

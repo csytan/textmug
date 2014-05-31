@@ -1,4 +1,3 @@
-
 Editor = {
     editable: true,
     password: null,
@@ -20,8 +19,9 @@ Editor.init = function(container, options){
 
     // Editor
     self.updateView();
-    var text = $(container).text();
+    var text = container.textContent || container.innerText;
     container.innerHTML = self.textToHTML(text);
+
     $(container)
         .on('keydown', null, 'meta+s', self.save)
         .on('keydown', null, 'ctrl+s', self.save)
@@ -29,7 +29,7 @@ Editor.init = function(container, options){
         .on('keydown', null, 'ctrl+z', self.undo)
         .on('keydown', null, 'meta+shift+z', self.redo)
         .on('keydown', null, 'ctrl+shift+z', self.redo)
-        .keypress(self.keypress)
+        .keydown(self.keydown)
         .keyup(self.keyup)
         .on('click', function(){
             Editor.updateActive();
@@ -37,6 +37,7 @@ Editor.init = function(container, options){
         .on('click', 'a', function(){
             window.open(this.href, '_blank');
         })
+        .blur(self.blur)
         .focus();
 
     // Controls
@@ -99,8 +100,38 @@ Editor.init = function(container, options){
     });
 };
 
-Editor.keypress = function(e){
-    // Return key Browser normalization.
+Editor.keydown = function(e){
+    // Tab key
+    if (e.keyCode === 9){
+        console.log('hello')
+        var editor = document.getElementById('editor');
+        var caret = Editor.getCaretPosition();
+        var container = caret.node;
+        var text = container.textContent || container.innerText;
+        // Insert 4 spaces at first offset
+        text = text.slice(0, caret.offset) + '    ' + text.slice(caret.offset);
+        // Increment caret position
+        caret.offset += 4;
+
+
+        for (var cIndex=0, n=container; n=n.previousSibling; cIndex++);
+        var newContainer = document.createElement('div');
+        editor.replaceChild(newContainer, container);
+        var html = Editor.textToHTML(text);
+        newContainer.outerHTML = html;
+
+        Editor.saved = false;
+        $('.save').css('display', 'inline-block');
+
+        newContainer = editor.childNodes[cIndex];
+        Editor.setCaretPosition(newContainer, caret.offset);
+
+        Editor.updateActive();
+        return false;
+    }
+
+
+    // Return key browser normalization.
     // Browsers use different elements as their 'empty' element:
     // http://lists.whatwg.org/pipermail/whatwg-whatwg.org/2011-May/031577.html
     if (e.keyCode === 13){
@@ -109,7 +140,7 @@ Editor.keypress = function(e){
         if (!range.collapsed) range.deleteContents();
         var caret = Editor.getCaretPosition();
         var container = caret.node;
-        var text = container.textContent || container.innerText;;
+        var text = container.textContent || container.innerText;
 
         // Insert newline at first offset
         text = text.slice(0, caret.offset) + '\n' + text.slice(caret.offset);
@@ -121,7 +152,6 @@ Editor.keypress = function(e){
         var newContainer = document.createElement('div');
         editor.replaceChild(newContainer, container);
         var html = Editor.textToHTML(text);
-        console.log(text.replace(/\n/g, 'N'),  html);
         newContainer.outerHTML = html;
 
         Editor.saved = false;
@@ -133,22 +163,17 @@ Editor.keypress = function(e){
         Editor.updateActive();
 
         //Editor.updateUndoStack(this.innerHTML, offsets);
-        //Editor.checkMismatch(this, text);
         return false;
     }
 };
 
-Editor.updateActive = function(){
-    $('#editor .active').removeClass('active');
-    var range = window.getSelection().getRangeAt(0);
-    var editor = document.getElementById('editor');
-    for (var node=range.startContainer; node && node.parentElement !== editor; node=node.parentElement);
-    $(node).addClass('active');
-};
-
 Editor.keyup = function(e){
-    // Skip arrow keys and enter key
-    //if (e.keyCode >= 37 && e.keyCode <= 40 || e.keyCode === 13) return;
+    // Skip events that don't change text
+    // Enter, Shift, Arrow keys
+    if (e.keyCode === 13 || e.keyCode === 16 || e.keyCode >= 37 && e.keyCode <= 40){
+        Editor.updateActive();
+        return;
+    }
 
     var editor = document.getElementById('editor');
     var caret = Editor.getCaretPosition();
@@ -171,8 +196,20 @@ Editor.keyup = function(e){
 
     Editor.setCaretPosition(newContainer, caret.offset);
     //Editor.updateUndoStack(this.innerHTML, offsets);
-    //Editor.checkMismatch(this, text);
 };
+
+Editor.blur = function(){
+    $('#editor .active').removeClass('active');
+};
+
+Editor.updateActive = function(){
+    $('#editor .active').removeClass('active');
+    var range = window.getSelection().getRangeAt(0);
+    var editor = document.getElementById('editor');
+    for (var node=range.startContainer; node && node.parentElement !== editor; node=node.parentElement);
+    $(node).addClass('active');
+};
+
 
 Editor.save = function(){
     if (Editor.saved) return false;
@@ -344,162 +381,155 @@ Editor.getText = function(){
 }
 
 Editor.textToHTML = function(text){
-    var tokens = this.tokenize(text);
+    // Daps to marked.js for the lesson on parsing: https://github.com/chjj/marked
     var html = '';
+    var prevBlock = false;
+    var cap;
 
-    function hasPrevBlock(index){
-        for (var i=index, token; token=tokens[i]; i--){
-            if (token.type !== 'newline'){
-                return true;
+    while (text){
+        // New lines
+        if (cap = /^\n/.exec(text)){
+            text = text.substring(cap[0].length);
+            // Skip newline if there are previous and following 
+            // are block level elements.
+            // a\na        <div>a</div>
+            //             <div>a</div>
+            // 
+            // a\n\na      <div>a</div>
+            //             <div><br></div>
+            //             <div>a</div>
+            var followingBlock = /^\n*[^\n]/.exec(text);
+            if (prevBlock && followingBlock){
+                // Skip newline
+            } else {
+                html += '<div class="br"><br></div>';
             }
+            prevBlock = false;
+            continue;
         }
-        return false;
-    }
 
-    for (var i=0, token; token=tokens[i]; i++){
-        if (token.type === 'newline'){
-            var next = tokens[i + 1];
-            if (next && next.type !== 'newline' && hasPrevBlock(i)){
-                // Skip a newline if next element is a block element
-                // and there is a previous block element
-                // a\na        <div>a</div>
-                //             <div>a</div>
-                // 
-                // a\n\na      <div>a</div>
-                //             <div><br></div>
-                //             <div>a</div>
-                continue;
+        prevBlock = true;
+
+        // Headings
+        if (cap = /^(#{1,6}\s?)([^\n]*)/.exec(text)){
+            text = text.substring(cap[0].length);
+            var depth = cap[1].replace(/\s/g, '').length;
+            var hashes = cap[1];
+            html += '<h' + depth + '><span>' + hashes + '</span>' +
+                this.inlineHTML(cap[2]) + '</h' + depth + '>';
+            continue;
+        }
+
+        // Block quotes
+        if (cap = /^(>\s?)([^\n]*)/.exec(text)){
+            text = text.substring(cap[0].length);
+            html += '<blockquote><span>' + cap[1] + '</span>' + 
+                this.inlineHTML(cap[2]) + '</blockquote>';
+            continue;
+        }
+
+        // Horizontal rules
+        if (cap = /^-{4,}/.exec(text)){
+            text = text.substring(cap[0].length);
+            html += '<div class="hr">' + this.inlineHTML(cap[0]) + '</div>';
+            continue;
+        }
+
+        // List headers
+        if (cap = /^([^\n]+:)(\n|$)/.exec(text)){
+            text = text.substring(cap[1].length);
+            html += '<div class="lh">' + this.inlineHTML(cap[1]) + '</div>';
+            continue;
+        }
+
+        // List elements
+        if (cap = /^(\s*)(-\s?)([^\n]*)/.exec(text)){
+            text = text.substring(cap[0].length);
+            var depth = Math.floor(cap[1].length / 4) + 1;
+            console.log(cap, depth)
+            html += '<div class="li' + depth + '"><span>' + cap[1] + cap[2] + '</span>';
+            if (cap[3]){
+                html += this.inlineHTML(cap[3]);
             }
-            html += '<div class="br"><br></div>';
-        }
-        if (token.type === 'heading'){
-            html += '<h' + token.depth + '><span class="hidden">' + token.hashes + '</span>' +
-                this.inlineHTML(token.text) + '</h' + token.depth + '>';
+            html += '</div>';
             continue;
         }
-        if (token.type === 'blockquote'){
-            html += '<blockquote>' + this.inlineHTML(token.text) + '</blockquote>';
+
+        // Code blocks
+        if (cap = /^```((?:(?!```)[\s\S])+)```/.exec(text)){
+            text = text.substring(cap[0].length);
+            html += '<pre><span>```</span>' + this.escape(cap[1]) + '<span>```</span></pre>';
             continue;
         }
-        if (token.type === 'hr'){
-            html += '<div class="hr">' + this.inlineHTML(token.text) + '</div>';
+
+        // Text
+        if (cap = /^[^\n]+/.exec(text)){
+            text = text.substring(cap[0].length);
+            html += '<div>' + this.inlineHTML(cap[0]) + '</div>';
             continue;
         }
-        if (token.type === 'lh'){
-            html += '<div class="lh">' + this.inlineHTML(token.text) + '</div>';
-            continue;
-        }
-        if (token.type === 'li'){
-            html += '<div class="li' + token.depth + '">' + this.inlineHTML(token.text) + '</div>';
-            continue;
-        }
-        if (token.type === 'pre'){
-            html += '<pre>' + this.escape(token.text) + '</pre>';
-            continue;
-        }
-        if (token.type === 'div'){
-            html += '<div>' + this.inlineHTML(token.text) + '</div>';
-            continue;
+
+        if (text){
+            alert('Big problems!!');
         }
     }
     return html;
 };
 
-Editor.tokenize = function(text){
-    var rules = {
-        newline: /^\n/,
-        heading: /^(#{1,6})([^\n]*)/,
-        blockquote: /^>[^\n]*/,
-        li: /^(-{1,3})[^\n]*/,
-        hr: /^-{4,}/,
-        lh: /^([^\n]+:)(\n|$)/,
-        pre: /^```((?!```)[\s\S])+(```)?/,
-        text: /^[^\n]+/
-    };
-    var tokens = [];
+Editor.inlineHTML = function(text){
+    var html = '';
     var cap;
 
     while (text){
-        // New lines
-        if (cap = rules.newline.exec(text)){
+        // Inline Links
+        if (cap = /^\[([^\n]+)\]\((https?:\/\/[^\s<]+[^<.,:;"')\]\s])\)/.exec(text)){
             text = text.substring(cap[0].length);
-            tokens.push({
-                type: 'newline'
-            });
+            html += '<span>[</span><a href="' + this.escape(cap[2]) + '" rel="nofollow">' + 
+                this.escape(cap[1]) + '</a><span>]</span><span>(' + this.escape(cap[2]) + ')</span>';
             continue;
         }
-        // Headings
-        if (cap = rules.heading.exec(text)){
+
+        // Plain Links
+        if (cap = /^https?:\/\/[^\s<]+[^<.,:;"')\]\s]/.exec(text)){
             text = text.substring(cap[0].length);
-            tokens.push({
-                type: 'heading',
-                depth: cap[1].length,
-                hashes: cap[1],
-                text: cap[2]
-            });
+            html += '<a href="' + this.escape(cap[0]) + '" rel="nofollow">' + this.escape(cap[0]) + '</a>';
             continue;
         }
-        // Block quotes
-        if (cap = rules.blockquote.exec(text)){
+
+        // Email
+        if (cap = /^\S+@[a-z0-9-\.]+[a-z]/.exec(text)){
             text = text.substring(cap[0].length);
-            tokens.push({
-                type: 'blockquote',
-                text: cap[0]
-            });
+            html += '<a class="email" rel="nofollow" href="mailto:' + this.escape(cap[0]) + '">' + 
+                this.escape(cap[0]) + '</a>';
             continue;
         }
-        // Horizontal rules
-        if (cap = rules.hr.exec(text)){
+
+        // Code
+        if (cap = /^`([^`]+)`/.exec(text)){
             text = text.substring(cap[0].length);
-            tokens.push({
-                type: 'hr',
-                text: cap[0]
-            });
+            html += '<code><span>`</span>' + this.escape(cap[1]) + '<span>`</span></code>';
             continue;
         }
-        // List elements
-        if (cap = rules.li.exec(text)){
+
+        // Strong
+        if (cap = /^\*\*([^\*]+)\*\*/.exec(text)){
             text = text.substring(cap[0].length);
-            tokens.push({
-                type: 'li',
-                depth: cap[1].length,
-                text: cap[0]
-            });
+            html += '<strong><span>**</span>' + this.escape(cap[1]) + '<span>**</span></strong>';
             continue;
         }
-        // List headers
-        if (cap = rules.lh.exec(text)){
-            text = text.substring(cap[1].length);
-            tokens.push({
-                type: 'lh',
-                text: cap[1]
-            });
-            continue;
-        }
-        // Code blocks
-        if (cap = rules.pre.exec(text)){
+
+        // Em
+        if (cap = /^\*([^\*]+)\*/.exec(text)){
             text = text.substring(cap[0].length);
-            var token = {
-                type: 'pre',
-                text: cap[0]
-            };
-            tokens.push(token);
+            html += '<em><span>*</span>' + this.escape(cap[1]) + '<span>*</span></em>';
             continue;
         }
+
         // Text
-        if (cap = rules.text.exec(text)){
-            text = text.substring(cap[0].length);
-            tokens.push({
-                type: 'div',
-                text: cap[0]
-            });
-            continue;
-        }
-        if (text){
-            alert('Big problems!!');
-        }
+        html += this.escape(text[0]);
+        text = text.substring(1);
     }
-    return tokens;
+    return html;
 };
 
 Editor.escape = function(text) {
@@ -508,57 +538,6 @@ Editor.escape = function(text) {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
-};
-
-Editor.inlineHTML = function(text){
-    var rules = {
-        link: /^https?:\/\/[^\s<]+[^<.,:;"')\]\s]/,
-        email: /^\S+@[a-z0-9-\.]+[a-z]/,
-        code: /^`[^`]+`/,
-        strong: /^\*\*([^\*]+?)\*\*/,
-        em: /^\*[^\*]+\*/
-    };
-    var html = '';
-
-    while (text){
-        // Links
-        if (cap = rules.link.exec(text)){
-            text = text.substring(cap[0].length);
-            html += '<a href="' + this.escape(cap[0]) + '" rel="nofollow">' + this.escape(cap[0]) + '</a>';
-            continue;
-        }
-        // Email
-        if (cap = rules.email.exec(text)){
-            text = text.substring(cap[0].length);
-            html += '<a class="email" rel="nofollow" href="mailto:' + this.escape(cap[0]) + '">' + 
-                this.escape(cap[0]) + 
-            '</a>';
-            continue;
-        }
-        // Code
-        if (cap = rules.code.exec(text)){
-            text = text.substring(cap[0].length);
-            html += '<code>' + this.escape(cap[0]) + '</code>';
-            continue;
-        }
-        // Strong
-        if (cap = rules.strong.exec(text)){
-            text = text.substring(cap[0].length);
-            html += '<strong><span class="hidden">**</span>' + this.escape(cap[1]) + 
-                '<span class="hidden">**</span></strong>';
-            continue;
-        }
-        // Em
-        if (cap = rules.em.exec(text)){
-            text = text.substring(cap[0].length);
-            html += '<em>' + this.escape(cap[0]) + '</em>';
-            continue;
-        }
-        // Text
-        html += this.escape(text[0]);
-        text = text.substring(1);
-    }
-    return html;
 };
 
 Editor.getCaretPosition = function(){
