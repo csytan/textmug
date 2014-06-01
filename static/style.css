@@ -8,8 +8,6 @@ body {
     background: #eee;
     margin: 0;
     line-height: 1.4;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
 }
 
@@ -18,7 +16,6 @@ h1, h2, h3, h4 {
     font-weight: bold;
     margin: 0;
     margin-bottom: 0.6em;
-    -webkit-font-smoothing: auto;
 }
 
 h1.title {
@@ -61,6 +58,7 @@ blockquote:after {
 pre, code {
     font-family: Menlo, Monaco, "Lucida Console", monospace;
     background: rgba(0,0,0,0.3);
+    -webkit-font-smoothing: auto;
 }
 
 pre {
@@ -91,19 +89,9 @@ code {
     display: list-item;
     margin-bottom: 8px;
 }
-
-.li1.active,
-.li2.active,
-.li3.active {
-    display: block;
-}
-
 .li1 { margin-left: 20px; }
-.li1.active { margin-left: 10px; }
 .li2 { margin-left: 40px; }
-.li2.active { margin-left: 14px; }
 .li3 { margin-left: 60px; }
-.li3.active { margin-left: 18px; }
 
 .hr {
     color: #ddd;
@@ -195,10 +183,11 @@ select {
     top: 0;
     left: 0;
     z-index: 10;
-    width: 100px;
+    width: 130px;
+    height: 100%;
 }
-#menu:hover {
-    background: #444;
+#menu.active {
+    background: #666;
 }
 #menu .logo {
     display: inline-block;
@@ -207,26 +196,30 @@ select {
     padding: 20px;
     padding-bottom: 5px;
     line-height: 0;
+    cursor: pointer;
 }
-#menu:hover .logo {
+#menu .logo:hover {
+    color: rgba(0,0,0,0.7);
+}
+#menu.active .logo {
     color: #ddd;
     -webkit-transform: rotate(-25deg);
 }
 #menu .items {
     display: none;
-    padding: 10px 0;
+    margin-top: 25px;
 }
 #menu .item {
     display: block;
     color: #ddd;
-    padding: 4px 20px;
-    font-size: 17px;
+    padding: 8px 20px;
+    font-size: 19px;
     text-decoration: none;
 }
 #menu .item:hover {
     background: #555;
 }
-#menu:hover .items {
+#menu.active .items {
     display: block;
 }
 
@@ -257,7 +250,7 @@ select {
     font-size: 17px;
     font-family: Monaco, "Lucida Console", monospace;
     margin-bottom: 20px;
-    margin-left: 25px;
+    margin-left: 30px;
 }
 .user_header a {
     color: #666;
@@ -363,7 +356,6 @@ select {
     box-sizing: border-box;
     white-space: pre-wrap;
 }
-
 #editor ::selection {
     background: rgba(0,0,0,.05);
 }
@@ -384,15 +376,14 @@ select {
     margin: auto;
     max-width: 100%;
 }
-#editor .active img {
-    display: none;
-}
-
 #editor span {
     display: none;
 }
 #editor .active span {
     display: inline;
+}
+#editor .active .hidden {
+    display: none;
 }
 
 

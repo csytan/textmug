@@ -29,6 +29,7 @@ Editor.init = function(container, options){
         .on('keydown', null, 'ctrl+z', self.undo)
         .on('keydown', null, 'meta+shift+z', self.redo)
         .on('keydown', null, 'ctrl+shift+z', self.redo)
+        // TODO: Shit + tab in a list element
         .keydown(self.keydown)
         .keyup(self.keyup)
         .on('click', function(){
@@ -102,6 +103,7 @@ Editor.init = function(container, options){
 
 Editor.keydown = function(e){
     // Tab key
+    // Tab in a list element
     if (e.keyCode === 9){
         console.log('hello')
         var editor = document.getElementById('editor');
@@ -131,9 +133,13 @@ Editor.keydown = function(e){
     }
 
 
+
     // Return key browser normalization.
     // Browsers use different elements as their 'empty' element:
     // http://lists.whatwg.org/pipermail/whatwg-whatwg.org/2011-May/031577.html
+
+    // TODO: Enter , with prev element being list 
+
     if (e.keyCode === 13){
         var editor = document.getElementById('editor');
         var range = window.getSelection().getRangeAt(0);
@@ -200,6 +206,10 @@ Editor.keyup = function(e){
 
 Editor.blur = function(){
     $('#editor .active').removeClass('active');
+};
+
+Editor.replaceText = function(node, text, caretOffset){
+
 };
 
 Editor.updateActive = function(){
@@ -443,15 +453,12 @@ Editor.textToHTML = function(text){
         }
 
         // List elements
-        if (cap = /^(\s*)(-\s?)([^\n]*)/.exec(text)){
+        if (cap = /^(\s*-\n?)([^\n]*)/.exec(text)){
             text = text.substring(cap[0].length);
             var depth = Math.floor(cap[1].length / 4) + 1;
-            console.log(cap, depth)
-            html += '<div class="li' + depth + '"><span>' + cap[1] + cap[2] + '</span>';
-            if (cap[3]){
-                html += this.inlineHTML(cap[3]);
-            }
-            html += '</div>';
+            html += '<div class="li' + depth + '"><span class="hidden">' + cap[1] + 
+                (cap[1][-1] === '-' ? '&nbsp;' : '') + '</span>' +
+                (cap[2] ? this.inlineHTML(cap[2]) : '<br>') + '</div>';
             continue;
         }
 
@@ -465,7 +472,8 @@ Editor.textToHTML = function(text){
         // Images
         if (cap = /^https?:\/\/(i\.imgur\.com\/[a-zA-Z0-9]+\.(?:png|jpg|gif))/.exec(text)){
             text = text.substring(cap[0].length);
-            html += '<div><span>' + this.escape(cap[0]) + '</span><img src="https://' + this.escape(cap[1]) + '"></div>';
+            html += '<div><span>' + this.escape(cap[0]) + 
+                '</span><img src="https://' + this.escape(cap[1]) + '"></div>';
             continue; 
         }
 
