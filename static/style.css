@@ -83,7 +83,7 @@ code {
 
 .li1, .li2, .li3 {
     display: list-item;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
 .li1 { margin-left: 20px; }
 .li2 { margin-left: 40px; }
@@ -224,7 +224,7 @@ select {
     font-size: 15px;
     color: #555;
     left: 85px;
-    top: 10px;
+    top: 30px;
     width: 200px;
 }
 
@@ -379,10 +379,6 @@ select {
     display: none;
 }
 
-
-#editor > div {
-    margin-bottom: 0.2em;
-}
 
 
 
