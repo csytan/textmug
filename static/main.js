@@ -1,4 +1,3 @@
-
 Editor = {
     editable: true,
     password: null,
@@ -7,7 +6,8 @@ Editor = {
     locked: false,
     encrypted: false,
     public: true,
-    undoStack: []
+    undoStack: [],
+    undoState: []
 };
 
 Editor.init = function(container, options){
@@ -20,8 +20,9 @@ Editor.init = function(container, options){
 
     // Editor
     self.updateView();
-    var text = self.domToText(container);
+    var text = container.textContent || container.innerText;
     container.innerHTML = self.textToHTML(text);
+
     $(container)
         .on('keydown', null, 'meta+s', self.save)
         .on('keydown', null, 'ctrl+s', self.save)
@@ -29,11 +30,16 @@ Editor.init = function(container, options){
         .on('keydown', null, 'ctrl+z', self.undo)
         .on('keydown', null, 'meta+shift+z', self.redo)
         .on('keydown', null, 'ctrl+shift+z', self.redo)
-        .keypress(self.keypress)
+        // TODO: Shit + tab in a list element
+        .keydown(self.keydown)
         .keyup(self.keyup)
+        .on('click', function(){
+            Editor.updateActive();
+        })
         .on('click', 'a', function(){
             window.open(this.href, '_blank');
         })
+        .blur(self.blur)
         .focus();
 
     // Controls
@@ -96,44 +102,122 @@ Editor.init = function(container, options){
     });
 };
 
-Editor.keypress = function(e){
-    // Return key Browser normalization.
-    // Browsers use different elements as their 'empty' element:
-    // http://lists.whatwg.org/pipermail/whatwg-whatwg.org/2011-May/031577.html
-    if (e.keyCode === 13){
-        var offsets = Editor.getCaretPositions(this);
-        var text = Editor.domToText(this);
-
-        // Delete selected text if exists
-        text = text.slice(0, offsets[0]) + text.slice(offsets[1]);
-        // Insert newline at first offset
-        text = text.slice(0, offsets[0]) + '\n' + text.slice(offsets[0]);
+Editor.keydown = function(e){
+    // Tab key
+    // Tab in a list element
+    if (e.keyCode === 9){
+        console.log('hello')
+        var editor = document.getElementById('editor');
+        var caret = Editor.getCaretPosition();
+        var container = caret.node;
+        var text = container.textContent || container.innerText;
+        // Insert 4 spaces at first offset
+        text = text.slice(0, caret.offset) + '    ' + text.slice(caret.offset);
         // Increment caret position
-        offsets = [offsets[0] + 1, offsets[0] + 1];
+        caret.offset += 4;
 
-        this.innerHTML = Editor.textToHTML(text);
+
+        for (var cIndex=0, n=container; n=n.previousSibling; cIndex++);
+        var newContainer = document.createElement('div');
+        editor.replaceChild(newContainer, container);
+        var html = Editor.textToHTML(text);
+        newContainer.outerHTML = html;
+
         Editor.saved = false;
         $('.save').css('display', 'inline-block');
-        Editor.setCaretPositions(offsets, this);
-        Editor.updateUndoStack(this.innerHTML, offsets);
-        Editor.checkMismatch(this, text);
+
+        newContainer = editor.childNodes[cIndex];
+        Editor.setCaretPosition(newContainer, caret.offset);
+
+        Editor.updateActive();
         return false;
     }
+
+    // Return key browser normalization.
+    // Browsers use different elements as their 'empty' element:
+    // http://lists.whatwg.org/pipermail/whatwg-whatwg.org/2011-May/031577.html
+
+    // TODO: Enter , with prev element being list 
+
+    if (e.keyCode === 13){
+        var editor = document.getElementById('editor');
+        var range = window.getSelection().getRangeAt(0);
+        if (!range.collapsed) range.deleteContents();
+        var caret = Editor.getCaretPosition();
+        var container = caret.node;
+        var text = container.textContent || container.innerText;
+
+        // Insert newline at first offset
+        text = text.slice(0, caret.offset) + '\n' + text.slice(caret.offset);
+        // Increment caret position
+        caret.offset++;
+
+        for (var cIndex=0, n=container; n=n.previousSibling; cIndex++);
+
+        var newContainer = document.createElement('div');
+        editor.replaceChild(newContainer, container);
+        var html = Editor.textToHTML(text);
+        newContainer.outerHTML = html;
+
+        Editor.saved = false;
+        $('.save').css('display', 'inline-block');
+
+        newContainer = editor.childNodes[cIndex];
+        Editor.setCaretPosition(newContainer, caret.offset);
+        Editor.updateActive();
+        return false;
+    }
+
+    Editor.updateActive();
 };
 
 Editor.keyup = function(e){
-    // Skip arrow keys
-    if (e.keyCode >= 37 && e.keyCode <= 40) return;
-    var offsets = Editor.getCaretPositions(this);
-    var text = Editor.domToText(this);
+    // Skip events that don't change text
+    // Enter, Shift, Arrow keys
+    if (e.keyCode === 13 || e.keyCode === 16 || e.keyCode >= 37 && e.keyCode <= 40){
+        Editor.updateActive();
+        Editor.updateUndoStack();
+        return;
+    }
+
+    var editor = document.getElementById('editor');
+    var caret = Editor.getCaretPosition();
+    var container = caret.node;
+    var containerIndex = Array.prototype.indexOf.call(editor.childNodes, container);
+    var text = container.textContent || container.innerText;
     var html = Editor.textToHTML(text);
-    this.innerHTML = html;
+
+    var newContainer = document.createElement('div');
+    editor.replaceChild(newContainer, container);
+    newContainer.outerHTML = html;
+
     Editor.saved = false;
     $('.save').css('display', 'inline-block');
-    Editor.setCaretPositions(offsets, this);
-    Editor.updateUndoStack(this.innerHTML, offsets);
-    Editor.checkMismatch(this, text);
+
+    newContainer = editor.childNodes[containerIndex];
+
+    $('#editor .active').removeClass('active');
+    $(newContainer).addClass('active');
+
+    Editor.setCaretPosition(newContainer, caret.offset);
 };
+
+Editor.blur = function(){
+    $('#editor .active').removeClass('active');
+};
+
+Editor.replaceText = function(node, text, caretOffset){
+
+};
+
+Editor.updateActive = function(){
+    $('#editor .active').removeClass('active');
+    var range = window.getSelection().getRangeAt(0);
+    var editor = document.getElementById('editor');
+    for (var node=range.startContainer; node && node.parentElement !== editor; node=node.parentElement);
+    $(node).addClass('active');
+};
+
 
 Editor.save = function(){
     if (Editor.saved) return false;
@@ -150,12 +234,12 @@ Editor.save = function(){
     if (Editor.locked){
         data.text = Editor.cipherJSON;
     } else if (Editor.encrypted){
-        var text = Editor.domToText(Editor.container);
+        var text = Editor.getText();
         var cipherObj = sjcl.encrypt(Editor.password, text);
         Editor.cipherJSON = JSON.stringify(cipherObj);
         data.text = Editor.cipherJSON;
     } else {
-        data.text = Editor.domToText(Editor.container);
+        data.text = Editor.getText();
     }
     console.log(data);
 
@@ -224,27 +308,6 @@ Editor.delete = function(){
     return false;
 };
 
-Editor.xsrf = function(){
-    return /_xsrf=([a-z0-9]+)/.exec(document.cookie)[1];
-};
-
-Editor.undo = function(){
-    var state = Editor.undoStack.pop();
-    if (state){
-        var html = state[0];
-        var offsets = state[1];
-        this.innerHTML = html;
-        Editor.setCaretPositions(offsets, this);
-    }
-    console.log('undo');
-    return false;
-};
-
-Editor.redo = function(){
-    console.log('redo');
-    return false;
-};
-
 Editor.updateView = function(){
     // Shows and hides ui elements based on state
     if (!this.editable){
@@ -272,245 +335,259 @@ Editor.updateView = function(){
     }
 };
 
-Editor.updateUndoStack = function(html, caretOffsets){
-    var prev = Editor.undoStack[Editor.undoStack.length - 1];
-    if (!prev || Math.abs(prev[0].length - html.length) > 10){
-        Editor.undoStack.push([html, caretOffsets]);
-    }
+Editor.xsrf = function(){
+    return /_xsrf=([a-z0-9]+)/.exec(document.cookie)[1];
 };
 
-Editor.checkMismatch = function(container, text){
-    var text2 = Editor.domToText(container);
-    if (text2 != text){
-        console.log('Mismatch!------------');
-        console.log('DOM --> TXT:');
-        console.log(text);
-        console.log('TXT --> HTML:')
-        console.log(container.innerHTML);
-        console.log('HTML --> DOM --> TXT:');
-        console.log(text2);
-    }
-};
-
-Editor.partialUpdates = function(){
-    // Ideas for only modifying part of the editor contents when text is modified
-    // Make an HTML token list. Diff tokens lists first before modifying individual elements
-    // Use html token list?
-};
-
-Editor.isBlockElement = function(node){
-    var blockElements = 'H1,H2,H3,H4,H5,H6,DIV,BLOCKQUOTE,PRE';
-    if (blockElements.indexOf(node.tagName) === -1){
-        return false;
-    }
-    return true;
-};
-
-Editor.domToText = function(container){
-    var text = '';
-    var that = this;
-    function traverse(node){
-        if (node.nodeType === 3){
-            // Text Node
-            text += node.nodeValue;
+Editor.undo = function(){
+    console.log('undo');
+    var change = Editor.undoStack.pop();
+    var editor = Editor.container;
+    if (change){
+        var index = [].indexOf.call(editor.childNodes, change.b[0]);
+        console.log(index);
+        for (var i = 0, node; node = change.b[i]; i++){
+            editor.removeChild(node);
         }
 
-        if (node !== container && that.isBlockElement(node) && node.innerText === '\n'){
-            // Chrome uses block elements that only contain a <br>
-            // as 'filler' for the caret after a new line
-            // <div><br></div>, <pre><br></pre>, etc.
-            // Skip traversing child nodes
-        } else if (node.hasChildNodes()){
-            for (var i=0, child; child=node.childNodes[i]; i++){
-                traverse(child);
+        var before = editor.childNodes[index] ? editor.childNodes[index] : null;
+        for (var i = 0, node; node = change.a[i]; i++){
+            if (before){
+                editor.insertBefore(node, before);
+            } else {
+                editor.appendChild(node);
             }
         }
 
-        if (node !== container && that.isBlockElement(node) && node.nextSibling){
-            // Add a new line at the end of block elements
-            // if the element is followed by another block element
+        var sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(change.range);
+    }
+    return false;
+};
+
+Editor.redo = function(){
+    console.log('redo');
+    return false;
+};
+
+Editor.updateUndoStack = function(){
+    // insert character: replacement
+    // enter: replacement & addition
+    // backspace/delete: replacement, deletion
+    // selection + press key: deletion, addition
+
+    // { action: 'removed', index: 5, caret: caret }
+    // { action: 'added', index: 5, node: node, caret: caret }
+    var prevState = this.undoState[this.undoState.length - 1];
+    var state = [];
+    for (var node=this.container.childNodes[0]; node=node.nextSibling;)
+        state.push(node);
+    this.undoState.push(state);
+
+    if (!prevState) return;
+
+    // Find the common start and end indexes of changed nodes
+    //      0 1 2 3 4 5 6 
+    //      A B C D E F G
+    //      -->       <--
+    //      A B X Y   F G
+    //
+    //      [C,D,E] -> [X,Y]
+    for (var start = 0; state[start] === prevState[start] && start < state.length; start++);
+    for (var end = -1; state[state.length + end] === prevState[prevState.length + end] && end > -state.length; end--);
+    end++;
+
+    var prevNodes = prevState.slice(start, end);
+    var currNodes = state.slice(start, end);
+    var range = window.getSelection().getRangeAt(0);
+    this.undoStack.push({
+        a: prevNodes,
+        b: currNodes,
+        range: range
+    });
+}
+
+
+Editor.isBrNode = function(node){
+    return node && (node.textContent || node.innerText) === '\n';
+};
+
+Editor.getText = function(){
+    var text = '';
+    for (var node, i=0; node=this.container.childNodes[i]; i++){
+        if (this.isBrNode(node)){
+            // BR elements
             text += '\n';
+        } else {
+            // Block elements (everything but BRs)
+            // innerText for IE < 9
+            text += (node.textContent || node.innerText);
+
+            // Add a newline if block element is followed by another element
+            if (node.nextSibling){
+                text += '\n';
+            }
         }
     }
-    traverse(container);
     return text;
-};
+}
 
 Editor.textToHTML = function(text){
-    var tokens = this.tokenize(text);
+    // Daps to marked.js for the lesson on parsing: https://github.com/chjj/marked
     var html = '';
+    var prevBlock = false;
+    var cap;
 
-    function allNewlines(){
-        for (var i=0, token; token=tokens[i]; i++){
-            if (token.type !== 'newline'){
-                return false;
+    while (text){
+        // New lines
+        if (cap = /^\n/.exec(text)){
+            text = text.substring(cap[0].length);
+            // Skip newline if there are previous and following 
+            // are block level elements.
+            // a\na        <div>a</div>
+            //             <div>a</div>
+            // 
+            // a\n\na      <div>a</div>
+            //             <div><br></div>
+            //             <div>a</div>
+            var followingBlock = /^\n*[^\n]/.exec(text);
+            if (prevBlock && followingBlock){
+                // Skip newline
+            } else {
+                html += '<div class="br"><br></div>';
             }
+            prevBlock = false;
+            continue;
         }
-        return true;
-    }
 
-    function hasPrevBlock(index){
-        for (var i=index, token; token=tokens[i]; i--){
-            if (token.type !== 'newline'){
-                return true;
-            }
-        }
-        return false;
-    }
+        prevBlock = true;
 
-    for (var i=0, token; token=tokens[i]; i++){
-        if (token.type === 'newline'){
-            var next = tokens[i + 1];
-            if (i === 0 && allNewlines()){
-                // If text is all newlines add an extra new line
-                //  \n          <div><br></div>
-                //              <div><br></div>
-                //
-                //  \n\n        <div><br></div>
-                //              <div><br></div>
-                //              <div><br></div>
-                //
-                html += '<div><br></div>';
-            } else if (next && next.type !== 'newline' && hasPrevBlock(i)){
-                // Skip a newline if next element is a block element
-                // and there is previous block element before this one
-                // a\na        <div>a</div>
-                //             <div>a</div>
-                // 
-                // a\n\na      <div>a</div>
-                //             <div><br></div>
-                //             <div>a</div>
-                continue;
-            }
-            html += '<div><br></div>';
-        }
-        if (token.type === 'heading'){
-            html += '<h' + token.depth + '>' + this.inlineHTML(token.text) + '</h' + token.depth + '>';
+        // Headings
+        if (cap = /^(#{1,6}\s?)([^\n]*)/.exec(text)){
+            text = text.substring(cap[0].length);
+            var depth = cap[1].replace(/\s/g, '').length;
+            var hashes = cap[1];
+            html += '<h' + depth + '><span>' + hashes + '</span>' +
+                this.inlineHTML(cap[2]) + '</h' + depth + '>';
             continue;
         }
-        if (token.type === 'blockquote'){
-            html += '<blockquote>' + this.inlineHTML(token.text) + '</blockquote>';
+
+        // Block quotes
+        if (cap = /^(>\s?)([^\n]*)/.exec(text)){
+            text = text.substring(cap[0].length);
+            html += '<blockquote><span>' + cap[1] + '</span>' + 
+                this.inlineHTML(cap[2]) + '</blockquote>';
             continue;
         }
-        if (token.type === 'hr'){
-            html += '<div class="hr">' + this.inlineHTML(token.text) + '</div>';
+
+        // Horizontal rules
+        if (cap = /^-{4,}/.exec(text)){
+            text = text.substring(cap[0].length);
+            html += '<div class="hr">' + this.inlineHTML(cap[0]) + '</div>';
             continue;
         }
-        if (token.type === 'lh'){
-            html += '<div class="lh">' + this.inlineHTML(token.text) + '</div>';
+
+        // List headers
+        if (cap = /^([^\n]+:)(\n|$)/.exec(text)){
+            text = text.substring(cap[1].length);
+            html += '<div class="lh">' + this.inlineHTML(cap[1]) + '</div>';
             continue;
         }
-        if (token.type === 'li'){
-            html += '<div class="li' + token.depth + '">' + this.inlineHTML(token.text) + '</div>';
+
+        // List elements
+        if (cap = /^(\s*-\n?)([^\n]*)/.exec(text)){
+            text = text.substring(cap[0].length);
+            var depth = Math.floor(cap[1].length / 4) + 1;
+            html += '<div class="li' + depth + '"><span class="hidden">' + cap[1] + 
+                (cap[1][-1] === '-' ? '&nbsp;' : '') + '</span>' +
+                (cap[2] ? this.inlineHTML(cap[2]) : '<br>') + '</div>';
             continue;
         }
-        if (token.type === 'pre'){
-            html += '<pre>' + this.escape(token.text) + '</pre>';
+
+        // Code blocks
+        if (cap = /^```((?:(?!```)[\s\S])+)```/.exec(text)){
+            text = text.substring(cap[0].length);
+            html += '<pre><span>```</span>' + this.escape(cap[1]) + '<span>```</span></pre>';
             continue;
         }
-        if (token.type === 'div'){
-            html += '<div>' + this.inlineHTML(token.text) + '</div>';
+
+        // Images
+        if (cap = /^https?:\/\/(i\.imgur\.com\/[a-zA-Z0-9]+\.(?:png|jpg|gif))/.exec(text)){
+            text = text.substring(cap[0].length);
+            html += '<div><span>' + this.escape(cap[0]) + 
+                '</span><img src="https://' + this.escape(cap[1]) + '"></div>';
+            continue; 
+        }
+
+        // Text
+        if (cap = /^[^\n]+/.exec(text)){
+            text = text.substring(cap[0].length);
+            html += '<div>' + this.inlineHTML(cap[0]) + '</div>';
             continue;
+        }
+
+        if (text){
+            alert('Big problems!!');
         }
     }
     return html;
 };
 
-Editor.tokenize = function(text){
-    var rules = {
-        newline: /^\n/,
-        heading: /^(#{1,6})[^\n]*/,
-        blockquote: /^>[^\n]*/,
-        li: /^(-{1,3})[^\n]*/,
-        hr: /^-{4,}/,
-        lh: /^[^\n]+:\n/,
-        pre: /^```((?!```)[\s\S])+(```)?/,
-        text: /^[^\n]+/
-    };
-    var tokens = [];
+Editor.inlineHTML = function(text){
+    var html = '';
     var cap;
 
     while (text){
-        // New lines
-        if (cap = rules.newline.exec(text)){
+        // Inline Links
+        if (cap = /^\[([^\n]+)\]\((https?:\/\/[^\s<]+[^<.,:;"')\]\s])\)/.exec(text)){
             text = text.substring(cap[0].length);
-            tokens.push({
-                type: 'newline'
-            });
+            html += '<span>[</span><a href="' + this.escape(cap[2]) + '" rel="nofollow">' + 
+                this.escape(cap[1]) + '</a><span>]</span><span>(' + this.escape(cap[2]) + ')</span>';
             continue;
         }
-        // Headings
-        if (cap = rules.heading.exec(text)){
+
+        // Plain Links
+        if (cap = /^https?:\/\/[^\s<]+[^<.,:;"')\]\s]/.exec(text)){
             text = text.substring(cap[0].length);
-            tokens.push({
-                type: 'heading',
-                depth: cap[1].length,
-                text: cap[0]
-            });
+            html += '<a href="' + this.escape(cap[0]) + '" rel="nofollow">' + this.escape(cap[0]) + '</a>';
             continue;
         }
-        // Block quotes
-        if (cap = rules.blockquote.exec(text)){
+
+        // Email
+        if (cap = /^\S+@[a-z0-9-\.]+[a-z]/.exec(text)){
             text = text.substring(cap[0].length);
-            tokens.push({
-                type: 'blockquote',
-                text: cap[0]
-            });
+            html += '<a class="email" rel="nofollow" href="mailto:' + this.escape(cap[0]) + '">' + 
+                this.escape(cap[0]) + '</a>';
             continue;
         }
-        // Horizontal rules
-        if (cap = rules.hr.exec(text)){
+
+        // Code
+        if (cap = /^`([^`]+)`/.exec(text)){
             text = text.substring(cap[0].length);
-            tokens.push({
-                type: 'hr',
-                text: cap[0]
-            });
+            html += '<code><span>`</span>' + this.escape(cap[1]) + '<span>`</span></code>';
             continue;
         }
-        // List elements
-        if (cap = rules.li.exec(text)){
+
+        // Strong
+        if (cap = /^\*\*([^\*]+)\*\*/.exec(text)){
             text = text.substring(cap[0].length);
-            tokens.push({
-                type: 'li',
-                depth: cap[1].length,
-                text: cap[0]
-            });
+            html += '<strong><span>**</span>' + this.escape(cap[1]) + '<span>**</span></strong>';
             continue;
         }
-        // List headers
-        if (cap = rules.lh.exec(text)){
-            var capTxt = cap[0].replace('\n', '');
-            text = text.substring(capTxt.length);
-            tokens.push({
-                type: 'lh',
-                text: capTxt
-            });
-            continue;
-        }
-        // Code blocks
-        if (cap = rules.pre.exec(text)){
+
+        // Em
+        if (cap = /^\*([^\*]+)\*/.exec(text)){
             text = text.substring(cap[0].length);
-            var token = {
-                type: 'pre',
-                text: cap[0]
-            };
-            tokens.push(token);
+            html += '<em><span>*</span>' + this.escape(cap[1]) + '<span>*</span></em>';
             continue;
         }
+
         // Text
-        if (cap = rules.text.exec(text)){
-            text = text.substring(cap[0].length);
-            tokens.push({
-                type: 'div',
-                text: cap[0]
-            });
-            continue;
-        }
-        if (text){
-            alert('Big problems!!');
-        }
+        html += this.escape(text[0]);
+        text = text.substring(1);
     }
-    return tokens;
+    return html;
 };
 
 Editor.escape = function(text) {
@@ -521,119 +598,59 @@ Editor.escape = function(text) {
         .replace(/'/g, '&#39;');
 };
 
-Editor.inlineHTML = function(text){
-    var rules = {
-        link: /^https?:\/\/[^\s<]+[^<.,:;"')\]\s]/,
-        email: /^\S+@[a-z0-9-\.]+[a-z]/,
-        code: /^`[^`]+`/,
-        strong: /^\*\*[^\*]+?\*\*/,
-        em: /^\*[^\*]+\*/
-    };
-    var html = '';
-
-    while (text){
-        // Links
-        if (cap = rules.link.exec(text)){
-            text = text.substring(cap[0].length);
-            html += '<a href="' + this.escape(cap[0]) + '" rel="nofollow">' + this.escape(cap[0]) + '</a>';
-            continue;
-        }
-        // Email
-        if (cap = rules.email.exec(text)){
-            text = text.substring(cap[0].length);
-            html += '<a class="email" rel="nofollow" href="mailto:' + this.escape(cap[0]) + '">' + 
-                this.escape(cap[0]) + 
-            '</a>';
-            continue;
-        }
-        // Code
-        if (cap = rules.code.exec(text)){
-            text = text.substring(cap[0].length);
-            html += '<code>' + this.escape(cap[0]) + '</code>';
-            continue;
-        }
-        // Strong
-        if (cap = rules.strong.exec(text)){
-            text = text.substring(cap[0].length);
-            html += '<strong>' + this.escape(cap[0]) + '</strong>';
-            continue;
-        }
-        // Em
-        if (cap = rules.em.exec(text)){
-            text = text.substring(cap[0].length);
-            html += '<em>' + this.escape(cap[0]) + '</em>';
-            continue;
-        }
-        // Text
-        html += this.escape(text[0]);
-        text = text.substring(1);
-    }
-    return html;
-};
-
-Editor.getCaretPositions = function(element){
-    // Returns the 0-indexed character offsets of the caret in
-    // a contenteditable element.
-    // 
-    // https://developer.mozilla.org/en-US/docs/Web/API/Range.startOffset
+Editor.getCaretPosition = function(){
+    // Returns the 0-indexed character offset of the caret in the editor
     var range = window.getSelection().getRangeAt(0);
+    var editor = document.getElementById('editor');
+    var node = range.startContainer;
+    var offset = range.startOffset;
 
-    //console.log('startRange:', range.startContainer, range.startOffset);
-    //console.log('endRange:', range.endContainer, range.endOffset);
-
-    function findOffset(node, container, rangeOffset, state){
-        // Traverses the node tree depth-first to find a
-        // range's character offset
-        state = state || {finished: false};
-        var offset = 0;
-
-        if (node === container){
-            // Found a match
-            state.finished = true;
-
-            if (node.nodeType === 3){
-                // Text node: rangeOffset == n'th character
-                offset += rangeOffset;
-            } else {
-                // Non-text node: rangeOffset == n child nodes
-                for (var i=0; i < rangeOffset; i++){
-                    offset += findOffset(node.childNodes[i], container, rangeOffset, state);
-                }
-            }
-            return offset;
-        } 
-
-        if (node.nodeType === 3){
-            // Text Node
-            offset += node.nodeValue.length;
-        }
-
-        if (node.hasChildNodes()){
-            for (var i=0, child; child=node.childNodes[i]; i++){
-                offset += findOffset(child, container, rangeOffset, state);
-                if (state.finished){
-                    return offset;
-                }
-            }
-        }
-
-        if (Editor.isBlockElement(node)){
-            // The end of <h1> or <div> counts as new line
-            offset += 1;
-        }
-        return offset;
+    // Traverses up the DOM tree to find the character offset from the editor element.
+    if (node.nodeType === 3){
+        // Text node: offset == n'th character
+        // https://developer.mozilla.org/en-US/docs/Web/API/Range.startOffset
+    } else {
+        // Non-text node: offset == n'th child node
+        node = node.childNodes[offset];
+        offset = 0;
     }
 
-    var startOffset = findOffset(element, range.startContainer, range.startOffset);
-    var endOffset = findOffset(element, range.endContainer, range.endOffset);
-
-    return [startOffset, endOffset];
+    while (node){
+        if (node.parentElement === editor){
+            break;
+        } else if (node.previousSibling){
+            node = node.previousSibling;
+            if (this.isBrNode(node)){
+                offset++;
+            } else {
+                offset += node.textContent.length;
+            }
+        } else {
+            node = node.parentElement;
+        }
+    }
+    return {node: node, offset: offset};
 };
 
-Editor.setCaretPositions = function(offsets, element){
-    // Sets the caret positions on a content editable DOM element
+Editor.setCaretPosition = function(node, offset){
+    // Sets the caret position on a DOM element
+    // Find offset on first-level element
+    while (node){
+        var textLen = (node.textContent || node.innerText).length;
+        if (!this.isBrNode(node)){
+            // Add 1 for a newline at the end of block elements
+            textLen++;
+        }
+        if (offset >= textLen){
+            offset -= textLen;
+        } else {
+            break;
+        }
+        node = node.nextSibling;
+    }
 
-    function findOffset(node, offset){
+    // Now find offset from inner text node
+    function findTextNodeOffset(node, offset){
         if (node.nodeType === 3){
             // Text node
             if (offset <= node.nodeValue.length){
@@ -648,40 +665,24 @@ Editor.setCaretPositions = function(offsets, element){
 
         if (node.hasChildNodes()){
             for (var i=0, child; child=node.childNodes[i]; i++){
-                var result = findOffset(child, offset);
+                var result = findTextNodeOffset(child, offset);
                 offset = result[1];
                 if (result[0] !== null){
                     return result;
                 }
             }
-        } 
-
-        if (Editor.isBlockElement(node)){
-            // The end of <h1> or <div> counts as new line
-            offset -= 1;
         }
         return [null, offset];
     }
-
+    
     var range = document.createRange();
     var sel = window.getSelection();
-    var startOffset = findOffset(element, offsets[0]);
-    range.setStart(startOffset[0], startOffset[1]);
-
-    if (offsets[0] === offsets[1]){
-        range.collapse(true);
-    } else {
-        var endOffset = findOffset(element, offsets[1]);
-        range.setEnd(endOffset[0], endOffset[1]);
-    }
-
+    var textNodeOffset = findTextNodeOffset(node, offset);
+    range.setStart(textNodeOffset[0], textNodeOffset[1]);
+    range.collapse(true);
     sel.removeAllRanges();
     sel.addRange(range);
 };
-
-
-
-
 
 
 

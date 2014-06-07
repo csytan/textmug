@@ -41,7 +41,7 @@ class Settings(BaseModel):
             })
             settings = cls.create(value=defaults)
         settings = json.loads(settings.value)
-        return settings['cookie_secret']
+        return settings[arg]
 
 
 class User(BaseModel):
