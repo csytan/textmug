@@ -6,8 +6,7 @@ Editor = {
     locked: false,
     encrypted: false,
     public: true,
-    undoStack: [],
-    undoState: []
+    undoStack: []
 };
 
 Editor.init = function(container, options){
@@ -103,10 +102,14 @@ Editor.init = function(container, options){
 };
 
 Editor.keydown = function(e){
+    if (e.keyCode !== 91 /* Command */ && !e.metaKey) {
+        Editor.saveUndoState();
+    }
+
+
     // Tab key
     // Tab in a list element
     if (e.keyCode === 9){
-        console.log('hello')
         var editor = document.getElementById('editor');
         var caret = Editor.getCaretPosition();
         var container = caret.node;
@@ -115,7 +118,6 @@ Editor.keydown = function(e){
         text = text.slice(0, caret.offset) + '    ' + text.slice(caret.offset);
         // Increment caret position
         caret.offset += 4;
-
 
         for (var cIndex=0, n=container; n=n.previousSibling; cIndex++);
         var newContainer = document.createElement('div');
@@ -128,7 +130,6 @@ Editor.keydown = function(e){
 
         newContainer = editor.childNodes[cIndex];
         Editor.setCaretPosition(newContainer, caret.offset);
-
         Editor.updateActive();
         return false;
     }
@@ -172,11 +173,12 @@ Editor.keydown = function(e){
 };
 
 Editor.keyup = function(e){
-    // Skip events that don't change text
-    // Enter, Shift, Arrow keys
-    if (e.keyCode === 13 || e.keyCode === 16 || e.keyCode >= 37 && e.keyCode <= 40){
+    // Skip events that don't change text or are handled elsewhere
+    if (e.keyCode === 13 || /* Enter */
+        e.keyCode === 16 || /* Shift */
+        e.keyCode === 91 || /* Command */
+        e.keyCode >= 37 && e.keyCode <= 40 /* Arrow keys */){
         Editor.updateActive();
-        Editor.updateUndoStack();
         return;
     }
 
@@ -198,7 +200,6 @@ Editor.keyup = function(e){
 
     $('#editor .active').removeClass('active');
     $(newContainer).addClass('active');
-
     Editor.setCaretPosition(newContainer, caret.offset);
 };
 
@@ -341,27 +342,11 @@ Editor.xsrf = function(){
 
 Editor.undo = function(){
     console.log('undo');
-    var change = Editor.undoStack.pop();
-    var editor = Editor.container;
-    if (change){
-        var index = [].indexOf.call(editor.childNodes, change.b[0]);
-        console.log(index);
-        for (var i = 0, node; node = change.b[i]; i++){
-            editor.removeChild(node);
-        }
-
-        var before = editor.childNodes[index] ? editor.childNodes[index] : null;
-        for (var i = 0, node; node = change.a[i]; i++){
-            if (before){
-                editor.insertBefore(node, before);
-            } else {
-                editor.appendChild(node);
-            }
-        }
-
-        var sel = window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(change.range);
+    var state = Editor.undoStack.pop();
+    if (state){
+        var nodes = state[0];
+        var range = state[1];
+        Editor.setUndoState(nodes, range);
     }
     return false;
 };
@@ -371,43 +356,95 @@ Editor.redo = function(){
     return false;
 };
 
-Editor.updateUndoStack = function(){
-    // insert character: replacement
-    // enter: replacement & addition
-    // backspace/delete: replacement, deletion
-    // selection + press key: deletion, addition
-
-    // { action: 'removed', index: 5, caret: caret }
-    // { action: 'added', index: 5, node: node, caret: caret }
-    var prevState = this.undoState[this.undoState.length - 1];
-    var state = [];
-    for (var node=this.container.childNodes[0]; node=node.nextSibling;)
-        state.push(node);
-    this.undoState.push(state);
-
-    if (!prevState) return;
-
-    // Find the common start and end indexes of changed nodes
-    //      0 1 2 3 4 5 6 
-    //      A B C D E F G
-    //      -->       <--
-    //      A B X Y   F G
-    //
-    //      [C,D,E] -> [X,Y]
-    for (var start = 0; state[start] === prevState[start] && start < state.length; start++);
-    for (var end = -1; state[state.length + end] === prevState[prevState.length + end] && end > -state.length; end--);
-    end++;
-
-    var prevNodes = prevState.slice(start, end);
-    var currNodes = state.slice(start, end);
+Editor.saveUndoState = function(){
+    console.log('saving undo state')
     var range = window.getSelection().getRangeAt(0);
-    this.undoStack.push({
-        a: prevNodes,
-        b: currNodes,
-        range: range
-    });
-}
+    var nodes = [];
+    for (var i = 0, node; node = this.container.childNodes[i]; i++){
+        nodes.push(node);
+    }
+    var rangeData = {
+        collapsed: range.collapsed,
+        startContainer: range.startContainer,
+        startOffset: range.startOffset,
+        endContainer: range.endContainer,
+        endOffset: range.endOffset
+    };
+    this.undoStack.push([nodes, rangeData]);
+};
 
+Editor.setUndoState = function(nodesB, rangeData){
+    //  A B C   D E F
+    //  ---->   <----
+    //  A B C X D E F
+    //
+    //  Add: X
+    //
+    //  A B C D E F
+    //  ---->   <--
+    //  A B C   E F
+    //  Remove D 
+
+    var add = [];
+    var remove = [];
+    var nodesA = this.container.childNodes;
+    var insertBefore = null;
+    var end;
+
+    // Find the last matching node from the end
+    for (var i = 1; ; i++){
+        var nodeA = nodesA[nodesA.length - i];
+        var nodeB = nodesB[nodesB.length - i];
+        if (nodeA && nodeB && nodeA === nodeB) {
+            end = nodeA;
+        } else {
+            break;
+        }
+    }
+
+    // Find insertBefore node
+    for (var i = 0; ; i++){
+        var nodeA = nodesA[i];
+        var nodeB = nodesB[i];
+        if (nodeA === end || nodeB === end) {
+            if (nodeA === end){
+                while (nodeB !== end){
+                    add.push(nodeB);
+                    nodeB = nodesB[++i];
+                }
+            } else {
+                while (nodeA !== end){
+                    remove.push(nodeA);
+                    nodeA = nodesA[++i];
+                }
+            }
+            break;
+        } else if (nodeA === nodeB) {
+            insertBefore = nodeA.nextSibling;
+        } else {
+            add.push(nodeB);
+            remove.push(nodeA);
+        }
+    }
+
+    // Add changed nodes from B to editor
+    for (var i = 0, node; node = add[i]; i++) {
+        this.container.insertBefore(node, insertBefore);
+    }
+
+    // Remove changed nodes from A
+    for (var i = 0, node; node = remove[i]; i++) {
+        this.container.removeChild(node);
+    }
+
+    var sel = window.getSelection();
+    var range = document.createRange();
+    range.setStart(rangeData.startContainer, rangeData.startOffset);
+    range.setEnd(rangeData.endContainer, rangeData.endOffset);
+    range.collapse();
+    sel.removeAllRanges();
+    sel.addRange(range);
+};
 
 Editor.isBrNode = function(node){
     return node && (node.textContent || node.innerText) === '\n';
