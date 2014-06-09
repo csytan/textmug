@@ -4,12 +4,20 @@ html{font-family:sans-serif;-ms-text-size-adjust:100%;-webkit-text-size-adjust:1
 body {
     font-family: 'Lucida Grande', sans-serif;
     font-size: 19px;
-    color: #444;
+    color: #333;
     background: #f5f5f5;
     margin: 0;
     line-height: 1.4;
     text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
+
+@media (max-width: 500px) {
+    /* optimizeLegibility is slow on mobile devices */
+    text-rendering: auto;
+}
+
 
 h1, h2, h3, h4 {
     line-height: 1.25;
@@ -83,7 +91,7 @@ code {
 
 .li1, .li2, .li3 {
     display: list-item;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 .li1 { margin-left: 20px; }
 .li2 { margin-left: 40px; }
@@ -123,6 +131,7 @@ label {
     width: 275px;
     max-width: 100%;
     margin-bottom: 20px;
+    -webkit-font-smoothing: inherit;
 }
 
 
@@ -179,10 +188,17 @@ select {
     left: 0;
     z-index: 10;
     width: 130px;
-    height: 100%;
 }
+
+@media (max-width: 800px) {
+    #menu {
+        position: absolute;
+    }
+}
+
 #menu.active {
     background: #444;
+    height: 100%;
 }
 #menu .logo {
     display: inline-block;
@@ -234,6 +250,13 @@ select {
     max-width: 650px;
     padding: 70px 0 100px;
     margin: auto;
+}
+
+@media (max-width: 800px) {
+    #main {
+        width: auto;
+        padding: 70px 20px 100px;
+    }
 }
 
 
@@ -300,7 +323,7 @@ select {
 .page_created {
     float: right;
     color: #888;
-    font-size: 15px;
+    font-size: 14px;
     margin-top: 4px;
 }
 
@@ -328,6 +351,13 @@ select {
     text-decoration: none;
     margin-bottom: 7px;
 }
+@media (max-width: 800px) {
+    .control {
+        float: right;
+        margin: 0;
+        margin-left: 7px;
+    }
+}
 .control:hover,
 .control.active {
     color: rgba(0,0,0,.8);
@@ -336,9 +366,10 @@ select {
     display: none;
 }
 
+
 #editor {
     font: 18px 'Merriweather', Georgia, serif;
-    line-height: 1.6;
+    line-height: 1.8;
     min-height: 50px;
     outline: none;
     background: none;
@@ -412,24 +443,4 @@ select {
 }
 
 
-
-@media (max-width: 800px) {
-    #main {
-        width: auto;
-        padding: 60px 20px;
-    }
-
-    #menu, #controls {
-        position: absolute;
-    }
-
-    #controls {
-        width: auto;
-    }
-    .control {
-        float: right;
-        margin: 0;
-        margin-left: 7px;
-    }
-}
 
