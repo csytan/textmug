@@ -60,15 +60,14 @@ blockquote:after {
 }
 
 pre, code {
+    color: #ddd;
+    background: #333;
     font-family: Menlo, Monaco, "Lucida Console", monospace;
-    background: rgba(0,0,0,0.3);
     -webkit-font-smoothing: auto;
 }
 
 pre {
     display: block;
-    color: #ddd;
-    background: #333;
     font-size: 15px;
     padding: 10px 15px;
     border-radius: 5px;
@@ -78,9 +77,7 @@ code {
     display: inline;
     font-size: 16px;
     border-radius: 3px;
-    padding: 1px 4px;
-    background: #f0f6fc;
-    border: 1px dashed rgba(0,0,0,0.3);
+    padding: 4px 6px;
 }
 
 .lh {
