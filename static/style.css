@@ -294,20 +294,25 @@ select {
 /* user.html
 ======================================================== */
 
+.page_search {
+    margin-top: 50px;
+    padding: 15px 20px;
+    border: none;
+    font-size: 18px;
+    border-radius: 0;
+    width: 70%;
+    background: rgba(0,0,0,.03);
+    border-bottom: 3px dotted rgba(0,0,0,.08);
+}
+.page_search:focus {
+    background: rgba(0,0,0,.05);
+}
+
 .page {
-    padding: 10px 0;
+    padding: 12px 0;
 }
 .page:hover {
-    background: #f3f3f3;
-}
-.page .icon {
-    float: left;
-    color: #888;
-    font-size: 23px;
-    line-height: 0.8;
-    margin-right: 12px;
-    padding: 5px;
-    padding-left: 0;
+    background: #eee;
 }
 .page_name {
     color: #555;

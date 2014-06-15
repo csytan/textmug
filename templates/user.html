@@ -11,7 +11,8 @@
     <h1 class="title">{{ user.id }}</h1>
 
     {% if pages %}
-        
+        <input type="text" class="page_search input" placeholder="Type to search">
+
         {% for page in pages %}
             <div class="page">
                 <a class="page_name" href="/{{ page.name }}">{{ page.page_name }}</a>
