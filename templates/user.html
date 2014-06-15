@@ -2,23 +2,24 @@
 
 
 {% block main %}
-    <h1 class="title">{{ user.id }}</h1>
-
     <div id="controls">
         {% if current_user and user == current_user %}
             <a class="control icon-plus" href="/new"></a>
         {% end %}
     </div>
 
-    {% if not pages %}
-        <p class="help">There's nothing here.</p>
-    {% end %}
+    <h1 class="title">{{ user.id }}</h1>
 
-    {% for page in pages %}
-        <div class="page">
-            <a class="page_name" href="/{{ page.name }}">{{ page.page_name }}</a>
-            <div class="page_created">{{ relative_date(page.created) }}</div>
-            <div style="clear:both"></div>
-        </div>
+    {% if pages %}
+        
+        {% for page in pages %}
+            <div class="page">
+                <a class="page_name" href="/{{ page.name }}">{{ page.page_name }}</a>
+                <div class="page_created">{{ relative_date(page.created) }}</div>
+                <div style="clear:both"></div>
+            </div>
+        {% end %}
+    {% else %}
+        <p class="help">There's nothing here.</p>
     {% end %}
 {% end %}

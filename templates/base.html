@@ -11,10 +11,10 @@
 </head>
 
 <body>
-    <div id="menu">
-        <div class="logo icon-logo"></div>
-        <div class="items">
-            <a class="item"
+    <div class="menu">
+        <div class="menu_logo icon-logo"></div>
+        <div class="menu_items">
+            <a class="menu_item"
                 {% if current_user %}
                     href="/{{ current_user.id }}"
                 {% else %}
@@ -22,14 +22,14 @@
                 {% end %}>
                 home
             </a>
-            <a href="/new" class="item">new</a>
-            <a href="/recent" class="item">recent</a>
+            <a href="/new" class="menu_item">new</a>
+            <a href="/recent" class="menu_item">recent</a>
             {% if current_user %}
-                <a href="/" class="item">about</a>
-                <a href="/logout" class="item">logout</a>
+                <a href="/" class="menu_item">about</a>
+                <a href="/logout" class="menu_item">logout</a>
             {% else %}
-                <a href="/login" class="item">login</a>
-                <a href="/signup" class="item">sign up</a>
+                <a href="/login" class="menu_item">login</a>
+                <a href="/signup" class="menu_item">sign up</a>
             {% end %}
         </div>
     </div>
@@ -46,15 +46,15 @@
     <script>
         $(function(){
             function toggleMenu(){
-                $('#menu, body').toggleClass('active');
+                $('.menu, body').toggleClass('active');
                 return false;
             }
             $(document.body).click(function(){
                 if ($(this).hasClass('active')){
-                    $('#menu, body').toggleClass('active');
+                    $('.menu, body').toggleClass('active');
                 }
             });
-            $('#menu .logo').click(toggleMenu);
+            $('.menu_logo').click(toggleMenu);
         });
     </script>
     {% block script %}{% end %}

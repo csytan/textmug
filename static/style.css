@@ -9,6 +9,7 @@ body {
     margin: 0;
     line-height: 1.4;
     text-rendering: optimizeLegibility;
+    border-left: 10px solid #e4e4e4;
 }
 
 @media (max-width: 500px) {
@@ -58,23 +59,25 @@ blockquote:after {
 }
 
 pre, code {
-    color: #eee;
-    background: #555;
+    font-size: 15px;
     font-family: Menlo, Monaco, "Lucida Console", monospace;
 }
 
 pre {
     display: block;
-    font-size: 15px;
+    color: #eee;
+    background: #444;
     padding: 10px 15px;
     border-radius: 5px;
 }
 
 code {
     display: inline;
-    font-size: 16px;
+    color: #444;
+    background: #ddd;
     border-radius: 3px;
-    padding: 4px 6px;
+    padding: 2px 6px;
+    white-space: pre;
 }
 
 .lh {
@@ -176,55 +179,56 @@ select {
 /* base.html
 ======================================================== */
 
-#menu {
+.menu {
     position: fixed;
     top: 0;
     left: 0;
     z-index: 10;
-    width: 130px;
+    width: 135px;
 }
 
 @media (max-width: 800px) {
-    #menu {
+    .menu {
         position: absolute;
     }
 }
 
-#menu.active {
+.menu.active {
     background: #444;
     height: 100%;
 }
-#menu .logo {
+.menu_logo {
     display: inline-block;
     font-size: 45px;
-    color: rgba(0,0,0,.5);
-    padding: 20px;
+    color: rgba(0,0,0,.25);
+    padding: 20px 32px;
     padding-bottom: 5px;
     line-height: 0;
     cursor: pointer;
 }
-#menu .logo:hover {
+.menu_logo:hover {
     color: rgba(0,0,0,0.7);
 }
-#menu.active .logo {
+.menu.active .menu_logo {
     color: #ddd;
     -webkit-transform: rotate(-25deg);
 }
-#menu .items {
+.menu_items {
     display: none;
     margin-top: 25px;
 }
-#menu .item {
+.menu_item {
     display: block;
     color: #ddd;
-    padding: 8px 20px;
+    padding: 10px 32px;
     font-size: 17px;
     text-decoration: none;
 }
-#menu .item:hover {
+.menu_item:hover {
+    color: #ddd;
     background: #666;
 }
-#menu.active .items {
+.menu.active .menu_items {
     display: block;
 }
 
@@ -241,15 +245,15 @@ select {
 
 #main {
     width: 80%;
-    max-width: 600px;
-    padding: 70px 0 100px;
+    max-width: 640px;
+    padding: 100px 0;
     margin: auto;
 }
 
 @media (max-width: 800px) {
     #main {
         width: auto;
-        padding: 70px 20px 100px;
+        padding: 100px 20px;
     }
 }
 
@@ -260,7 +264,7 @@ select {
 .user_header {
     color: #777;
     font-size: 19px;
-    margin: 30px 0 35px;
+    margin-bottom: 35px;
 }
 .user_header a {
     color: #777;
@@ -362,7 +366,7 @@ select {
 
 
 #editor {
-    font: 17px 'Merriweather', Georgia, serif;
+    font: 18px 'Merriweather', Georgia, serif;
     line-height: 1.8;
     min-height: 50px;
     outline: none;
