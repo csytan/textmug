@@ -34,7 +34,7 @@ class Settings(BaseModel):
     @classmethod
     def get_setting(cls, arg):
         try:
-            settings = cls.get(cls.id == '1')
+            settings = cls.get(cls.id == 1)
         except peewee.DoesNotExist:
             defaults = json.dumps({
                 'cookie_secret': str(uuid.uuid4())

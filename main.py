@@ -213,15 +213,15 @@ settings = {
     'template_path': os.path.join(os.path.dirname(__file__), 'templates'),
     'static_path': os.path.join(os.path.dirname(__file__), 'static'),
     'login_url': '/login',
-    'debug': False,
+    'debug': True,
     'xsrf_cookies': True,
     'cookie_secret': db.Settings.get_setting('cookie_secret')
 }
 
 
 if __name__ == '__main__':
-    if 'debug' in sys.argv:
-        settings['debug'] = True
+    if 'prod' in sys.argv:
+        settings['debug'] = False
     app = tornado.web.Application(routes, **settings)
     app.listen(8888, address='127.0.0.1')
     tornado.ioloop.IOLoop.instance().start()

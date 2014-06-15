@@ -406,17 +406,16 @@ Editor.setUndoState = function(nodesB, rangeData){
     for (var i = 0; ; i++){
         var nodeA = nodesA[i];
         var nodeB = nodesB[i];
-        if (nodeA === end || nodeB === end) {
-            if (nodeA === end){
-                while (nodeB !== end){
-                    add.push(nodeB);
-                    nodeB = nodesB[++i];
-                }
-            } else {
-                while (nodeA !== end){
-                    remove.push(nodeA);
-                    nodeA = nodesA[++i];
-                }
+        if (nodeA === end) {
+            while (nodeB !== end) {
+                add.push(nodeB);
+                nodeB = nodesB[++i];
+            }
+            break;
+        } else if (nodeB === end) {
+            while (nodeA !== end){
+                remove.push(nodeA);
+                nodeA = nodesA[++i];
             }
             break;
         } else if (nodeA === nodeB) {
@@ -426,6 +425,9 @@ Editor.setUndoState = function(nodesB, rangeData){
             remove.push(nodeA);
         }
     }
+
+    console.log(add, remove, insertBefore)
+    insertBefore = insertBefore || this.container.firstChild;
 
     // Add changed nodes from B to editor
     for (var i = 0, node; node = add[i]; i++) {
