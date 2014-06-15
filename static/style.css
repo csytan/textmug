@@ -9,7 +9,7 @@ body {
     margin: 0;
     line-height: 1.4;
     text-rendering: optimizeLegibility;
-    border-left: 10px solid #e4e4e4;
+    border-left: 10px solid rgba(0,0,0,.05);
 }
 
 @media (max-width: 500px) {
@@ -200,7 +200,7 @@ select {
 .menu_logo {
     display: inline-block;
     font-size: 45px;
-    color: rgba(0,0,0,.25);
+    color: rgba(0,0,0,.1);
     padding: 20px 32px;
     padding-bottom: 5px;
     line-height: 0;
