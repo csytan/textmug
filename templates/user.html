@@ -4,7 +4,7 @@
 {% block script %}
     <script>
         $('.page_search').keyup(function() {
-            var value = this.value;
+            var value = this.value.toLowerCase();
             $('.page').each(function() {
                 var name = $(this).data('name');
                 if (name.indexOf(value) === 0 || name.indexOf('-' + value) > 0) {
