@@ -1,6 +1,23 @@
 {% extends "base.html" %}
 
 
+{% block script %}
+    <script>
+        $('.page_search').keyup(function() {
+            var value = this.value;
+            $('.page').each(function() {
+                var name = $(this).data('name');
+                if (name.indexOf(value) === 0 || name.indexOf('-' + value) > 0) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+        });
+    </script>
+{% end %}
+
+
 {% block main %}
     <div id="controls">
         {% if current_user and user == current_user %}
@@ -14,7 +31,7 @@
         <input type="text" class="page_search input" placeholder="Type to search">
 
         {% for page in pages %}
-            <div class="page">
+            <div class="page" data-name="{{ page.page_name.lower() }}">
                 <a class="page_name" href="/{{ page.name }}">{{ page.page_name }}</a>
                 <div class="page_created">{{ relative_date(page.created) }}</div>
                 <div style="clear:both"></div>
