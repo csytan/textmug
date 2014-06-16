@@ -129,7 +129,7 @@ label {
     margin-bottom: 20px;
 }
 .input:focus {
-    background: rgba(46, 204, 113,.05);
+    background: rgba(0,0,0,.05);
 }
 
 
