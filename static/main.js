@@ -43,7 +43,7 @@ Editor.init = function(container, options){
 
     // Controls
     $('.unlocked').click(self.lock);
-    $('#page_name').keyup(function(){
+    $('.user_header_input').keyup(function(){
         var value = this.value.toLowerCase()
             .replace(/\s+/, '-')
             .replace(/[^a-z0-9\_\.-]+/, '');
@@ -226,7 +226,7 @@ Editor.save = function(){
     var data = {
         action: 'save',
         _xsrf: Editor.xsrf(),
-        page_name: $('#page_name').val(),
+        page_name: $('.user_header_input').val(),
         encrypted: Editor.encrypted,
         public: Editor.public
     };

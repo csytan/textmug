@@ -119,16 +119,17 @@ label {
     display: block;
     box-sizing: border-box;
     font-size: 17px;
-    padding: 10px;
+    padding: 12px 15px;
     border: none;
+    background: rgba(0,0,0,.03);
+    border-bottom: 3px dotted rgba(0,0,0,.08);
     outline: none;
-    background: rgba(0,0,0,.04);
-    border: 2px solid rgba(0,0,0,0.1);
-    border-radius: 4px;
     width: 275px;
     max-width: 100%;
     margin-bottom: 20px;
-    -webkit-font-smoothing: inherit;
+}
+.input:focus {
+    background: rgba(46, 204, 113,.05);
 }
 
 
@@ -273,21 +274,22 @@ select {
 .user_header a:hover {
     color: #555;
 }
-.user_header #page_name {
+.user_header_input {
     display: inline-block;
     width: 60%;
     color: #777;
     font-size: inherit;
     padding: 5px 10px;
-    margin: -5px 0 0 -8px;
+    margin-top: -5px;
+    margin-left: -5px;
     background: none;
     border-color: transparent;
 }
-.user_header #page_name:hover,
-.user_header #page_name:focus,
-.user_header #page_name.active {
+.user_header_input:hover,
+.user_header_input:focus,
+.user_header_input.active {
+    border-bottom: 3px dotted rgba(0,0,0,.08);
     background: rgba(0,0,0,.04);
-    border: 2px solid rgba(0,0,0,0.1);
 }
 
 
@@ -296,16 +298,9 @@ select {
 
 .page_search {
     margin-top: 40px;
-    padding: 12px 15px;
-    border: none;
     font-size: 18px;
-    border-radius: 0;
     width: 100%;
-    background: rgba(0,0,0,.03);
-    border-bottom: 3px dotted rgba(0,0,0,.08);
-}
-.page_search:focus {
-    background: rgba(0,0,0,.05);
+    padding: 15px;
 }
 
 .page {
