@@ -60,7 +60,7 @@ Editor.init = function(container, options){
         if (self.locked){
             $('.decrypt_dialog').show();
         } else {
-            $('#editor').show();
+            $('.editor').show();
         }
         return false;
     });
@@ -95,7 +95,7 @@ Editor.init = function(container, options){
         if (self.locked){
             $('.decrypt_dialog').toggle();
         } else {
-            $('#editor').toggle();
+            $('.editor').toggle();
         }
         return false;
     });
@@ -112,7 +112,7 @@ Editor.keydown = function(e){
     // Tab key
     // Tab in a list element
     if (e.keyCode === 9){
-        var editor = document.getElementById('editor');
+        var editor = Editor.container;
         var caret = Editor.getCaretPosition();
         var container = caret.node;
         var text = container.textContent || container.innerText;
@@ -143,7 +143,7 @@ Editor.keydown = function(e){
     // TODO: Enter , with prev element being list 
 
     if (e.keyCode === 13){
-        var editor = document.getElementById('editor');
+        var editor = Editor.container;
         var range = window.getSelection().getRangeAt(0);
         if (!range.collapsed) range.deleteContents();
         var caret = Editor.getCaretPosition();
@@ -183,8 +183,7 @@ Editor.keyup = function(e){
         Editor.updateActive();
         return;
     }
-
-    var editor = document.getElementById('editor');
+    var editor = Editor.container;
     var caret = Editor.getCaretPosition();
     var container = caret.node;
     var containerIndex = Array.prototype.indexOf.call(editor.childNodes, container);
@@ -200,13 +199,13 @@ Editor.keyup = function(e){
 
     newContainer = editor.childNodes[containerIndex];
 
-    $('#editor .active').removeClass('active');
+    $('.editor .active').removeClass('active');
     $(newContainer).addClass('active');
     Editor.setCaretPosition(newContainer, caret.offset);
 };
 
 Editor.blur = function(){
-    $('#editor .active').removeClass('active');
+    $('.editor .active').removeClass('active');
 };
 
 Editor.replaceText = function(node, text, caretOffset){
@@ -214,9 +213,9 @@ Editor.replaceText = function(node, text, caretOffset){
 };
 
 Editor.updateActive = function(){
-    $('#editor .active').removeClass('active');
+    $('.editor .active').removeClass('active');
     var range = window.getSelection().getRangeAt(0);
-    var editor = document.getElementById('editor');
+    var editor = Editor.container;
     for (var node=range.startContainer; node && node.parentElement !== editor; node=node.parentElement);
     $(node).addClass('active');
 };
@@ -246,12 +245,12 @@ Editor.save = function(){
     }
     console.log(data);
 
-    $('#status').text('Saving...');
+    $('.status').text('Saving...');
     $.post(location.href, data, function(response){
         if (response.indexOf('/') === 0){
             window.location.href = response;
         }
-        $('#status').text('Saved');
+        $('.status').text('Saved');
         $('.save').hide();
         Editor.saved = true;
     });
@@ -299,12 +298,12 @@ Editor.unlock = function(){
 
 Editor.delete = function(){
     if (confirm('Are you sure?')){
-        $('#status').text('Deleting...');
+        $('.status').text('Deleting...');
         $.post('', {action: 'delete', _xsrf: Editor.xsrf()}, function(response){
             if (response.indexOf('/') === 0){
                 window.location.href = response;
             } else {
-                $('#status').text(response);
+                $('.status').text(response);
             }
         });
     }
@@ -319,7 +318,7 @@ Editor.updateView = function(){
     }
 
     if (this.locked){
-        $('#editor, .controls_lock').hide();
+        $('.editor, .controls_lock').hide();
         $('.decrypt_dialog')
             .show()
             .focus();
@@ -334,7 +333,7 @@ Editor.updateView = function(){
         } else {
             $('.save').hide();
         }
-        $('#editor').show().focus();
+        $('.editor').show().focus();
     }
 };
 
@@ -642,7 +641,7 @@ Editor.escape = function(text) {
 Editor.getCaretPosition = function(){
     // Returns the 0-indexed character offset of the caret in the editor
     var range = window.getSelection().getRangeAt(0);
-    var editor = document.getElementById('editor');
+    var editor = Editor.container;
     var node = range.startContainer;
     var offset = range.startOffset;
 

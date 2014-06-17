@@ -240,17 +240,17 @@ select {
 }
 
 
-#status {
+.status {
     position: fixed;
     font-size: 15px;
-    color: #555;
-    left: 85px;
+    color: rgba(0,0,0,.3);
+    left: 100px;
     top: 30px;
     width: 200px;
 }
 
 
-#main {
+.main {
     width: 80%;
     max-width: 640px;
     padding: 100px 0;
@@ -258,7 +258,7 @@ select {
 }
 
 @media (max-width: 800px) {
-    #main {
+    .main {
         width: auto;
         padding: 100px 20px;
     }
@@ -345,12 +345,6 @@ select {
     user-select: none;
 }
 
-@media (max-width: 500px) {
-    .controls {
-        font-size: 35px;
-    }
-}
-
 .controls_btn {
     float: left;
     color: rgba(0,0,0,.1);
@@ -370,7 +364,7 @@ select {
 }
 
 
-#editor {
+.editor {
     font: 18px 'Merriweather', Georgia, serif;
     line-height: 1.8;
     min-height: 50px;
@@ -380,36 +374,36 @@ select {
     box-sizing: border-box;
     white-space: pre-wrap;
 }
-#editor ::selection {
-    background: rgba(0,0,0,.05);
+.editor ::selection {
+    background: rgba(0,0,0,.1);
 }
 
-#editor a {
+.editor a {
     color: #e67e22;
     text-decoration: none;
     cursor: pointer;
     border-bottom: 1px dotted #ccc;
 }
-#editor a:hover {
+.editor a:hover {
     color: #d35400;
     border-color: #e67e22;
 }
 
-#editor img {
+.editor img {
     display: block;
     margin: auto;
     max-width: 100%;
 }
-#editor span {
+.editor span {
     display: none;
 }
-#editor .active {
+.editor .active {
     background: #EFE2F5;
 }
-#editor .active span {
+.editor .active span {
     display: inline;
 }
-#editor .active .hidden {
+.editor .active .hidden {
     display: none;
 }
 

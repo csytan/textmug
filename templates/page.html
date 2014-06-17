@@ -3,7 +3,7 @@
 
 {% block script %}
     <script>
-        Editor.init(document.getElementById('editor'), {
+        Editor.init(document.getElementsByClassName('editor')[0], {
             public: {% raw json_encode(page.public) %},
             encrypted: {% raw json_encode(page.encrypted) %},
             cipherJSON: {% raw json_encode(page.text if page.encrypted else None) %}
@@ -55,7 +55,7 @@
         {% end %}
     </div>
 
-    <form class="decrypt_dialog dialog" method="get">
+    <form class="decrypt_dialog dialog">
         <h1>Page locked</h1>
         <p class="help">Please enter a password</p>
         <input name="page_password" class="input" type="password" placeholder="password">
@@ -93,6 +93,6 @@
         <input class="btn" type="submit" value="Save settings">
     </form>
 
-    <div id="editor" contenteditable="true">{% if not page.encrypted %}{{ page.text }}{% end %}</div>
+    <div class="editor" contenteditable="true">{% if not page.encrypted %}{{ page.text }}{% end %}</div>
 {% end %}
 

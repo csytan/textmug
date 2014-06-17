@@ -33,11 +33,11 @@
             {% end %}
         </div>
     </div>
-    <div id="status">
+    <div class="status">
         {% set flash = handler.get_and_clear_flash() %}
         {% if flash %}{{ flash }}{% end %}
     </div>    
-    <div id="main">
+    <div class="main">
         {% block main %}{% end %}
     </div>
     
