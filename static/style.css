@@ -16,7 +16,7 @@ body {
     body {
         /* optimizeLegibility is slow on mobile devices */
         text-rendering: auto;
-        border-left-width: 5px;
+        border-left: none;
     }
 }
 
