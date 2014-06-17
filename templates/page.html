@@ -13,7 +13,7 @@
 
 
 {% block main %}
-    <div class="user_header">
+    <div class="page_header">
         {% if page.id == 1 %}
         {% elif page.id %}
             {% if page.user %}
@@ -24,7 +24,7 @@
             {% end %}
 
             {% if current_user and page.user == current_user %}
-                <input class="user_header_input input" type="text" placeholder="new-page" 
+                <input class="page_header_input input" type="text" placeholder="new-page" 
                     value="{{ page.page_name }}" maxlength="40">
             {% else %}
                 <span>{{ page.page_name }}</span>
@@ -36,34 +36,34 @@
                     {{ current_user.id }}
                 </a>
                 <span>/</span>
-                <input class="user_header_input input" type="text" placeholder="new-page" maxlength="40" class="active">
+                <input class="page_header_input input" type="text" placeholder="new-page" maxlength="40" class="active">
             {% else %}
                 <span>new page - write something!</span>
             {% end %}
         {% end %}
     </div>
 
-    <div id="controls">
+    <div class="controls">
         {% if page.id == 1 %}
-            <a class="control icon-plus" href="/new"></a>
+            <a class="controls_btn icon-plus" href="/new"></a>
         {% end %}
         
         {% if page.editable(current_user) %}
-            <a class="control settings icon-cog"></a>
-            <a class="control locked icon-locked"></a>
-            <a class="control unlocked icon-unlocked"></a>
+            <a class="controls_btn controls_unlock icon-locked"></a>
+            <a class="controls_btn controls_lock icon-unlocked"></a>
+            <a class="controls_btn controls_settings icon-cog"></a>
         {% end %}
     </div>
 
-    <div id="decrypt_dialog" class="dialog">
+    <form class="decrypt_dialog dialog" method="get">
         <h1>Page locked</h1>
         <p class="help">Please enter a password</p>
         <input name="page_password" class="input" type="password" placeholder="password">
-        <input class="btn unlock" type="submit" value="Unlock">
-    </div>
+        <input class="btn" type="submit" value="Unlock">
+    </form>
 
-    <form id="settings_dialog" class="dialog" method="post">
-        <div class="close icon-close"></div>
+    <form class="settings_dialog dialog" method="post">
+        <div class="dialog_close icon-close"></div>
         {% raw xsrf_form_html() %}
         <h1>Settings</h1>
 
@@ -73,21 +73,21 @@
             <option value="false">Keep this page private</option>
         </select>
         
-        <div class="encryption">
+        <div class="settings_dialog_encrypt">
             <label>Encryption</label>
             <select name="encrypted">
                 <option value="false">Don't encrypt this page</option>
                 <option value="true">Enable client side encryption</option>
             </select>
             
-            <div class="encrypt_password">
+            <div class="settings_dialog_password">
                 <label>Password</label>
                 <input name="password" class="input" type="password" placeholder="password">
             </div>
         </div>
 
         <label>Deletion</label>
-        <a class="btn delete">Delete page</a> 
+        <a class="btn btn_delete settings_dialog_delete">Delete page</a> 
         <div></div>
 
         <input class="btn" type="submit" value="Save settings">

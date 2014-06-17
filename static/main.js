@@ -42,8 +42,10 @@ Editor.init = function(container, options){
         .focus();
 
     // Controls
-    $('.unlocked').click(self.lock);
-    $('.user_header_input').keyup(function(){
+    $('.controls_lock').click(self.lock);
+    $('.controls_unlock').click(self.unlock);
+
+    $('.page_header_input').keyup(function(){
         var value = this.value.toLowerCase()
             .replace(/\s+/, '-')
             .replace(/[^a-z0-9\_\.-]+/, '');
@@ -51,10 +53,33 @@ Editor.init = function(container, options){
             this.value = value;
         }
     });
-    $('.save').click(self.save);
-    $('.delete').click(self.delete);
-    $('.settings').click(function(){
-        $('#settings_dialog')
+
+    // Dialogs
+    $('.dialog_close').click(function(){
+        $(this).closest('.dialog').hide();
+        if (self.locked){
+            $('.decrypt_dialog').show();
+        } else {
+            $('#editor').show();
+        }
+        return false;
+    });
+
+    $('.settings_dialog')
+        .submit(self.saveSettings)
+        .find('select[name="encrypted"]')
+            .change(function(){
+                var encrypted = $(this).find('option:selected').val();
+                if (encrypted === 'true'){
+                    $('.settings_dialog_password').show();
+                } else {
+                    $('.settings_dialog_password').hide();
+                }
+            });
+    $('.settings_dialog_delete').click(self.delete);
+
+    $('.controls_settings').click(function(){
+        $('.settings_dialog')
             .toggle()
             .find('input[type="password"]')
                 .val(self.password)
@@ -66,39 +91,16 @@ Editor.init = function(container, options){
                 .prop('selected', true)
                 .closest('select')
                 .change();
+
         if (self.locked){
-            $('#decrypt_dialog').toggle();
-            $('#settings_dialog .encryption').hide();
+            $('.decrypt_dialog').toggle();
         } else {
             $('#editor').toggle();
-            $('#settings_dialog .encryption').show();
         }
         return false;
     });
 
-    // Dialogs
-    $('#settings_dialog')
-        .submit(self.saveSettings)
-        .find('select[name="encrypted"]')
-            .change(function(){
-                var encrypted = $(this).find('option:selected').val();
-                if (encrypted === 'true'){
-                    $('.encrypt_password').show();
-                } else {
-                    $('.encrypt_password').hide();
-                }
-            });
-    $('.lock').click(self.lock);
-    $('.unlock').click(self.unlock);
-    $('.close').click(function(){
-        $(this).closest('.dialog').hide();
-        if (self.locked){
-            $('#decrypt_dialog').show();
-        } else {
-            $('#editor').show();
-        }
-        return false;
-    });
+    $('.decrypt_dialog').submit(self.unlock);
 };
 
 Editor.keydown = function(e){
@@ -226,7 +228,7 @@ Editor.save = function(){
     var data = {
         action: 'save',
         _xsrf: Editor.xsrf(),
-        page_name: $('.user_header_input').val(),
+        page_name: $('.page_header_input').val(),
         encrypted: Editor.encrypted,
         public: Editor.public
     };
@@ -268,7 +270,7 @@ Editor.saveSettings = function(){
     Editor.password = options.password;
     Editor.saved = false;
     Editor.save();
-    $('#settings_dialog').hide();
+    $('.settings_dialog').hide();
     Editor.updateView();
     return false;
 };
@@ -282,7 +284,7 @@ Editor.lock = function(){
 };
 
 Editor.unlock = function(){
-    var $password = $('#decrypt_dialog input[type="password"]');
+    var $password = $('.decrypt_dialog input[type="password"]');
     var password = $password.val();
     $password.val('');
     var cipherJSON = $.parseJSON(Editor.cipherJSON);
@@ -291,7 +293,7 @@ Editor.unlock = function(){
     Editor.password = password;
     Editor.locked = false;
     Editor.updateView();
-    $('#decrypt_dialog').hide();
+    $('.decrypt_dialog').hide();
     return false;
 };
 
@@ -317,15 +319,15 @@ Editor.updateView = function(){
     }
 
     if (this.locked){
-        $('#editor, .unlocked, .save').hide();
-        $('#decrypt_dialog')
+        $('#editor, .controls_lock').hide();
+        $('.decrypt_dialog')
             .show()
             .focus();
     } else {
         if (this.encrypted){
-            $('.unlocked').css('display', 'inline-block');
+            $('.controls_lock').css('display', 'inline-block');
         } else {
-            $('.unlocked').hide();
+            $('.controls_lock').hide();
         }
         if (this.saved){
             $('.save').css('display', 'inline-block');

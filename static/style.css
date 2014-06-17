@@ -167,15 +167,15 @@ select {
     border-bottom-width: 1px;
 }
 
-.btn.delete {
+.btn_delete {
     font-size: 0.7em;
     margin-top: 0;
     background: rgb(209, 101, 101);
 }
-.btn.delete:hover {
+.btn_delete:hover {
     background: rgb(223, 120, 120);
 }
-.btn.delete:active {
+.btn_delete:active {
     margin-top: 3px;
 }
 
@@ -190,13 +190,6 @@ select {
     z-index: 10;
     width: 135px;
 }
-
-@media (max-width: 800px) {
-    .menu {
-        position: absolute;
-    }
-}
-
 .menu.active {
     background: #444;
     height: 100%;
@@ -217,6 +210,16 @@ select {
     color: #ddd;
     -webkit-transform: rotate(-25deg);
 }
+
+@media (max-width: 500px) {
+    .menu {
+        position: absolute;
+    }
+    .menu_logo {
+        padding: 20px;
+    }
+}
+
 .menu_items {
     display: none;
     margin-top: 25px;
@@ -265,19 +268,19 @@ select {
 /* user.html, page.html
 ======================================================== */
 
-.user_header {
+.page_header {
     color: #777;
     font-size: 19px;
     margin-bottom: 35px;
 }
-.user_header a {
+.page_header a {
     color: #777;
     border: none;
 }
-.user_header a:hover {
+.page_header a:hover {
     color: #555;
 }
-.user_header_input {
+.page_header_input {
     display: inline-block;
     width: 60%;
     color: #777;
@@ -288,9 +291,9 @@ select {
     background: none;
     border-color: transparent;
 }
-.user_header_input:hover,
-.user_header_input:focus,
-.user_header_input.active {
+.page_header_input:hover,
+.page_header_input:focus,
+.page_header_input.active {
     border-bottom: 3px dotted rgba(0,0,0,.08);
     background: rgba(0,0,0,.04);
 }
@@ -332,37 +335,37 @@ select {
 /* page.html
 ======================================================== */
 
-#controls {
+.controls {
     position: absolute;
     top: 15px;
-    right: 20px;
-    width: 47px;
+    right: 15px;
+    font-size: 40px;
     -webkit-user-select: none;
     -moz-user-select: none;
     user-select: none;
 }
-.control {
-    display: inline-block;
+
+@media (max-width: 500px) {
+    .controls {
+        font-size: 35px;
+    }
+}
+
+.controls_btn {
+    float: left;
     color: rgba(0,0,0,.1);
-    font-size: 40px;
-    padding: 7px;
+    margin-left: 10px;
+    padding: 5px;
     line-height: 0;
     cursor: pointer;
     text-decoration: none;
-    margin-bottom: 7px;
 }
-@media (max-width: 800px) {
-    .control {
-        float: right;
-        margin: 0;
-        margin-left: 7px;
-    }
-}
-.control:hover,
-.control.active {
+.controls_btn:hover,
+.controls_btn.active {
     color: rgba(0,0,0,.8);
 }
-.locked, .unlocked {
+.controls_lock,
+.controls_unlock {
     display: none;
 }
 
@@ -418,10 +421,10 @@ select {
     position: relative;
     padding: 25px;
     padding-bottom: 40px;
-    border: 1px dashed rgba(0,0,0,0.2);
+    border: 2px dashed rgba(0,0,0,0.2);
     background: #fefefe;
 }
-.dialog .close {
+.dialog_close {
     cursor: pointer;
     position: absolute;
     top: 10px;
@@ -431,14 +434,11 @@ select {
     color: #888;
     line-height: 0;
 }
-.dialog .close:hover {
+.dialog_close:hover {
     color: #333;
 }
 
-#settings_dialog .encrypt_password {
-    display: none;
-}
-#settings_dialog .delete {
+.settings_dialog_delete {
     margin-bottom: 20px;
 }
 
