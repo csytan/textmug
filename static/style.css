@@ -13,8 +13,11 @@ body {
 }
 
 @media (max-width: 500px) {
-    /* optimizeLegibility is slow on mobile devices */
-    text-rendering: auto;
+    body {
+        /* optimizeLegibility is slow on mobile devices */
+        text-rendering: auto;
+        border-left-width: 5px;
+    }
 }
 
 
