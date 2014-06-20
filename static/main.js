@@ -104,6 +104,8 @@ Editor.init = function(container, options){
 };
 
 Editor.keydown = function(e){
+    var editor = Editor.container;
+
     if (e.keyCode !== 91 /* Command */ && !e.metaKey) {
         Editor.saveUndoState();
     }
@@ -112,7 +114,6 @@ Editor.keydown = function(e){
     // Tab key
     // Tab in a list element
     if (e.keyCode === 9){
-        var editor = Editor.container;
         var caret = Editor.getCaretPosition();
         var container = caret.node;
         var text = container.textContent || container.innerText;
@@ -136,24 +137,38 @@ Editor.keydown = function(e){
         return false;
     }
 
+    // Delete inside list elements
+    if (e.keyCode === 8){
+        var caret = Editor.getCaretPosition();
+        var container = caret.node;
+        if (caret.offset === 0 && $(container).hasClass('li1') >= 0){
+            var containerIndex = Array.prototype.indexOf.call(editor.childNodes, container);
+            var text = (container.textContent || container.innerText).slice(1);
+            var html = Editor.textToHTML(text);
+            var newContainer = document.createElement('div');
+            editor.replaceChild(newContainer, container);
+            newContainer.outerHTML = html;
+            newContainer = editor.childNodes[containerIndex];
+            Editor.setCaretPosition(newContainer, 0);
+            return false;
+        }
+    }
+
     // Return key browser normalization.
     // Browsers use different elements as their 'empty' element:
     // http://lists.whatwg.org/pipermail/whatwg-whatwg.org/2011-May/031577.html
-
-    // TODO: Enter , with prev element being list 
-
     if (e.keyCode === 13){
-        var editor = Editor.container;
         var range = window.getSelection().getRangeAt(0);
         if (!range.collapsed) range.deleteContents();
         var caret = Editor.getCaretPosition();
         var container = caret.node;
         var text = container.textContent || container.innerText;
+        var insert = (container.className.indexOf('li') >= 0) ? '\n-' : '\n';
 
         // Insert newline at first offset
-        text = text.slice(0, caret.offset) + '\n' + text.slice(caret.offset);
+        text = text.slice(0, caret.offset) + insert + text.slice(caret.offset);
         // Increment caret position
-        caret.offset++;
+        caret.offset += insert.length;
 
         for (var cIndex=0, n=container; n=n.previousSibling; cIndex++);
 
@@ -528,19 +543,11 @@ Editor.textToHTML = function(text){
             continue;
         }
 
-        // List headers
-        if (cap = /^([^\n]+:)(\n|$)/.exec(text)){
-            text = text.substring(cap[1].length);
-            html += '<div class="lh">' + this.inlineHTML(cap[1]) + '</div>';
-            continue;
-        }
-
         // List elements
-        if (cap = /^(\s*-\n?)([^\n]*)/.exec(text)){
+        if (cap = /^(\s*-)([^\n]*)/.exec(text)){
             text = text.substring(cap[0].length);
             var depth = Math.floor(cap[1].length / 4) + 1;
-            html += '<div class="li' + depth + '"><span class="hidden">' + cap[1] + 
-                (cap[1][-1] === '-' ? '&nbsp;' : '') + '</span>' +
+            html += '<div class="li' + depth + '"><span class="hidden">' + cap[1] + '</span>' +
                 (cap[2] ? this.inlineHTML(cap[2]) : '<br>') + '</div>';
             continue;
         }
