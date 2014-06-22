@@ -13,36 +13,6 @@
 
 
 {% block main %}
-    <div class="page_header">
-        {% if page.id == 1 %}
-        {% elif page.id %}
-            {% if page.user %}
-                <a href="/{{ page.user.id }}">
-                    {{ page.user.id }}
-                </a>
-                <span>/</span>
-            {% end %}
-
-            {% if current_user and page.user == current_user %}
-                <input class="page_header_input input" type="text" placeholder="new-page" 
-                    value="{{ page.page_name }}" maxlength="40">
-            {% else %}
-                <span>{{ page.page_name }}</span>
-            {% end %}
-        {% else %}
-            {# new page #}
-            {% if current_user %}
-                <a href="/{{ current_user.id }}">
-                    {{ current_user.id }}
-                </a>
-                <span>/</span>
-                <input class="page_header_input input" type="text" placeholder="new-page" maxlength="40" class="active">
-            {% else %}
-                <span>new page - write something!</span>
-            {% end %}
-        {% end %}
-    </div>
-
     <div class="controls">
         {% if page.id == 1 %}
             <a class="controls_btn icon-plus" href="/new"></a>
@@ -55,17 +25,23 @@
         {% end %}
     </div>
 
-    <form class="decrypt_dialog dialog">
-        <h1>Page locked</h1>
-        <p class="help">Please enter a password</p>
-        <input name="page_password" class="input" type="password" placeholder="password">
-        <input class="btn" type="submit" value="Unlock">
-    </form>
+    <h1 class="page_title" contenteditable="true">{{ page.title if page.id else '' }}</h1>
+    <div class="page_about">
+        Posted by
+        {% if page.user %}
+            <a class="page_about_user" href="/{{ page.user.id }}">{{ page.user.id }}</a>,
+        {% else %}
+            Anonymous,
+        {% end %}
+        {{ relative_date(page.created) }}
+    </div>
+
+    <div class="editor" contenteditable="true">{% if not page.encrypted %}{{ page.text }}{% end %}</div>
 
     <form class="settings_dialog dialog" method="post">
         <div class="dialog_close icon-close"></div>
         {% raw xsrf_form_html() %}
-        <h1>Settings</h1>
+        <h2>Settings</h2>
 
         <label>Sharing</label>
         <select name="public">
@@ -93,6 +69,11 @@
         <input class="btn" type="submit" value="Save settings">
     </form>
 
-    <div class="editor" contenteditable="true">{% if not page.encrypted %}{{ page.text }}{% end %}</div>
+    <form class="decrypt_dialog dialog">
+        <h2>Page locked</h2>
+        <p class="help">Please enter a password</p>
+        <input name="page_password" class="input" type="password" placeholder="password">
+        <input class="btn" type="submit" value="Unlock">
+    </form>
 {% end %}
 

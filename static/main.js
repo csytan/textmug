@@ -22,6 +22,9 @@ Editor.init = function(container, options){
     var text = container.textContent || container.innerText;
     container.innerHTML = self.textToHTML(text);
 
+    $(document.body)
+        .on('keydown', null, 'meta+s', self.save);
+
     $(container)
         .on('keydown', null, 'meta+s', self.save)
         .on('keydown', null, 'ctrl+s', self.save)
@@ -44,15 +47,6 @@ Editor.init = function(container, options){
     // Controls
     $('.controls_lock').click(self.lock);
     $('.controls_unlock').click(self.unlock);
-
-    $('.page_header_input').keyup(function(){
-        var value = this.value.toLowerCase()
-            .replace(/\s+/, '-')
-            .replace(/[^a-z0-9\_\.-]+/, '');
-        if (value !== this.value){
-            this.value = value;
-        }
-    });
 
     // Dialogs
     $('.dialog_close').click(function(){
@@ -242,7 +236,7 @@ Editor.save = function(){
     var data = {
         action: 'save',
         _xsrf: Editor.xsrf(),
-        page_name: $('.page_header_input').val(),
+        title: $('.page_title').text(),
         encrypted: Editor.encrypted,
         public: Editor.public
     };
@@ -260,12 +254,12 @@ Editor.save = function(){
     }
     console.log(data);
 
-    $('.status').text('Saving...');
+    Editor.status('Saving...');
     $.post(location.href, data, function(response){
-        if (response.indexOf('/') === 0){
-            window.location.href = response;
+        if (response !== window.location.pathname){
+            window.location.pathname = response;
         }
-        $('.status').text('Saved');
+        Editor.status('Saved');
         $('.save').hide();
         Editor.saved = true;
     });
@@ -313,12 +307,12 @@ Editor.unlock = function(){
 
 Editor.delete = function(){
     if (confirm('Are you sure?')){
-        $('.status').text('Deleting...');
+        Editor.status('Deleting...');
         $.post('', {action: 'delete', _xsrf: Editor.xsrf()}, function(response){
             if (response.indexOf('/') === 0){
                 window.location.href = response;
             } else {
-                $('.status').text(response);
+                Editor.status(response);
             }
         });
     }
@@ -350,6 +344,10 @@ Editor.updateView = function(){
         }
         $('.editor').show().focus();
     }
+};
+
+Editor.status = function(text){
+    $('.nav_status').text(text).show();
 };
 
 Editor.xsrf = function(){

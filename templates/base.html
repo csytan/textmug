@@ -14,12 +14,7 @@
     <div class="menu">
         <div class="menu_logo icon-logo"></div>
         <div class="menu_items">
-            <a class="menu_item"
-                {% if current_user %}
-                    href="/{{ current_user.id }}"
-                {% else %}
-                    href="/"
-                {% end %}>
+            <a class="menu_item" href="/">
                 home
             </a>
             <a href="/new" class="menu_item">new</a>
@@ -33,10 +28,17 @@
             {% end %}
         </div>
     </div>
-    <div class="status">
-        {% set flash = handler.get_and_clear_flash() %}
-        {% if flash %}{{ flash }}{% end %}
-    </div>    
+    <div class="nav">
+        {% if current_user %}
+            <a class="nav_user" href="/{{ current_user.id }}">
+                {{ current_user.id }}
+            </a>
+        {% end %}
+        <span class="nav_status">
+            {% set flash = handler.get_and_clear_flash() %}
+            {% if flash %}{{ flash }}{% end %}
+        </span>
+    </div>
     <div class="main">
         {% block main %}{% end %}
     </div>

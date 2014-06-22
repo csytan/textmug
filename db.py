@@ -72,7 +72,7 @@ class User(BaseModel):
         return bcrypt.checkpw(password, self.password_hash)
 
     def get_pages(self, current_user=False):
-        q = self.pages.order_by(Page.name)
+        q = self.pages.order_by(Page.created.desc())
         if not current_user:
             q = q.where(Page.public == True)
         return [p for p in q]
@@ -81,7 +81,7 @@ class User(BaseModel):
 
 class Page(BaseModel):
     id = peewee.PrimaryKeyField()
-    name = peewee.TextField(unique=True, null=True)
+    title = peewee.TextField()
     user = peewee.ForeignKeyField(User, null=True, related_name='pages')
     created = peewee.DateTimeField()
     text = peewee.TextField(default='')
@@ -93,20 +93,8 @@ class Page(BaseModel):
         return cls.select().where(cls.id == id).first()
 
     @classmethod
-    def get_by_name(cls, name):
-        return cls.select().where(cls.name == name).first()
-
-    @classmethod
     def get_recent(cls):
         return cls.select().where(cls.public == True).order_by(cls.created.desc())
-
-    @property
-    def page_name(self):
-        if self.user and self.name:
-            return self.name.split('/')[1]
-        elif self.name is not None:
-            return self.name
-        return str(self.id)
 
     def editable(self, user):
         if not self.id or \
@@ -117,4 +105,7 @@ class Page(BaseModel):
 
 
 peewee.create_model_tables([Settings, User, Page], fail_silently=True)
+
+
+
 

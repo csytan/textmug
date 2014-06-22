@@ -77,49 +77,32 @@ class User(Base):
 
 
 class Page(Base):
-    def get(self, name=None, id=None):
-        page = self.fetch_page(name, id)
-        if not page or (not page.public and not page.editable(self.current_user)):
-            raise tornado.web.HTTPError(404)
+    def get(self, id=None, user_id=None):
+        page = self.fetch_page(id)
         self.render('page.html', page=page)
         
-    def post(self, name=None, id=None):
-        page = self.fetch_page(name, id)
+    def post(self, id=None, user_id=None):
+        page = self.fetch_page(id, user_id)
         if page.user != self.current_user or page.id == 1:
             if not self.current_user or not self.current_user.is_admin():
                 raise tornado.web.HTTPError(401)
         
         action = self.get_argument('action', None)
         if action == 'save':
+            page.title = self.get_argument('title', '')
             page.text = self.get_argument('text', '', strip=False)
-            redirect = False if page.id else True
-
             if self.current_user:
-                can_has_chars = 'abcdefghijklmnopqrstuvwxyz0123456789._-'
-                page_name = self.get_argument('page_name', '').lower()
-                page_name = ''.join(c for c in page_name if c in can_has_chars)
-                if not page_name:
-                    page.save()
-                    page_name = str(page.id)
-                page_name = self.current_user.id + '/' + page_name[:30]
-                if page_name != page.name:
-                    redirect = True
-                page.name = page_name
                 page.encrypted = True if self.get_argument('encrypted', None) == 'true' else False
                 page.public = True if self.get_argument('public', None) == 'true' else False
             page.save()
-
-            if redirect:
-                self.write('/' + (page.name or str(page.id)))
-            else:
-                self.write('1')
+            path = '/' + (self.current_user.id + '/' if self.current_user else '') + str(page.id)
+            self.write(path)
         elif action == 'delete':
             page.delete_instance()
             self.set_secure_cookie('flash', 'Page deleted')
             self.write('/' + self.current_user.id)
 
-    def fetch_page(self, name=None, id=None):
-        page = None
+    def fetch_page(self, id, user_id=None):
         if self.request.path == '/':
             page = db.Page.get_by_id(1)
         elif self.request.path == '/new':
@@ -127,12 +110,12 @@ class Page(Base):
                 user=self.current_user,
                 public=False if self.current_user else True,
                 created=datetime.datetime.now())
-        elif id:
+        else:
             page = db.Page.get_by_id(int(id))
-        elif name is not None:
-            page = db.Page.get_by_name(name)
 
-        if not page:
+        if not page or \
+            (user_id and page.user.id != user_id) or \
+            (not page.public and not page.editable(self.current_user)):
             raise tornado.web.HTTPError(404)
         return page
 
@@ -205,7 +188,7 @@ routes = [
     (r'/users', Users),
     (r'/new', Page),
     (r'/(?P<id>\d+)', Page),
-    (r'/(.+/.+)', Page),
+    (r'/(?P<user_id>.+)/(?P<id>.+)', Page),
     (r'/(.+)', User)
 ]
 

@@ -6,7 +6,7 @@
 
     {% for page in pages %}
         <div class="page">
-            <a class="page_name" href="/{{ page.name or page.id }}">{{ page.page_name }}</a>
+            <a class="page_name" href="/{{ page.id }}">{{ page.title }}</a>
             <div class="page_created">{{ relative_date(page.created) }}</div>
             <div style="clear:both"></div>
         </div>
