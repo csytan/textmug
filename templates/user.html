@@ -34,7 +34,7 @@
     {% if pages %}
         {% for page in pages %}
             <div class="page_listing" data-title="{{ page.title.lower() }}">
-                <a class="page_listing_name" href="/{{ user.id }}/{{ page.id }}">{{ page.title }}</a>
+                <a class="page_listing_title" href="/{{ user.id }}/{{ page.id }}">{{ page.title }}</a>
                 <div class="page_listing_created">{{ relative_date(page.created) }}</div>
             </div>
         {% end %}

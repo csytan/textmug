@@ -318,18 +318,15 @@ select {
 }
 
 .page_listing {
-    padding: 12px 0;
+    padding: 15px 0;
 }
-.page_listing:hover {
-    background: #eee;
-}
-.page_listing_name {
+.page_listing_title {
     color: #555;
-    font-size: 21px;
+    font-size: 22px;
     font-family: 'Merriweather', Georgia, serif;
 }
-.page_listing_name:hover {
-    color: #444;
+.page_listing:hover .page_listing_title {
+    color: #222;
 }
 .page_listing_created {
     color: #888;

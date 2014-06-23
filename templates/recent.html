@@ -5,10 +5,9 @@
     <h1 class="title">Recent</h1>
 
     {% for page in pages %}
-        <div class="page">
-            <a class="page_name" href="/{{ page.id }}">{{ page.title }}</a>
-            <div class="page_created">{{ relative_date(page.created) }}</div>
-            <div style="clear:both"></div>
+        <div class="page_listing">
+            <a class="page_listing_title" href="/{{ page.id }}">{{ page.title }}</a>
+            <div class="page_listing_created">{{ relative_date(page.created) }}</div>
         </div>
     {% end %}
 {% end %}
