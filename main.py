@@ -203,10 +203,11 @@ settings = {
 
 
 if __name__ == '__main__':
+    logging.getLogger().setLevel(logging.INFO)
     if 'prod' in sys.argv:
         settings['debug'] = False
     app = tornado.web.Application(routes, **settings)
-    app.listen(8888, address='127.0.0.1')
+    app.listen(8000, address='127.0.0.1')
     tornado.ioloop.IOLoop.instance().start()
 
 

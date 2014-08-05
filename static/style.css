@@ -285,7 +285,7 @@ select {
 .page_title {
     font-family: 'Merriweather', Georgia, serif;
     outline: none;
-    margin-bottom: 6px;
+    margin-bottom: 10px;
 }
 .page_title:empty:before {
     content: 'Title here';
@@ -294,7 +294,7 @@ select {
 
 .page_about {
     color: rgba(0,0,0,.5);
-    font-size: 17px;
+    font-size: 18px;
     margin-bottom: 35px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -407,6 +407,9 @@ select {
 }
 .editor .active {
     background: #EFE2F5;
+}
+.editor pre.active {
+    background: #6D4680;
 }
 .editor .active span {
     display: inline;
