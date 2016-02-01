@@ -52,11 +52,6 @@ class Base(tornado.web.RequestHandler):
             return str(td.seconds) + ' seconds ago'
 
 
-class Index(Base):
-    def get(self):
-        self.render('index.html', text=None)
-
-
 class Recent(Base):
     def get(self):
         self.render('recent.html', pages=db.Page.get_recent())

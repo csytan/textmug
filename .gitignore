@@ -1,2 +1,8 @@
 
 database
+
+database-shm
+
+database-wal
+
+*.pyc
